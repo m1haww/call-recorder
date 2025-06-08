@@ -9,9 +9,28 @@ import SwiftUI
 
 @main
 struct call_recorderApp: App {
+    @State private var showSplash = true
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ZStack {
+                ContentView()
+                    .opacity(showSplash ? 0 : 1)
+                    .animation(.easeIn(duration: 0.5), value: showSplash)
+                
+                if showSplash {
+                    SplashView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                withAnimation {
+                                    showSplash = false
+                                }
+                            }
+                        }
+                }
+            }
         }
     }
 }
