@@ -41,7 +41,8 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .tint(.skyBlue)
+        .tint(.primaryGreen)
+        .preferredColorScheme(.dark)
         .environmentObject(appManager)
         .toast(message: appManager.alertMessage, isShowing: $showToast)
         .onChange(of: appManager.showAlert) { newValue in
@@ -61,25 +62,6 @@ struct ContentView: View {
             Text(appManager.permissionType == .microphone ?
                  "Microphone access is required to record calls. Please enable it in Settings." :
                     "Phone access is required to make calls. Please enable it in Settings.")
-        }
-        .overlay(alignment: .bottomTrailing) {
-            Button(action: {
-                HapticManager.shared.impact(.medium)
-                makePhoneCall()
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.skyBlue)
-                        .frame(width: 60, height: 60)
-                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                    
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.white)
-                }
-            }
-            .padding(.trailing, 20)
-            .padding(.bottom, 90)
         }
     }
 }

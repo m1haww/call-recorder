@@ -1,6 +1,8 @@
 import SwiftUI
 import Combine
+#if !os(macOS)
 import AVFoundation
+#endif
 
 class AppViewModel: ObservableObject {
     @Published var recordings: [Recording] = []
@@ -15,6 +17,13 @@ class AppViewModel: ObservableObject {
     @Published var selectedPlan = "monthly"
     @Published var showPermissionAlert = false
     @Published var permissionType: PermissionType = .microphone
+    @Published var userPhoneNumber = ""
+    @Published var userCountryCode = ""
+    @Published var userCountryName = ""
+    @Published var isOnboardingComplete = false
+    
+    // Recording service configuration
+    let recordingServiceNumber = "+18885551234" // Replace with your actual service number
     
     enum UserType {
         case free, premium
@@ -25,53 +34,32 @@ class AppViewModel: ObservableObject {
     }
     
     init() {
-        loadMockData()
         checkPermissions()
+        loadUserData()
+        
+        // Load phone number from current user if authenticated
+        if let currentUser = AuthManager.shared.currentUser {
+            userPhoneNumber = currentUser.phoneNumber
+        }
     }
     
-    func loadMockData() {
-        recordings = [
-            Recording(
-                contactName: "John Doe",
-                phoneNumber: "+1 234-567-8900",
-                duration: 125,
-                transcript: "Hey John, thanks for calling back. I wanted to discuss the project timeline and make sure we're on track for the upcoming deadline.",
-                isUploaded: true
-            ),
-            Recording(
-                contactName: "Jane Smith",
-                phoneNumber: "+1 234-567-8901",
-                duration: 360,
-                transcript: "Hi Jane, I'm following up on our meeting yesterday. The proposal looks great and I think we can move forward with the implementation.",
-                isUploaded: false
-            ),
-            Recording(
-                contactName: "Unknown",
-                phoneNumber: "+1 234-567-8902",
-                duration: 45,
-                transcript: nil,
-                isUploaded: true
-            ),
-            Recording(
-                contactName: "Mike Johnson",
-                phoneNumber: "+1 555-123-4567",
-                duration: 240,
-                transcript: "Mike, we need to reschedule our appointment for next week. Please let me know what works best for you.",
-                isUploaded: true
-            )
-        ]
-    }
+    // Removed loadMockData - recordings will only come from actual user recordings
     
     func checkPermissions() {
+        #if !os(macOS)
         let microphoneStatus = AVAudioSession.sharedInstance().recordPermission
         hasPermissions = microphoneStatus == .granted
         
         if microphoneStatus == .undetermined {
             requestMicrophonePermission()
         }
+        #else
+        hasPermissions = true // For macOS testing
+        #endif
     }
     
     func requestMicrophonePermission() {
+        #if !os(macOS)
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             DispatchQueue.main.async {
                 self.hasPermissions = granted
@@ -80,6 +68,7 @@ class AppViewModel: ObservableObject {
                 }
             }
         }
+        #endif
     }
     
     func showPermissionDenied(_ type: PermissionType) {
@@ -111,20 +100,50 @@ class AppViewModel: ObservableObject {
         }
         
         isRecording = true
-        showToast("Recording started...")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.isRecording = false
-            self.showToast("Recording saved")
+        // Call server API to start recording
+        startRecordingOnServer(targetNumber: phoneNumber)
+    }
+    
+    private func startRecordingOnServer(targetNumber: String?) {
+        guard !userPhoneNumber.isEmpty else {
+            showToast("User phone number not set")
+            isRecording = false
+            return
+        }
+        
+        guard let targetNumber = targetNumber else {
+            showToast("Target phone number required")
+            isRecording = false
+            return
+        }
+        
+        // Call server API to start recording
+        let recordingData: [String: Any] = [
+            "recording_status": "started",
+            "recording_duration": 0,
+            "transcription_status": "pending"
+        ]
+        
+        ServerManager.shared.saveCallRecording(
+            userPhone: userPhoneNumber,
+            targetPhone: targetNumber,
+            recordingData: recordingData
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.showToast("Recording started on server")
+                case .failure(let error):
+                    self?.showToast("Failed to start recording: \(error.localizedDescription)")
+                    self?.isRecording = false
+                }
+            }
         }
     }
     
     func refreshRecordings() {
-        isLoading = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.isLoading = false
-            self.showToast("Recordings updated")
-        }
+        fetchCallsFromServer()
     }
     
     func showToast(_ message: String) {
@@ -173,5 +192,91 @@ class AppViewModel: ObservableObject {
         }
         
         return filtered
+    }
+    
+    func loadUserData() {
+        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? ""
+        userCountryCode = UserDefaults.standard.string(forKey: "userCountryCode") ?? ""
+        userCountryName = UserDefaults.standard.string(forKey: "userCountryName") ?? ""
+        selectedPlan = UserDefaults.standard.string(forKey: "selectedPlan") ?? "free_trial"
+        isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
+    }
+    
+    func saveUserPhoneNumber(_ phoneNumber: String) {
+        userPhoneNumber = phoneNumber
+        UserDefaults.standard.set(phoneNumber, forKey: "userPhoneNumber")
+    }
+    
+    func saveUserCountry(code: String, name: String) {
+        userCountryCode = code
+        userCountryName = name
+        UserDefaults.standard.set(code, forKey: "userCountryCode")
+        UserDefaults.standard.set(name, forKey: "userCountryName")
+    }
+    
+    func completeOnboarding() {
+        isOnboardingComplete = true
+        UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
+    }
+    
+    func fetchCallsFromServer() {
+        guard !userPhoneNumber.isEmpty else {
+            showToast("Phone number required")
+            return
+        }
+        
+        isLoading = true
+        
+        ServerManager.shared.fetchCallsForUser(phoneNumber: userPhoneNumber) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                switch result {
+                case .success(let jsonArray):
+                    self?.recordings = []
+                    
+                    for item in jsonArray {
+                        // Parse each recording from the server data
+                        let id = item["id"] as? String ?? UUID().uuidString
+                        let callDate = item["call_date"] as? String ?? ""
+                        let fromPhone = item["from_phone"] as? String ?? ""
+                        let toPhone = item["to_phone"] as? String ?? self?.userPhoneNumber ?? ""
+                        let recordingDuration = item["recording_duration"] as? Int ?? 0
+                        let recordingStatus = item["recording_status"] as? String ?? ""
+                        let recordingUrl = item["recording_url"] as? String
+                        let summary = item["summary"] as? String
+                        let title = item["title"] as? String
+                        let transcriptionStatus = item["transcription_status"] as? String ?? ""
+                        let transcriptionText = item["transcription_text"] as? String
+                        
+                        // Determine contact name from phone number
+                        let contactName = title ?? (fromPhone == self?.userPhoneNumber ? toPhone : fromPhone)
+                        
+                        // Create Recording object
+                        let recording = Recording(
+                            id: UUID(uuidString: id) ?? UUID(),
+                            contactName: contactName,
+                            phoneNumber: fromPhone == self?.userPhoneNumber ? toPhone : fromPhone,
+                            date: self?.parseDate(callDate) ?? Date(),
+                            duration: TimeInterval(recordingDuration),
+                            transcript: transcriptionText ?? summary,
+                            isUploaded: recordingUrl != nil
+                        )
+                        
+                        self?.recordings.append(recording)
+                    }
+                    
+                    self?.showToast("\(jsonArray.count) recordings loaded")
+                    
+                case .failure(let error):
+                    self?.showToast("Failed to fetch calls: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    private func parseDate(_ dateString: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        return formatter.date(from: dateString)
     }
 }

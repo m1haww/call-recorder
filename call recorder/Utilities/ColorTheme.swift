@@ -1,11 +1,24 @@
 import SwiftUI
 
 extension Color {
+    // Primary colors from the new design
+    static let primaryGreen = Color(hex: "#4AE54A")
+    static let accentGreen = Color(hex: "#2ECC40")
+    static let darkBackground = Color(hex: "#1A1A1A")
+    static let cardBackground = Color(hex: "#2A2A2A")
+    static let surfaceBackground = Color(hex: "#333333")
+    
+    // Text colors
+    static let primaryText = Color.white
+    static let secondaryText = Color(hex: "#B0B0B0")
+    static let tertiaryText = Color(hex: "#808080")
+    
+    // Legacy colors (keeping for compatibility)
     static let navyBlue = Color(hex: "#1B2A49")
-    static let skyBlue = Color(hex: "#61A4F1")
-    static let lightGrey = Color(hex: "#F5F5F5")
-    static let mediumGrey = Color(hex: "#E0E0E0")
-    static let darkGrey = Color(hex: "#757575")
+    static let skyBlue = Color(hex: "#4AE54A") // Changed to green
+    static let lightGrey = Color(hex: "#2A2A2A") // Changed to dark
+    static let mediumGrey = Color(hex: "#333333")
+    static let darkGrey = Color(hex: "#B0B0B0")
     
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

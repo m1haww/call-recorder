@@ -65,7 +65,23 @@ struct HomeView: View {
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.large)
-            .background(Color.lightGrey)
+            .preferredColorScheme(.dark)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        viewModel.fetchCallsFromServer()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.primaryGreen)
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+            }
+            .background(Color.darkBackground)
+            .onAppear {
+                // Automatically fetch recordings when view appears
+                viewModel.fetchCallsFromServer()
+            }
         }
         .fullScreenCover(isPresented: $showPlayer) {
             if let recording = selectedRecording {
@@ -105,15 +121,19 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.darkGrey)
+                .foregroundColor(.secondaryText)
             
             TextField("Search recordings...", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
+                .foregroundColor(.primaryText)
         }
         .padding(12)
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.surfaceBackground, lineWidth: 1)
+        )
     }
 }
 
@@ -147,15 +167,15 @@ struct FilterButton: View {
         }) {
             Text(title)
                 .font(.subheadline)
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundColor(isSelected ? .white : .darkGrey)
+                .fontWeight(isSelected ? .semibold : .medium)
+                .foregroundColor(isSelected ? .black : .primaryText)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(isSelected ? Color.skyBlue : Color.white)
+                .background(isSelected ? Color.primaryGreen : Color.cardBackground)
                 .cornerRadius(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? Color.clear : Color.mediumGrey, lineWidth: 1)
+                        .stroke(isSelected ? Color.clear : Color.surfaceBackground, lineWidth: 1)
                 )
         }
         .frame(minWidth: 44, minHeight: 44)
@@ -174,18 +194,19 @@ struct RecordingCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recording.contactName)
                         .font(.headline)
-                        .foregroundColor(.navyBlue)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primaryText)
                     
                     Text(recording.phoneNumber)
                         .font(.subheadline)
-                        .foregroundColor(.darkGrey)
+                        .foregroundColor(.secondaryText)
                 }
                 
                 Spacer()
                 
                 if recording.isUploaded {
                     Image(systemName: "checkmark.icloud")
-                        .foregroundColor(.green)
+                        .foregroundColor(.primaryGreen)
                         .font(.footnote)
                 }
             }
@@ -193,29 +214,30 @@ struct RecordingCard: View {
             HStack {
                 Label(formatDate(recording.date), systemImage: "calendar")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.tertiaryText)
                 
                 Spacer()
                 
                 Text(formatDuration(recording.duration))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.tertiaryText)
             }
             
             Divider()
+                .background(Color.surfaceBackground)
             
             HStack(spacing: 20) {
                 Button(action: onPlay) {
-                    Image(systemName: "play.circle")
+                    Image(systemName: "play.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.skyBlue)
+                        .foregroundColor(.primaryGreen)
                 }
                 .frame(minWidth: 44, minHeight: 44)
                 
                 Button(action: onShare) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.title3)
-                        .foregroundColor(.skyBlue)
+                        .foregroundColor(.primaryGreen)
                 }
                 .frame(minWidth: 44, minHeight: 44)
                 
@@ -231,9 +253,12 @@ struct RecordingCard: View {
             .padding(.top, 4)
         }
         .padding(16)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .background(Color.cardBackground)
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.surfaceBackground, lineWidth: 1)
+        )
     }
     
     func formatDate(_ date: Date) -> String {

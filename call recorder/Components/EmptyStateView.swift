@@ -15,10 +15,16 @@ struct EmptyStateView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.navyBlue)
                 
-                Text("Start recording calls to see them here")
+                Text("Your recorded calls will appear here")
                     .font(.subheadline)
                     .foregroundColor(.darkGrey)
                     .multilineTextAlignment(.center)
+                
+                Text("Tap the Record Call tab to get started")
+                    .font(.caption)
+                    .foregroundColor(.darkGrey.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
             }
             
             Spacer()

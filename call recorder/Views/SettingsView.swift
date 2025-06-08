@@ -1,10 +1,15 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject private var authManager: AuthManager
     @State private var notificationsEnabled = true
     @State private var selectedLanguage = "English"
     @State private var selectedPlan = "monthly"
     @State private var showSubscriptionDetails = false
+    @State private var showSignOutAlert = false
+    @State private var showDeleteAccountAlert = false
+    @State private var userEmail = ""
+    @State private var userName = ""
     
     let languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese"]
     
@@ -12,6 +17,8 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+                    ProfileSection(userEmail: userEmail, userName: userName)
+                    
                     NotificationsSection(notificationsEnabled: $notificationsEnabled)
                     
                     LanguageSection(selectedLanguage: $selectedLanguage, languages: languages)
@@ -25,16 +32,108 @@ struct SettingsView: View {
                     
                     LegalSection()
                     
-                    AccountSection()
+                    AccountSection(
+                        showSignOutAlert: $showSignOutAlert,
+                        showDeleteAccountAlert: $showDeleteAccountAlert
+                    )
                 }
                 .padding(.vertical)
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .background(Color.lightGrey)
+            .preferredColorScheme(.dark)
+            .background(Color.darkBackground)
+            .onAppear {
+                loadUserData()
+            }
         }
         .sheet(isPresented: $showSubscriptionDetails) {
             SubscriptionDetailsView(selectedPlan: $selectedPlan)
+        }
+        .alert("Sign Out", isPresented: $showSignOutAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Sign Out", role: .destructive) {
+                signOut()
+            }
+        } message: {
+            Text("Are you sure you want to sign out?")
+        }
+        .alert("Delete Account", isPresented: $showDeleteAccountAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                // Handle account deletion
+            }
+        } message: {
+            Text("This action cannot be undone. All your data will be permanently deleted.")
+        }
+    }
+    
+    private func loadUserData() {
+        if let currentUser = authManager.currentUser {
+            userEmail = currentUser.email
+            userName = currentUser.fullName
+        }
+    }
+    
+    private func signOut() {
+        authManager.signOut()
+    }
+}
+
+struct ProfileSection: View {
+    let userEmail: String
+    let userName: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Profile", icon: "person.circle")
+            
+            VStack(spacing: 0) {
+                HStack {
+                    Circle()
+                        .fill(Color.primaryGreen.opacity(0.2))
+                        .frame(width: 50, height: 50)
+                        .overlay(
+                            Text(userName.prefix(1).uppercased())
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primaryGreen)
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(userName.isEmpty ? "User" : userName)
+                            .font(.headline)
+                            .foregroundColor(.primaryText)
+                        
+                        Text(userEmail)
+                            .font(.subheadline)
+                            .foregroundColor(.secondaryText)
+                    }
+                    
+                    Spacer()
+                    
+                    Button("Edit") {
+                        // Handle edit profile
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.primaryGreen)
+                }
+                .padding()
+            }
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.surfaceBackground, lineWidth: 1)
+            )
+        }
+        .padding(.horizontal)
+        .sheet(isPresented: $showEditSheet) {
+            EditProfileView(
+                userName: userName,
+                userEmail: userEmail,
+                userAvatar: $userAvatar
+            )
         }
     }
 }
@@ -54,10 +153,14 @@ struct NotificationsSection: View {
                         .font(.subheadline)
                 }
             }
-            .tint(.skyBlue)
+            .tint(.primaryGreen)
             .padding()
-            .background(Color.white)
-            .cornerRadius(10)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.surfaceBackground, lineWidth: 1)
+            )
         }
         .padding(.horizontal)
     }
@@ -230,9 +333,14 @@ struct LegalSection: View {
 }
 
 struct AccountSection: View {
+    @Binding var showSignOutAlert: Bool
+    @Binding var showDeleteAccountAlert: Bool
+    
     var body: some View {
         VStack(spacing: 12) {
-            Button(action: {}) {
+            Button(action: {
+                showSignOutAlert = true
+            }) {
                 HStack {
                     Image(systemName: "arrow.right.square")
                     Text("Sign Out")
@@ -240,12 +348,18 @@ struct AccountSection: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.white)
-                .foregroundColor(.navyBlue)
-                .cornerRadius(10)
+                .background(Color.cardBackground)
+                .foregroundColor(.primaryText)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.surfaceBackground, lineWidth: 1)
+                )
             }
             
-            Button(action: {}) {
+            Button(action: {
+                showDeleteAccountAlert = true
+            }) {
                 HStack {
                     Image(systemName: "trash")
                     Text("Delete Account")
@@ -255,7 +369,7 @@ struct AccountSection: View {
                 .padding()
                 .background(Color.red.opacity(0.1))
                 .foregroundColor(.red)
-                .cornerRadius(10)
+                .cornerRadius(12)
             }
         }
         .padding(.horizontal)
