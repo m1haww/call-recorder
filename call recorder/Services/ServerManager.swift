@@ -1,13 +1,12 @@
 import Foundation
 
-class ServerManager: ObservableObject {
+final class ServerManager: ObservableObject {
     static let shared = ServerManager()
     
     private let baseURL = "https://api-57018476417.europe-west1.run.app"
     
     init() {}
     
-    // MARK: - User Management
     
     func registerUser(email: String, fullName: String, phoneNumber: String, appleID: String? = nil, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         let url = URL(string: "\(baseURL)/register_user")!
@@ -53,88 +52,35 @@ class ServerManager: ObservableObject {
         }.resume()
     }
     
-    func loginUser(email: String, phoneNumber: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        let url = URL(string: "\(baseURL)/login_user")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    private func createRecording(from dictionary: [String: Any], userPhone: String) -> Recording? {
+        let id = dictionary["id"] as? String ?? UUID().uuidString
+        let callDate = dictionary["call_date"] as? String ?? ""
+        let fromPhone = dictionary["from_phone"] as? String ?? ""
+        let toPhone = dictionary["to_phone"] as? String ?? userPhone
+        let recordingDuration = dictionary["recording_duration"] as? Int ?? 0
+        let recordingStatus = dictionary["recording_status"] as? String ?? ""
+        let recordingUrl = dictionary["recording_url"] as? String
+        let summary = dictionary["summary"] as? String
+        let title = dictionary["title"] as? String
+        let transcriptionStatus = dictionary["transcription_status"] as? String ?? ""
+        let transcriptionText = dictionary["transcription_text"] as? String
         
-        let loginData: [String: Any] = [
-            "email": email,
-            "phone_number": phoneNumber
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: loginData)
-        } catch {
-            completion(.failure(error))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(ServerError.noData))
-                return
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    completion(.success(json))
-                } else {
-                    completion(.failure(ServerError.invalidResponse))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
+        return Recording(
+            id: id,
+            callDate: callDate,
+            fromPhone: fromPhone,
+            toPhone: toPhone,
+            recordingDuration: recordingDuration,
+            recordingStatus: recordingStatus,
+            recordingUrl: recordingUrl,
+            summary: summary,
+            title: title,
+            transcriptionStatus: transcriptionStatus,
+            transcriptionText: transcriptionText
+        )
     }
     
-    func getUserByPhoneNumber(_ phoneNumber: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        let url = URL(string: "\(baseURL)/get_user_by_phone")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let requestData = ["phone_number": phoneNumber]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestData)
-        } catch {
-            completion(.failure(error))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(ServerError.noData))
-                return
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    completion(.success(json))
-                } else {
-                    completion(.failure(ServerError.invalidResponse))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-    
-    // MARK: - Call Management (existing functionality)
-    
-    func fetchCallsForUser(phoneNumber: String, completion: @escaping (Result<[[String: Any]], Error>) -> Void) {
+    func fetchCallsForUser(phoneNumber: String, completion: @escaping (Result<[Recording], Error>) -> Void) {
         let url = URL(string: "\(baseURL)/get_calls_for_user")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -156,9 +102,9 @@ class ServerManager: ObservableObject {
             
             do {
                 if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                    completion(.success(jsonArray))
+                    let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
+                    completion(.success(recordings))
                 } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
-                    // Empty array response
                     completion(.success([]))
                 } else {
                     completion(.failure(ServerError.invalidResponse))
@@ -169,45 +115,25 @@ class ServerManager: ObservableObject {
         }.resume()
     }
     
-    func saveCallRecording(userPhone: String, targetPhone: String, recordingData: [String: Any], completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        let url = URL(string: "\(baseURL)/save_call")!
+    func fetchCallsForUser(phoneNumber: String) async throws -> [Recording] {
+        let url = URL(string: "\(baseURL)/get_calls_for_user")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        var callData = recordingData
-        callData["user_phone"] = userPhone
-        callData["target_phone"] = targetPhone
-        callData["call_date"] = ISO8601DateFormatter().string(from: Date())
+        let body = ["user_phone": phoneNumber]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: callData)
-        } catch {
-            completion(.failure(error))
-            return
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+            let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
+            return recordings
+        } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
+            return []
+        } else {
+            throw ServerError.invalidResponse
         }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(ServerError.noData))
-                return
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    completion(.success(json))
-                } else {
-                    completion(.failure(ServerError.invalidResponse))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
     }
 }
 

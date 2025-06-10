@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @ObservedObject var viewModel = AppViewModel.shared
+    
     @State private var phoneNumber = ""
     @State private var selectedCountry = Country.defaultCountry
     @State private var showCountryPicker = false
@@ -30,57 +31,53 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [Color.skyBlue.opacity(0.1), Color.navyBlue.opacity(0.05)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.darkBackground
+                .ignoresSafeArea()
             
-            VStack(spacing: 40) {
-                // Progress indicator
+            VStack(spacing: 0) {
                 HStack(spacing: 8) {
                     ForEach(0..<steps.count, id: \.self) { index in
                         Circle()
-                            .fill(index <= currentStep ? Color.skyBlue : Color.mediumGrey)
-                            .frame(width: 12, height: 12)
+                            .fill(index <= currentStep ? Color.primaryGreen : Color.surfaceBackground)
+                            .frame(width: 10, height: 10)
                             .animation(.easeInOut(duration: 0.3), value: currentStep)
                     }
                 }
-                .padding(.top, 60)
+                .padding(.top, 50)
+                .padding(.bottom, 20)
                 
-                Spacer()
-                
-                // Current step content
-                VStack(spacing: 30) {
-                    Image(systemName: steps[currentStep].icon)
-                        .font(.system(size: 80))
-                        .foregroundColor(.skyBlue)
-                        .id(currentStep)
-                        .transition(.scale.combined(with: .opacity))
-                    
-                    VStack(spacing: 12) {
-                        Text(steps[currentStep].title)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.navyBlue)
-                            .multilineTextAlignment(.center)
-                        
-                        Text(steps[currentStep].subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.darkGrey)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
+                TabView(selection: $currentStep) {
+                    ForEach(0..<steps.count, id: \.self) { index in
+                        VStack(spacing: 24) {
+                            Image(systemName: steps[index].icon)
+                                .font(.system(size: 70))
+                                .foregroundColor(.primaryGreen)
+                            
+                            VStack(spacing: 12) {
+                                Text(steps[index].title)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primaryText)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text(steps[index].subtitle)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondaryText)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                            }
+                            
+                            getStepContent(for: index)
+                                .padding(.bottom, 20)
+                        }
+                        .tag(index)
                     }
-                    
-                    // Step-specific content
-                    stepContent
                 }
-                .animation(.easeInOut(duration: 0.5), value: currentStep)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .onAppear(perform: {
+                    UIScrollView.appearance().isScrollEnabled = false
+                })
                 
-                Spacer()
-                
-                // Action buttons
                 VStack(spacing: 16) {
                     if currentStep < steps.count - 1 {
                         Button(action: nextStep) {
@@ -88,8 +85,8 @@ struct OnboardingView: View {
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(canProceed ? Color.skyBlue : Color.mediumGrey)
-                                .foregroundColor(.white)
+                                .background(canProceed ? Color.primaryGreen : Color.surfaceBackground)
+                                .foregroundColor(.black)
                                 .cornerRadius(12)
                         }
                         .disabled(!canProceed)
@@ -100,22 +97,15 @@ struct OnboardingView: View {
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.skyBlue)
+                                .background(Color.primaryGreen)
                                 .foregroundColor(.white)
                                 .cornerRadius(12)
                         }
                     }
                     
-                    if currentStep > 0 {
-                        Button(action: previousStep) {
-                            Text("Back")
-                                .font(.subheadline)
-                                .foregroundColor(.darkGrey)
-                        }
-                    }
                 }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 30) // Reduced from 50 to move button up
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
         .alert("Error", isPresented: $showError) {
@@ -126,105 +116,112 @@ struct OnboardingView: View {
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerView(selectedCountry: $selectedCountry)
         }
+        .preferredColorScheme(.dark)
     }
     
     @ViewBuilder
-    private var stepContent: some View {
-        switch currentStep {
+    private func getStepContent(for step: Int) -> some View {
+        switch step {
+        case 0:
+            VStack {
+                Spacer()
+            }
+            .frame(height: 100)
+            
         case 1:
             VStack(spacing: 20) {
-                // Country Selector
                 Button(action: {
                     showCountryPicker = true
                 }) {
                     HStack {
-                        Text(selectedCountry.shortDisplayName)
+                        Text("\(selectedCountry.flag) \(selectedCountry.name)")
                             .font(.title3)
-                            .foregroundColor(.navyBlue)
+                            .foregroundColor(.primaryText)
                         
                         Spacer()
                         
                         Image(systemName: "chevron.down")
-                            .foregroundColor(.darkGrey)
+                            .foregroundColor(.secondaryText)
                             .font(.caption)
                     }
                     .padding()
-                    .background(Color.white)
+                    .background(Color.cardBackground)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.mediumGrey, lineWidth: 1)
+                            .stroke(Color.surfaceBackground, lineWidth: 1)
                     )
                 }
                 
-                // Phone Number Input
                 HStack(spacing: 0) {
                     Text(selectedCountry.dialCode)
                         .font(.title3)
-                        .foregroundColor(.darkGrey)
+                        .foregroundColor(.secondaryText)
                         .padding(.leading, 16)
                         .padding(.vertical, 16)
                     
                     TextField("Phone number", text: $phoneNumber)
                         .font(.title3)
+                        .foregroundColor(.primaryText)
                         .padding(.trailing, 16)
                         .padding(.vertical, 16)
                         .keyboardType(.phonePad)
                         .textContentType(.telephoneNumber)
+                        .padding(.leading, 7)
                 }
-                .background(Color.white)
+                .background(Color.cardBackground)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(showError ? Color.red : Color.mediumGrey, lineWidth: 1)
+                        .stroke(showError ? Color.red : Color.surfaceBackground, lineWidth: 1)
                 )
                 
                 Text("Enter your phone number without the country code")
                     .font(.caption)
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 30)
             
         case 2:
-            VStack(spacing: 16) { // Reduced spacing from 20 to 16
+            VStack(spacing: 20) {
                 // Free Trial Card
                 VStack(spacing: 16) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: "gift.fill")
-                                    .foregroundColor(.skyBlue)
+                                    .foregroundColor(.primaryGreen)
                                 Text("Free Trial")
                                     .font(.headline)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.navyBlue)
+                                    .foregroundColor(.primaryText)
                             }
                             
                             Text("3 Days Free")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.navyBlue)
+                                .foregroundColor(.primaryText)
                             
                             Text("Full access to all features")
                                 .font(.caption)
-                                .foregroundColor(.darkGrey)
+                                .foregroundColor(.secondaryText)
                         }
                         
                         Spacer()
                         
                         if selectedPlan == "free_trial" {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.skyBlue)
+                                .foregroundColor(.primaryGreen)
                                 .font(.title2)
                         }
                     }
                     .padding()
-                    .background(selectedPlan == "free_trial" ? Color.skyBlue.opacity(0.1) : Color.white)
+                    .background(selectedPlan == "free_trial" ? Color.primaryGreen.opacity(0.1) : Color.cardBackground)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedPlan == "free_trial" ? Color.skyBlue : Color.mediumGrey, lineWidth: 2)
+                            .stroke(selectedPlan == "free_trial" ? Color.primaryGreen : Color.surfaceBackground, lineWidth: 2)
                     )
                     .onTapGesture {
                         selectedPlan = "free_trial"
@@ -232,12 +229,12 @@ struct OnboardingView: View {
                 }
                 
                 // Subscription Plans
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     Text("Then choose your plan:")
                         .font(.subheadline)
-                        .foregroundColor(.darkGrey)
+                        .foregroundColor(.secondaryText)
                     
-                    HStack(spacing: 12) {
+                    HStack(spacing: 10) {
                         SubscriptionPlanCard(
                             title: "Weekly",
                             price: "$9",
@@ -268,21 +265,20 @@ struct OnboardingView: View {
                 }
                 
                 // Features List
-                VStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     FeatureItem(icon: "infinity", text: "Unlimited recordings")
                     FeatureItem(icon: "text.bubble.fill", text: "AI transcriptions")
                     FeatureItem(icon: "icloud.fill", text: "Cloud sync")
                     FeatureItem(icon: "lock.shield.fill", text: "Secure & private")
                 }
-                .padding(.top, 8)
+                .padding(.top, 16)
                 
                 Text("Cancel anytime. No commitment.")
                     .font(.caption)
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
             }
-            .padding(.horizontal, 30)
-            .padding(.bottom, -20) // Reduce bottom padding to move button up
+            .padding(.horizontal, 24)
             
         default:
             EmptyView()
@@ -293,7 +289,7 @@ struct OnboardingView: View {
         switch currentStep {
         case 0: return true
         case 1: return isValidPhoneNumber(phoneNumber)
-        case 2: return true // Always allow proceeding from subscription step
+        case 2: return true
         default: return true
         }
     }
@@ -302,9 +298,6 @@ struct OnboardingView: View {
         switch currentStep {
         case 1:
             if isValidPhoneNumber(phoneNumber) {
-                let fullPhoneNumber = selectedCountry.dialCode + phoneNumber
-                viewModel.saveUserPhoneNumber(fullPhoneNumber)
-                viewModel.saveUserCountry(code: selectedCountry.code, name: selectedCountry.name)
                 withAnimation {
                     currentStep += 1
                 }
@@ -313,9 +306,10 @@ struct OnboardingView: View {
                 errorMessage = "Please enter a valid phone number for \(selectedCountry.name)"
             }
         case 2:
-            // Save selected subscription plan
-            viewModel.selectedPlan = selectedPlan
-            UserDefaults.standard.set(selectedPlan, forKey: "selectedPlan")
+            let fullPhoneNumber = selectedCountry.dialCode + phoneNumber
+            viewModel.saveUserPhoneNumber(fullPhoneNumber)
+            viewModel.saveUserCountry(code: selectedCountry.code, name: selectedCountry.name)
+            
             completeOnboarding()
         default:
             withAnimation {
@@ -324,11 +318,6 @@ struct OnboardingView: View {
         }
     }
     
-    private func previousStep() {
-        withAnimation {
-            currentStep -= 1
-        }
-    }
     
     private func completeOnboarding() {
         viewModel.completeOnboarding()
@@ -360,52 +349,52 @@ struct SubscriptionPlanCard: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 if isPopular {
                     Text("POPULAR")
-                        .font(.caption2)
+                        .font(.system(size: 10))
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.skyBlue)
-                        .cornerRadius(8)
+                        .padding(.vertical, 3)
+                        .background(Color.primaryGreen)
+                        .cornerRadius(6)
                 }
                 
                 Text(title)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.navyBlue)
+                    .foregroundColor(.primaryText)
                 
                 Text(price)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundColor(.navyBlue)
+                    .foregroundColor(.primaryText)
                 
                 Text("/ \(period)")
-                    .font(.caption2)
-                    .foregroundColor(.darkGrey)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondaryText)
                 
                 if let savings = savings {
                     Text(savings)
-                        .font(.caption2)
+                        .font(.system(size: 10))
                         .fontWeight(.medium)
-                        .foregroundColor(.green)
+                        .foregroundColor(.primaryGreen)
                 }
                 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.skyBlue)
+                        .foregroundColor(.primaryGreen)
                         .font(.caption)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(isSelected ? Color.skyBlue.opacity(0.1) : Color.white)
+            .frame(maxWidth: .infinity, minHeight: 120)
+            .padding(.vertical, 16)
+            .background(isSelected ? Color.primaryGreen.opacity(0.1) : Color.cardBackground)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.skyBlue : Color.mediumGrey, lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? Color.primaryGreen : Color.surfaceBackground, lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -419,19 +408,14 @@ struct FeatureItem: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.skyBlue)
+                .foregroundColor(.primaryGreen)
                 .frame(width: 20)
             
             Text(text)
                 .font(.caption)
-                .foregroundColor(.navyBlue)
+                .foregroundColor(.primaryText)
             
             Spacer()
         }
     }
-}
-
-#Preview {
-    OnboardingView()
-        .environmentObject(AppViewModel())
 }

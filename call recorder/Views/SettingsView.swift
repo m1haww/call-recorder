@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject private var authManager: AuthManager
+    @ObservedObject private var viewModel = AppViewModel.shared
     @State private var notificationsEnabled = true
     @State private var selectedLanguage = "English"
     @State private var selectedPlan = "monthly"
@@ -10,6 +10,7 @@ struct SettingsView: View {
     @State private var showDeleteAccountAlert = false
     @State private var userEmail = ""
     @State private var userName = ""
+    @State private var userPhoneNumber = ""
     
     let languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese"]
     
@@ -17,7 +18,7 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    ProfileSection(userEmail: userEmail, userName: userName)
+                    ProfileSection(userPhoneNumber: userPhoneNumber, userName: userName)
                     
                     NotificationsSection(notificationsEnabled: $notificationsEnabled)
                     
@@ -48,41 +49,35 @@ struct SettingsView: View {
             }
         }
         .sheet(isPresented: $showSubscriptionDetails) {
-            SubscriptionDetailsView(selectedPlan: $selectedPlan)
+            SubscriptionDetailsView()
         }
-        .alert("Sign Out", isPresented: $showSignOutAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Sign Out", role: .destructive) {
-                signOut()
-            }
-        } message: {
-            Text("Are you sure you want to sign out?")
-        }
-        .alert("Delete Account", isPresented: $showDeleteAccountAlert) {
+        .alert("Delete Data", isPresented: $showDeleteAccountAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                // Handle account deletion
+                deleteUserData()
             }
         } message: {
-            Text("This action cannot be undone. All your data will be permanently deleted.")
+            Text("This action will delete all your recorded calls and data. Are you sure you want to continue?")
         }
     }
     
     private func loadUserData() {
-        if let currentUser = authManager.currentUser {
-            userEmail = currentUser.email
-            userName = currentUser.fullName
-        }
+        userPhoneNumber = viewModel.userPhoneNumber
+        userEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
+        userName = UserDefaults.standard.string(forKey: "userName") ?? "User"
     }
     
-    private func signOut() {
-        authManager.signOut()
+    private func deleteUserData() {
+        // Clear all user data
+        viewModel.recordings.removeAll()
+        viewModel.showToast("All data deleted successfully")
     }
 }
 
 struct ProfileSection: View {
-    let userEmail: String
+    let userPhoneNumber: String
     let userName: String
+    @State private var showEditSheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -105,7 +100,7 @@ struct ProfileSection: View {
                             .font(.headline)
                             .foregroundColor(.primaryText)
                         
-                        Text(userEmail)
+                        Text(userPhoneNumber.isEmpty ? "No phone number" : userPhoneNumber)
                             .font(.subheadline)
                             .foregroundColor(.secondaryText)
                     }
@@ -113,7 +108,7 @@ struct ProfileSection: View {
                     Spacer()
                     
                     Button("Edit") {
-                        // Handle edit profile
+                        showEditSheet = true
                     }
                     .font(.subheadline)
                     .foregroundColor(.primaryGreen)
@@ -122,18 +117,10 @@ struct ProfileSection: View {
             }
             .background(Color.cardBackground)
             .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.surfaceBackground, lineWidth: 1)
-            )
         }
         .padding(.horizontal)
         .sheet(isPresented: $showEditSheet) {
-            EditProfileView(
-                userName: userName,
-                userEmail: userEmail,
-                userAvatar: $userAvatar
-            )
+            EditProfileView(userName: userName, phoneNumber: userPhoneNumber)
         }
     }
 }
@@ -148,19 +135,16 @@ struct NotificationsSection: View {
             Toggle(isOn: $notificationsEnabled) {
                 HStack {
                     Image(systemName: "bell.badge")
-                        .foregroundColor(.skyBlue)
+                        .foregroundColor(.primaryGreen)
                     Text("Push Notifications")
                         .font(.subheadline)
+                        .foregroundColor(.primaryText)
                 }
             }
             .tint(.primaryGreen)
             .padding()
             .background(Color.cardBackground)
             .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.surfaceBackground, lineWidth: 1)
-            )
         }
         .padding(.horizontal)
     }
@@ -169,41 +153,35 @@ struct NotificationsSection: View {
 struct LanguageSection: View {
     @Binding var selectedLanguage: String
     let languages: [String]
+    @State private var showLanguagePicker = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Language", icon: "globe")
             
-            VStack(spacing: 0) {
-                ForEach(languages, id: \.self) { language in
-                    Button(action: { selectedLanguage = language }) {
-                        HStack {
-                            Text(language)
-                                .font(.subheadline)
-                                .foregroundColor(.navyBlue)
-                            
-                            Spacer()
-                            
-                            if selectedLanguage == language {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.skyBlue)
-                                    .font(.footnote)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .padding()
-                    }
+            Button(action: {
+                showLanguagePicker = true
+            }) {
+                HStack {
+                    Text(selectedLanguage)
+                        .font(.subheadline)
+                        .foregroundColor(.primaryText)
                     
-                    if language != languages.last {
-                        Divider()
-                            .padding(.leading)
-                    }
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondaryText)
+                        .font(.caption)
                 }
+                .padding()
+                .background(Color.cardBackground)
+                .cornerRadius(12)
             }
-            .background(Color.white)
-            .cornerRadius(10)
         }
         .padding(.horizontal)
+        .sheet(isPresented: $showLanguagePicker) {
+            LanguagePickerView(selectedLanguage: $selectedLanguage, languages: languages)
+        }
     }
 }
 
@@ -220,6 +198,7 @@ struct PrivacySection: View {
                 )
                 
                 Divider()
+                    .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
                 SettingsRow(
@@ -229,6 +208,7 @@ struct PrivacySection: View {
                 )
                 
                 Divider()
+                    .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
                 SettingsRow(
@@ -237,8 +217,8 @@ struct PrivacySection: View {
                     showChevron: true
                 )
             }
-            .background(Color.white)
-            .cornerRadius(10)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
         }
         .padding(.horizontal)
     }
@@ -247,58 +227,52 @@ struct PrivacySection: View {
 struct SubscriptionSection: View {
     @Binding var selectedPlan: String
     @Binding var showDetails: Bool
+    @ObservedObject var viewModel = AppViewModel.shared
+    
+    var planText: String {
+        switch viewModel.currentUser {
+        case .free:
+            return "Free Plan"
+        case .premium:
+            return "Premium Plan"
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Subscription", icon: "creditcard")
             
-            VStack(spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Current Plan")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text("Pro Monthly")
-                            .font(.headline)
-                            .foregroundColor(.navyBlue)
-                    }
-                    
-                    Spacer()
-                    
-                    Button("Change Plan") {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Current Plan")
+                        .font(.caption)
+                        .foregroundColor(.secondaryText)
+                    Text(planText)
+                        .font(.headline)
+                        .foregroundColor(.primaryText)
+                }
+                
+                Spacer()
+                
+                if viewModel.currentUser == .free {
+                    Button("Upgrade") {
                         showDetails = true
                     }
                     .font(.footnote)
                     .fontWeight(.medium)
-                    .foregroundColor(.skyBlue)
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(10)
-                
-                HStack(spacing: 12) {
-                    PlanButton(
-                        title: "Weekly",
-                        price: "$4.99",
-                        isSelected: selectedPlan == "weekly",
-                        action: { selectedPlan = "weekly" }
-                    )
-                    
-                    PlanButton(
-                        title: "Monthly",
-                        price: "$14.99",
-                        isSelected: selectedPlan == "monthly",
-                        action: { selectedPlan = "monthly" }
-                    )
-                    
-                    PlanButton(
-                        title: "Yearly",
-                        price: "$99.99",
-                        isSelected: selectedPlan == "yearly",
-                        action: { selectedPlan = "yearly" }
-                    )
+                    .foregroundColor(.primaryGreen)
+                } else {
+                    Button("Manage") {
+                        showDetails = true
+                    }
+                    .font(.footnote)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primaryGreen)
                 }
             }
+            .padding()
+            .background(Color.cardBackground)
+            .cornerRadius(12)
         }
         .padding(.horizontal)
     }
@@ -317,6 +291,7 @@ struct LegalSection: View {
                 )
                 
                 Divider()
+                    .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
                 SettingsRow(
@@ -325,8 +300,8 @@ struct LegalSection: View {
                     showChevron: true
                 )
             }
-            .background(Color.white)
-            .cornerRadius(10)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
         }
         .padding(.horizontal)
     }
@@ -339,30 +314,11 @@ struct AccountSection: View {
     var body: some View {
         VStack(spacing: 12) {
             Button(action: {
-                showSignOutAlert = true
-            }) {
-                HStack {
-                    Image(systemName: "arrow.right.square")
-                    Text("Sign Out")
-                        .fontWeight(.medium)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.cardBackground)
-                .foregroundColor(.primaryText)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.surfaceBackground, lineWidth: 1)
-                )
-            }
-            
-            Button(action: {
                 showDeleteAccountAlert = true
             }) {
                 HStack {
                     Image(systemName: "trash")
-                    Text("Delete Account")
+                    Text("Delete Data")
                         .fontWeight(.medium)
                 }
                 .frame(maxWidth: .infinity)
@@ -384,12 +340,12 @@ struct SectionHeader: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .foregroundColor(.skyBlue)
+                .foregroundColor(.primaryGreen)
                 .font(.footnote)
             
             Text(title)
                 .font(.headline)
-                .foregroundColor(.navyBlue)
+                .foregroundColor(.primaryText)
         }
     }
 }
@@ -403,18 +359,18 @@ struct SettingsRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.skyBlue)
+                .foregroundColor(.primaryGreen)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.navyBlue)
+                    .foregroundColor(.primaryText)
                 
                 if let subtitle = subtitle {
                     Text(subtitle)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.secondaryText)
                 }
             }
             
@@ -422,7 +378,7 @@ struct SettingsRow: View {
             
             if showChevron {
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .font(.caption)
             }
         }
@@ -454,19 +410,18 @@ struct PlanButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(isSelected ? Color.skyBlue : Color.white)
-            .foregroundColor(isSelected ? .white : .navyBlue)
+            .background(isSelected ? Color.primaryGreen : Color.cardBackground)
+            .foregroundColor(isSelected ? .white : .primaryText)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.clear : Color.mediumGrey, lineWidth: 1)
+                    .stroke(isSelected ? Color.clear : Color.darkGrey.opacity(0.3), lineWidth: 1)
             )
         }
     }
 }
 
 struct SubscriptionDetailsView: View {
-    @Binding var selectedPlan: String
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -475,16 +430,16 @@ struct SubscriptionDetailsView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.skyBlue)
+                        .foregroundColor(.primaryGreen)
                     
                     Text("Unlock Premium Features")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.navyBlue)
+                        .foregroundColor(.primaryText)
                     
                     Text("Get unlimited recordings and transcripts")
                         .font(.subheadline)
-                        .foregroundColor(.darkGrey)
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 40)
@@ -505,26 +460,28 @@ struct SubscriptionDetailsView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.skyBlue)
+                            .background(Color.primaryGreen)
                             .foregroundColor(.white)
                             .cornerRadius(12)
                     }
                     
-                    Text("Then \(priceForPlan(selectedPlan))")
+                    Text("Then \(priceForPlan("weekly"))")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.secondaryText)
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 40)
             }
+            .background(Color.cardBackground)
             .navigationTitle("Premium")
             .navigationBarTitleDisplayMode(.inline)
+            .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.skyBlue)
+                    .foregroundColor(.primaryGreen)
                 }
             }
         }
@@ -547,18 +504,70 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .foregroundColor(.skyBlue)
+                .foregroundColor(.primaryGreen)
                 .frame(width: 24)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.navyBlue)
+                .foregroundColor(.primaryText)
             
             Spacer()
         }
     }
 }
 
-#Preview {
-    SettingsView()
+struct LanguagePickerView: View {
+    @Binding var selectedLanguage: String
+    let languages: [String]
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                ForEach(languages, id: \.self) { language in
+                    Button(action: {
+                        selectedLanguage = language
+                        HapticManager.shared.selection()
+                        dismiss()
+                    }) {
+                        HStack {
+                            Text(language)
+                                .font(.body)
+                                .foregroundColor(.primaryText)
+                            
+                            Spacer()
+                            
+                            if selectedLanguage == language {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.primaryGreen)
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                        .padding()
+                    }
+                    
+                    if language != languages.last {
+                        Divider()
+                            .background(Color.darkGrey.opacity(0.3))
+                            .padding(.leading)
+                    }
+                }
+                
+                Spacer()
+            }
+            .background(Color.darkBackground)
+            .navigationTitle("Language")
+            .navigationBarTitleDisplayMode(.inline)
+            .preferredColorScheme(.dark)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundColor(.primaryGreen)
+                }
+            }
+        }
+    }
 }

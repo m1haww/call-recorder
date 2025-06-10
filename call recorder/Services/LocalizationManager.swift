@@ -50,12 +50,10 @@ class LocalizationManager: ObservableObject {
         currentLanguage = language
         storedLanguage = language.rawValue
         
-        // Apply language change
         UserDefaults.standard.set([language.rawValue], forKey: "AppleLanguages")
         UserDefaults.standard.synchronize()
     }
     
-    // Localized strings
     func localizedString(_ key: String) -> String {
         return localizedStrings[currentLanguage]?[key] ?? localizedStrings[.english]?[key] ?? key
     }
@@ -148,7 +146,6 @@ class LocalizationManager: ObservableObject {
     ]
 }
 
-// SwiftUI View extension for easy localization
 extension View {
     func localized(_ key: String) -> String {
         LocalizationManager.shared.localizedString(key)

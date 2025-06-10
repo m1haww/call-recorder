@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @ObservedObject var viewModel = AppViewModel.shared
+    
     @State private var searchText = ""
     @State private var selectedFilter = "All"
     @State private var selectedRecording: Recording?
@@ -11,7 +12,7 @@ struct HomeView: View {
     @State private var showShareSheet = false
     @State private var recordingToShare: Recording?
     
-    let filters = ["Today", "Week", "All"]
+    let filters = ["All", "Today", "Week"]
     
     var filteredRecordings: [Recording] {
         viewModel.filterRecordings(by: selectedFilter, searchText: searchText)
@@ -32,10 +33,6 @@ struct HomeView: View {
                     EmptyStateView()
                 } else {
                     ScrollView {
-                        RefreshControl {
-                            viewModel.refreshRecordings()
-                        }
-                        
                         LazyVStack(spacing: 12) {
                             ForEach(filteredRecordings) { recording in
                                 RecordingCard(
@@ -61,27 +58,15 @@ struct HomeView: View {
                         }
                         .padding(.top, 8)
                     }
+                    .refreshable {
+                        await viewModel.fetchCallsFromServerAsync()
+                    }
                 }
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.large)
             .preferredColorScheme(.dark)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        viewModel.fetchCallsFromServer()
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.primaryGreen)
-                    }
-                    .disabled(viewModel.isLoading)
-                }
-            }
             .background(Color.darkBackground)
-            .onAppear {
-                // Automatically fetch recordings when view appears
-                viewModel.fetchCallsFromServer()
-            }
         }
         .fullScreenCover(isPresented: $showPlayer) {
             if let recording = selectedRecording {

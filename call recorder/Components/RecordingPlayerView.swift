@@ -272,14 +272,3 @@ struct ActionButton: View {
         }
     }
 }
-
-
-#Preview {
-    RecordingPlayerView(
-        recording: Recording(
-            contactName: "John Doe",
-            phoneNumber: "+1 234-567-8900",
-            duration: 125
-        )
-    )
-}

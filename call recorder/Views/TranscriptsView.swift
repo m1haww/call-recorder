@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 struct TranscriptsView: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @ObservedObject var viewModel = AppViewModel.shared
     @State private var selectedRecording: Recording?
     @State private var isLoadingTranscript = false
     @State private var showTranscriptUnavailable = false
@@ -21,9 +21,6 @@ struct TranscriptsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                LanguagePicker(selectedLanguage: $viewModel.selectedLanguage, languages: languages)
-                    .padding()
-                
                 if let selectedRecording = selectedRecording {
                     TranscriptDetailView(recording: selectedRecording, onBack: {
                         HapticManager.shared.impact(.light)
@@ -58,10 +55,11 @@ struct TranscriptsView: View {
             }
             .navigationTitle("Transcripts")
             .navigationBarTitleDisplayMode(.large)
-            .background(Color.lightGrey)
+            .preferredColorScheme(.dark)
+            .background(Color.darkBackground)
         }
         .sheet(isPresented: $showSubscriptionPrompt) {
-            SubscriptionDetailsView(selectedPlan: $viewModel.selectedPlan)
+            SubscriptionDetailsView()
         }
         .alert("Transcript Unavailable", isPresented: $showTranscriptUnavailable) {
             Button("Try Again") {
@@ -145,24 +143,24 @@ struct TranscriptCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recording.contactName)
                         .font(.headline)
-                        .foregroundColor(.navyBlue)
+                        .foregroundColor(.primaryText)
                     
                     Text(formatDate(recording.date))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.secondaryText)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .font(.caption)
             }
             
             if let transcript = recording.transcript {
                 Text(transcript)
                     .font(.subheadline)
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .lineLimit(2)
                     .padding(.top, 4)
             } else if userType == .free {
@@ -179,7 +177,7 @@ struct TranscriptCard: View {
             } else {
                 Text("Transcript not available")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondaryText.opacity(0.7))
                     .italic()
                     .padding(.top, 4)
             }
@@ -187,21 +185,21 @@ struct TranscriptCard: View {
             HStack {
                 Label(formatDuration(recording.duration), systemImage: "clock")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondaryText)
                 
                 Spacer()
                 
                 if recording.isUploaded {
                     Label("Synced", systemImage: "checkmark.icloud")
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(.primaryGreen)
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color.darkGrey)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
     }
     
     func formatDate(_ date: Date) -> String {
@@ -238,7 +236,7 @@ struct TranscriptDetailView: View {
                         Image(systemName: "chevron.left")
                         Text("Back")
                     }
-                    .foregroundColor(.skyBlue)
+                    .foregroundColor(.primaryGreen)
                 }
                 
                 Spacer()
@@ -246,16 +244,16 @@ struct TranscriptDetailView: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(recording.contactName)
                         .font(.headline)
-                        .foregroundColor(.navyBlue)
+                        .foregroundColor(.primaryText)
                     
                     Text(formatDate(recording.date))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.secondaryText)
                 }
             }
             .padding()
-            .background(Color.white)
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
+            .background(Color.darkGrey)
+            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
             
             ScrollView {
                 LazyVStack(spacing: 16) {
@@ -265,6 +263,7 @@ struct TranscriptDetailView: View {
                 }
                 .padding()
             }
+            .background(Color.darkBackground)
             
             HStack(spacing: 16) {
                 Button(action: {}) {
@@ -285,10 +284,10 @@ struct TranscriptDetailView: View {
                         .fontWeight(.medium)
                 }
             }
-            .foregroundColor(.skyBlue)
+            .foregroundColor(.primaryGreen)
             .padding()
-            .background(Color.white)
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: -2)
+            .background(Color.darkGrey)
+            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: -2)
         }
     }
     
@@ -322,18 +321,18 @@ struct MessageBubble: View {
                 Text(message.speaker)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(isYou ? .skyBlue : .navyBlue)
+                    .foregroundColor(isYou ? .primaryGreen : .primaryText)
                 
                 Text(message.text)
                     .font(.subheadline)
                     .padding(12)
-                    .background(isYou ? Color.skyBlue : Color.mediumGrey)
-                    .foregroundColor(isYou ? .white : .navyBlue)
+                    .background(isYou ? Color.primaryGreen : Color.darkGrey)
+                    .foregroundColor(isYou ? .white : .primaryText)
                     .cornerRadius(16)
                 
                 Text(formatTime(message.timestamp))
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondaryText)
             }
             .frame(maxWidth: 300, alignment: isYou ? .trailing : .leading)
             
@@ -346,8 +345,4 @@ struct MessageBubble: View {
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-}
-
-#Preview {
-    TranscriptsView()
 }

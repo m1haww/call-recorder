@@ -2,22 +2,28 @@ import SwiftUI
 
 struct EditProfileView: View {
     let userName: String
-    let userEmail: String
-    @Binding var userAvatar: UIImage?
+    let phoneNumber: String
     @Environment(\.dismiss) private var dismiss
     
     @State private var editedName: String = ""
-    @State private var editedEmail: String = ""
     @State private var showSaveAlert = false
     
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Avatar Section
+                // Profile Icon
                 VStack(spacing: 16) {
-                    AvatarImagePicker(selectedImage: $userAvatar)
+                    Circle()
+                        .fill(Color.primaryGreen.opacity(0.2))
+                        .frame(width: 100, height: 100)
+                        .overlay(
+                            Text(editedName.prefix(1).uppercased())
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primaryGreen)
+                        )
                     
-                    Text("Tap to change profile picture")
+                    Text("Edit your profile name")
                         .font(.caption)
                         .foregroundColor(.secondaryText)
                 }
@@ -48,24 +54,24 @@ struct EditProfileView: View {
                         )
                     }
                     
-                    // Email Field
+                    // Phone Number Field (Read-only)
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Email")
+                        Text("Phone Number")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.primaryText)
                         
                         HStack {
-                            Image(systemName: "envelope")
+                            Image(systemName: "phone")
                                 .foregroundColor(.secondaryText)
                             
-                            TextField("Enter your email", text: $editedEmail)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .foregroundColor(.primaryText)
+                            Text(phoneNumber)
+                                .foregroundColor(.secondaryText)
+                            
+                            Spacer()
                         }
                         .padding()
-                        .background(Color.cardBackground)
+                        .background(Color.cardBackground.opacity(0.5))
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
@@ -79,6 +85,7 @@ struct EditProfileView: View {
                 
                 // Save Button
                 Button(action: {
+                    UserDefaults.standard.set(editedName, forKey: "userName")
                     showSaveAlert = true
                 }) {
                     Text("Save Changes")
@@ -114,7 +121,6 @@ struct EditProfileView: View {
             }
             .onAppear {
                 editedName = userName
-                editedEmail = userEmail
             }
         }
         .alert("Profile Updated", isPresented: $showSaveAlert) {
@@ -130,7 +136,6 @@ struct EditProfileView: View {
 #Preview {
     EditProfileView(
         userName: "John Doe",
-        userEmail: "john@example.com",
-        userAvatar: .constant(nil)
+        phoneNumber: "+1234567890"
     )
 }

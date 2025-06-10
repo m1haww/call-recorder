@@ -23,13 +23,14 @@ struct CountryPickerView: View {
                 // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.darkGrey)
+                        .foregroundColor(.secondaryText)
                     
                     TextField("Search countries", text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(.primaryText)
                 }
                 .padding()
-                .background(Color.lightGrey)
+                .background(Color.surfaceBackground)
                 .cornerRadius(10)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -57,10 +58,11 @@ struct CountryPickerView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.skyBlue)
+                    .foregroundColor(.primaryGreen)
                 }
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -77,28 +79,25 @@ struct CountryRow: View {
                 Text(country.name)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.navyBlue)
+                    .foregroundColor(.primaryText)
                 
                 Text(country.dialCode)
                     .font(.caption)
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
             }
             
             Spacer()
             
             if isSelected {
                 Image(systemName: "checkmark")
-                    .foregroundColor(.skyBlue)
+                    .foregroundColor(.primaryGreen)
                     .font(.footnote)
                     .fontWeight(.semibold)
             }
         }
         .padding(.vertical, 8)
-        .background(isSelected ? Color.skyBlue.opacity(0.1) : Color.clear)
+        .padding(.horizontal, isSelected ? 12 : 0)
+        .background(isSelected ? Color.primaryGreen.opacity(0.1) : Color.clear)
         .cornerRadius(8)
     }
-}
-
-#Preview {
-    CountryPickerView(selectedCountry: .constant(Country.defaultCountry))
 }

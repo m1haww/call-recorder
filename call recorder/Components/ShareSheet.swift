@@ -53,14 +53,3 @@ struct ShareSheet: UIViewControllerRepresentable {
         return formatter.string(from: date)
     }
 }
-
-#Preview {
-    Text("ShareSheet Preview")
-        .sheet(isPresented: .constant(true)) {
-            ShareSheet(recording: Recording(
-                contactName: "John Doe",
-                phoneNumber: "+1 234-567-8900",
-                duration: 125
-            ))
-        }
-}

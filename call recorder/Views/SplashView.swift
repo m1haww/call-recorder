@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SplashView: View {
+    @ObservedObject var viewModel = AppViewModel.shared
+    
     @State private var isAnimating = false
     @State private var showLogo = false
     @State private var showAppName = false
@@ -72,10 +74,8 @@ struct SplashView: View {
                 showAppName = true
                 showTagline = true
             }
+            
+            viewModel.fetchCallsFromServer()
         }
     }
-}
-
-#Preview {
-    SplashView()
 }

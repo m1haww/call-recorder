@@ -1,36 +1,34 @@
 import SwiftUI
 
 struct EmptyStateView: View {
+    let screenHeight = UIScreen.main.bounds.height
+    
     var body: some View {
         VStack(spacing: 24) {
-            Spacer()
-            
             Image(systemName: "waveform.circle")
                 .font(.system(size: 80))
-                .foregroundColor(.darkGrey)
+                .foregroundColor(.secondaryText)
             
             VStack(spacing: 8) {
                 Text("No Recordings Yet")
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundColor(.navyBlue)
+                    .foregroundColor(.primaryText)
                 
                 Text("Your recorded calls will appear here")
                     .font(.subheadline)
-                    .foregroundColor(.darkGrey)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                 
                 Text("Tap the Record Call tab to get started")
                     .font(.caption)
-                    .foregroundColor(.darkGrey.opacity(0.8))
+                    .foregroundColor(.secondaryText.opacity(0.8))
                     .multilineTextAlignment(.center)
                     .padding(.top, 4)
             }
-            
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.lightGrey)
+        .background(Color.darkBackground)
     }
 }
 
@@ -41,14 +39,14 @@ struct LoadingView: View {
         VStack(spacing: 16) {
             Circle()
                 .trim(from: 0, to: 0.7)
-                .stroke(Color.skyBlue, lineWidth: 3)
+                .stroke(Color.primaryGreen, lineWidth: 3)
                 .frame(width: 40, height: 40)
                 .rotationEffect(Angle(degrees: isAnimating ? 360 : 0))
                 .animation(.linear(duration: 1).repeatForever(autoreverses: false), value: isAnimating)
             
             Text("Loading...")
                 .font(.subheadline)
-                .foregroundColor(.darkGrey)
+                .foregroundColor(.secondaryText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.3))
@@ -75,8 +73,4 @@ struct RefreshControl: View {
         }
         .frame(height: 0)
     }
-}
-
-#Preview {
-    EmptyStateView()
 }
