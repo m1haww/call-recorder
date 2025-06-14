@@ -20,7 +20,7 @@ final class AppViewModel: ObservableObject {
     @Published var showPermissionAlert = false
     
     @Published var permissionType: PermissionType = .microphone
-    @Published var userPhoneNumber = ""
+    @Published var userPhoneNumber = "+15202445872"
     @Published var userCountryCode = ""
     @Published var userCountryName = ""
     @Published var isOnboardingComplete = false
@@ -38,6 +38,11 @@ final class AppViewModel: ObservableObject {
     init() {
         loadUserData()
         checkMicrophonePermission()
+        
+        // Add sample recording with transcript for testing
+        #if DEBUG
+        addSampleRecordingWithTranscript()
+        #endif
     }
     
     func deleteRecording(at index: Int) {
@@ -180,4 +185,48 @@ final class AppViewModel: ObservableObject {
             }
         }
     }
+    
+    #if DEBUG
+    private func addSampleRecordingWithTranscript() {
+        let sampleTranscript = """
+        So, I wanted to discuss the quarterly report with you. The numbers are looking really good this quarter. We've seen a 15% increase in revenue compared to last quarter, which is fantastic.
+        
+        That's great news! What were the main drivers behind this growth? I'm particularly interested in understanding which product lines performed the best.
+        
+        Well, our new product line that we launched in January has been performing exceptionally well. It's already accounting for about 30% of our total revenue. The marketing campaign really paid off, and customer feedback has been overwhelmingly positive.
+        
+        That's excellent. How about our operational costs? Have we been able to maintain our margins despite the expansion?
+        
+        Yes, actually our margins have improved slightly. We've implemented some cost-saving measures in our supply chain, and the increased volume has given us better negotiating power with suppliers. Our gross margin is up by 2 percentage points.
+        
+        This is all very encouraging. What's the outlook for next quarter? Do you think we can maintain this momentum?
+        
+        I'm cautiously optimistic. We have several new initiatives in the pipeline, and if the market conditions remain favorable, we should be able to maintain similar growth rates. However, we need to keep an eye on the competitive landscape.
+        
+        Agreed. Let's schedule a follow-up meeting next week to dive deeper into the strategic planning for Q3. Can you prepare a detailed breakdown of the growth drivers and risk factors?
+        
+        Absolutely. I'll have that ready by Tuesday. Should I include the team leads in the meeting as well?
+        
+        Yes, please do. Their input will be valuable for our planning. Thanks for the update!
+        """
+        
+        let sampleRecording = Recording(
+            id: "sample-001",
+            callDate: ISO8601DateFormatter().string(from: Date()),
+            fromPhone: "+1234567890",
+            toPhone: "+0987654321",
+            recordingDuration: 480, // 8 minutes
+            recordingStatus: "completed",
+            recordingUrl: "https://example.com/sample.m4a",
+            summary: "Discussed Q2 performance with 15% revenue growth, new product line success, and improved margins. Planning follow-up for Q3 strategy.",
+            title: "John Smith - Q2 Business Review",
+            transcriptionStatus: "completed",
+            transcriptionText: sampleTranscript
+        )
+        
+        DispatchQueue.main.async {
+            self.recordings.insert(sampleRecording, at: 0)
+        }
+    }
+    #endif
 }
