@@ -3,83 +3,48 @@ import UIKit
 
 struct TranscriptsView: View {
     @ObservedObject var viewModel = AppViewModel.shared
-    @State private var selectedRecording: Recording?
-    @State private var isLoadingTranscript = false
-    @State private var showTranscriptUnavailable = false
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @Binding var navigationPath: NavigationPath
     @State private var showSubscriptionPrompt = false
     
-    let languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese"]
-    
     var recordingsWithTranscripts: [Recording] {
-        if viewModel.currentUser == .premium {
-            return viewModel.recordings
-        } else {
-            return viewModel.recordings.filter { $0.transcript != nil }
-        }
+        return viewModel.recordings.filter { $0.transcript != nil && !$0.transcript!.isEmpty }
     }
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                if let selectedRecording = selectedRecording {
-                    TranscriptDetailView(recording: selectedRecording, onBack: {
-                        HapticManager.shared.impact(.light)
-                        self.selectedRecording = nil
-                    })
-                } else {
-                    if recordingsWithTranscripts.isEmpty {
-                        TranscriptEmptyState(userType: viewModel.currentUser) {
-                            showSubscriptionPrompt = true
-                        }
-                    } else {
-                        TranscriptsList(
-                            recordings: recordingsWithTranscripts,
-                            userType: viewModel.currentUser,
-                            onSelect: { recording in
-                                HapticManager.shared.impact(.light)
-                                if recording.transcript == nil && viewModel.currentUser == .free {
-                                    showSubscriptionPrompt = true
-                                } else if recording.transcript == nil {
-                                    isLoadingTranscript = true
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        isLoadingTranscript = false
-                                        showTranscriptUnavailable = true
-                                    }
-                                } else {
-                                    selectedRecording = recording
-                                }
-                            }
-                        )
+                if recordingsWithTranscripts.isEmpty {
+                    TranscriptEmptyState(userType: viewModel.currentUser) {
+                        showSubscriptionPrompt = true
                     }
-                }
-            }
-            .navigationTitle("Transcripts")
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(recordingsWithTranscripts) { recording in
+                                TranscriptCard(recording: recording, userType: viewModel.currentUser)
+                                    .onTapGesture {
+                                        HapticManager.shared.impact(.light)
+                                        if recording.transcript != nil && !recording.transcript!.isEmpty {
+                                            navigationPath.append(NavigationDestination.transcriptDetail(recording))
+                                        } else if viewModel.currentUser == .free {
+                                            showSubscriptionPrompt = true
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                            }
+                        }
+                        .padding(.top, 8)
+                    }
+                }}
+            .navigationTitle(localized("transcripts"))
             .navigationBarTitleDisplayMode(.large)
-            .preferredColorScheme(.dark)
             .background(Color.darkBackground)
         }
+        .preferredColorScheme(.dark)
         .sheet(isPresented: $showSubscriptionPrompt) {
             SubscriptionDetailsView()
         }
-        .alert("Transcript Unavailable", isPresented: $showTranscriptUnavailable) {
-            Button("Try Again") {
-                isLoadingTranscript = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    isLoadingTranscript = false
-                    viewModel.showToast("Transcription generated!")
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("The transcript for this recording is not available yet. Would you like to try generating it now?")
-        }
-        .overlay(
-            Group {
-                if isLoadingTranscript {
-                    TranscriptLoadingView()
-                }
-            }
-        )
     }
 }
 
@@ -112,94 +77,77 @@ struct LanguagePicker: View {
     }
 }
 
-struct TranscriptsList: View {
-    let recordings: [Recording]
-    let userType: AppViewModel.UserType
-    let onSelect: (Recording) -> Void
-    
-    var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(recordings) { recording in
-                    TranscriptCard(recording: recording, userType: userType)
-                        .onTapGesture {
-                            onSelect(recording)
-                        }
-                        .padding(.horizontal)
-                }
-            }
-            .padding(.top, 8)
-        }
-    }
-}
 
 struct TranscriptCard: View {
     let recording: Recording
     let userType: AppViewModel.UserType
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recording.contactName)
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.primaryText)
                     
                     Text(formatDate(recording.date))
-                        .font(.caption)
-                        .foregroundColor(.secondaryText)
+                        .font(.system(size: 12))
+                        .foregroundColor(.tertiaryText)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.secondaryText)
-                    .font(.caption)
+                    .foregroundColor(.tertiaryText)
+                    .font(.system(size: 14))
             }
             
             if let transcript = recording.transcript {
                 Text(transcript)
-                    .font(.subheadline)
+                    .font(.system(size: 14))
                     .foregroundColor(.secondaryText)
                     .lineLimit(2)
-                    .padding(.top, 4)
+                    .padding(.top, 2)
             } else if userType == .free {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "lock.fill")
                         .foregroundColor(.orange)
-                        .font(.caption)
+                        .font(.system(size: 12))
                     Text("Transcript available with Premium")
-                        .font(.caption)
+                        .font(.system(size: 12))
                         .foregroundColor(.orange)
                         .italic()
                 }
-                .padding(.top, 4)
+                .padding(.top, 2)
             } else {
                 Text("Transcript not available")
-                    .font(.caption)
-                    .foregroundColor(.secondaryText.opacity(0.7))
+                    .font(.system(size: 12))
+                    .foregroundColor(.tertiaryText)
                     .italic()
-                    .padding(.top, 4)
+                    .padding(.top, 2)
             }
             
             HStack {
                 Label(formatDuration(recording.duration), systemImage: "clock")
-                    .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .font(.system(size: 11))
+                    .foregroundColor(.tertiaryText)
                 
                 Spacer()
                 
                 if recording.isUploaded {
-                    Label("Synced", systemImage: "checkmark.icloud")
-                        .font(.caption)
+                    Label("Synced", systemImage: "checkmark.icloud.fill")
+                        .font(.system(size: 11))
                         .foregroundColor(.primaryGreen)
                 }
             }
         }
         .padding(16)
-        .background(Color.darkGrey)
+        .background(Color.cardBackground)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.surfaceBackground.opacity(0.5), lineWidth: 0.5)
+        )
     }
     
     func formatDate(_ date: Date) -> String {
@@ -218,76 +166,113 @@ struct TranscriptCard: View {
 
 struct TranscriptDetailView: View {
     let recording: Recording
-    let onBack: () -> Void
-    
-    let mockConversation = [
-        TranscriptMessage(speaker: "You", text: "Hey John, thanks for calling back.", timestamp: Date()),
-        TranscriptMessage(speaker: "John Doe", text: "No problem! What's up?", timestamp: Date().addingTimeInterval(5)),
-        TranscriptMessage(speaker: "You", text: "I wanted to discuss the project timeline. We need to move the deadline up by two weeks.", timestamp: Date().addingTimeInterval(10)),
-        TranscriptMessage(speaker: "John Doe", text: "Two weeks earlier? That's going to be tight. Let me check with my team.", timestamp: Date().addingTimeInterval(20)),
-        TranscriptMessage(speaker: "You", text: "I understand it's challenging, but the client has moved up their launch date.", timestamp: Date().addingTimeInterval(30))
-    ]
+    @State private var showShareSheet = false
+    @State private var copiedToClipboard = false
     
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Button(action: onBack) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.primaryGreen)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(recording.contactName)
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: "phone.circle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.primaryGreen)
                     
-                    Text(formatDate(recording.date))
-                        .font(.caption)
-                        .foregroundColor(.secondaryText)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(recording.contactName)
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primaryText)
+                        
+                        HStack(spacing: 12) {
+                            Text(formatDate(recording.date))
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondaryText)
+                            
+                            Text(formatDuration(recording.duration))
+                                .font(.system(size: 13))
+                                .foregroundColor(.primaryGreen)
+                        }
+                    }
+                    
+                    Spacer()
                 }
+                .padding()
+                .background(Color.cardBackground)
             }
-            .padding()
-            .background(Color.darkGrey)
-            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
             
             ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(mockConversation) { message in
-                        MessageBubble(message: message)
+                VStack(alignment: .leading, spacing: 16) {
+                    if let transcript = recording.transcript, !transcript.isEmpty {
+                        Text(transcript)
+                            .font(.system(size: 15))
+                            .foregroundColor(.primaryText)
+                            .lineSpacing(6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color.cardBackground)
+                            .cornerRadius(12)
+                    } else {
+                        Text("No transcript available")
+                            .font(.system(size: 15))
+                            .foregroundColor(.tertiaryText)
+                            .italic()
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
                     }
                 }
                 .padding()
             }
             .background(Color.darkBackground)
             
-            HStack(spacing: 16) {
-                Button(action: {}) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title3)
+            HStack(spacing: 20) {
+                Button(action: {
+                    showShareSheet = true
+                }) {
+                    VStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 20))
+                        Text("Share")
+                            .font(.system(size: 10))
+                    }
                 }
+                .frame(minWidth: 44, minHeight: 44)
                 
-                Button(action: {}) {
-                    Image(systemName: "doc.on.doc")
-                        .font(.title3)
+                Button(action: {
+                    if let transcript = recording.transcript {
+                        UIPasteboard.general.string = transcript
+                        copiedToClipboard = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            copiedToClipboard = false
+                        }
+                    }
+                }) {
+                    VStack(spacing: 4) {
+                        Image(systemName: copiedToClipboard ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 20))
+                        Text(copiedToClipboard ? "Copied!" : "Copy")
+                            .font(.system(size: 10))
+                    }
                 }
+                .frame(minWidth: 44, minHeight: 44)
                 
                 Spacer()
-                
-                Button(action: {}) {
-                    Text("Highlight Important")
-                        .font(.footnote)
-                        .fontWeight(.medium)
-                }
             }
             .foregroundColor(.primaryGreen)
             .padding()
-            .background(Color.darkGrey)
-            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: -2)
+            .background(Color.cardBackground)
+            .overlay(
+                Rectangle()
+                    .fill(Color.surfaceBackground.opacity(0.5))
+                    .frame(height: 0.5),
+                alignment: .top
+            )
+        }
+        .navigationTitle("Transcript")
+        .navigationBarTitleDisplayMode(.inline)
+        .preferredColorScheme(.dark)
+        .sheet(isPresented: $showShareSheet) {
+            if let transcript = recording.transcript {
+                ShareSheet(items: [transcript])
+            }
         }
     }
     
@@ -297,52 +282,10 @@ struct TranscriptDetailView: View {
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-}
-
-struct TranscriptMessage: Identifiable {
-    let id = UUID()
-    let speaker: String
-    let text: String
-    let timestamp: Date
-}
-
-struct MessageBubble: View {
-    let message: TranscriptMessage
     
-    var isYou: Bool {
-        message.speaker == "You"
-    }
-    
-    var body: some View {
-        HStack {
-            if isYou { Spacer() }
-            
-            VStack(alignment: isYou ? .trailing : .leading, spacing: 4) {
-                Text(message.speaker)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(isYou ? .primaryGreen : .primaryText)
-                
-                Text(message.text)
-                    .font(.subheadline)
-                    .padding(12)
-                    .background(isYou ? Color.primaryGreen : Color.darkGrey)
-                    .foregroundColor(isYou ? .white : .primaryText)
-                    .cornerRadius(16)
-                
-                Text(formatTime(message.timestamp))
-                    .font(.caption2)
-                    .foregroundColor(.secondaryText)
-            }
-            .frame(maxWidth: 300, alignment: isYou ? .trailing : .leading)
-            
-            if !isYou { Spacer() }
-        }
-    }
-    
-    func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+    func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }

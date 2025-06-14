@@ -47,8 +47,10 @@ class LocalizationManager: ObservableObject {
     }
     
     func setLanguage(_ language: Language) {
-        currentLanguage = language
-        storedLanguage = language.rawValue
+        DispatchQueue.main.async { [weak self] in
+            self?.currentLanguage = language
+            self?.storedLanguage = language.rawValue
+        }
         
         UserDefaults.standard.set([language.rawValue], forKey: "AppleLanguages")
         UserDefaults.standard.synchronize()
@@ -60,13 +62,68 @@ class LocalizationManager: ObservableObject {
     
     private let localizedStrings: [Language: [String: String]] = [
         .english: [
+            // Tab bar
             "recordings": "Recordings",
             "record_call": "Record Call",
             "transcripts": "Transcripts",
             "settings": "Settings",
+            
+            // Home/Recordings
             "no_recordings": "No Recordings Yet",
             "your_recordings_appear": "Your recorded calls will appear here",
             "tap_record": "Tap the Record Call tab to get started",
+            "all": "All",
+            "today": "Today",
+            "week": "Week",
+            "search_recordings": "Search recordings...",
+            
+            // Call Details
+            "call_recording": "Call Recording",
+            "date": "Date",
+            "time": "Time",
+            "duration": "Duration",
+            "transcript": "Transcript",
+            "cloud_sync": "Cloud Sync",
+            "available": "Available",
+            "uploaded": "Uploaded",
+            "play_recording": "Play Recording",
+            "pause": "Pause",
+            "play": "Play",
+            "share": "Share",
+            "delete": "Delete",
+            "back": "Back",
+            "recording_id": "Recording ID",
+            
+            // Transcripts
+            "no_transcripts": "No Transcripts Yet",
+            "transcript_available_premium": "Transcript available with Premium",
+            "transcript_not_available": "Transcript not available",
+            "synced": "Synced",
+            "copy": "Copy",
+            "copied": "Copied!",
+            
+            // Settings
+            "profile": "Profile",
+            "language": "Language",
+            "privacy_security": "Privacy & Security",
+            "subscription": "Subscription",
+            "legal": "Legal",
+            "account": "Account",
+            "notifications": "Notifications",
+            "push_notifications": "Push Notifications",
+            "email_notifications": "Email Notifications",
+            "data_encryption": "Data Encryption",
+            "end_to_end_encrypted": "End-to-end encrypted",
+            "privacy_policy": "Privacy Policy",
+            "terms_service": "Terms of Service",
+            "current_plan": "Current Plan",
+            "free_plan": "Free Plan",
+            "premium_plan": "Premium Plan",
+            "upgrade_premium": "Upgrade to Premium",
+            "delete_data": "Delete Data",
+            "done": "Done",
+            
+            // Auth
             "welcome_back": "Welcome Back",
             "sign_in_account": "Sign in to your account",
             "create_account": "Create Account",
@@ -74,13 +131,68 @@ class LocalizationManager: ObservableObject {
             "continue_guest": "Continue as Guest"
         ],
         .spanish: [
+            // Tab bar
             "recordings": "Grabaciones",
             "record_call": "Grabar Llamada",
             "transcripts": "Transcripciones",
             "settings": "Configuración",
+            
+            // Home/Recordings
             "no_recordings": "Aún No Hay Grabaciones",
             "your_recordings_appear": "Sus llamadas grabadas aparecerán aquí",
             "tap_record": "Toque la pestaña Grabar Llamada para comenzar",
+            "all": "Todas",
+            "today": "Hoy",
+            "week": "Semana",
+            "search_recordings": "Buscar grabaciones...",
+            
+            // Call Details
+            "call_recording": "Grabación de Llamada",
+            "date": "Fecha",
+            "time": "Hora",
+            "duration": "Duración",
+            "transcript": "Transcripción",
+            "cloud_sync": "Sincronización en la Nube",
+            "available": "Disponible",
+            "uploaded": "Subido",
+            "play_recording": "Reproducir Grabación",
+            "pause": "Pausar",
+            "play": "Reproducir",
+            "share": "Compartir",
+            "delete": "Eliminar",
+            "back": "Atrás",
+            "recording_id": "ID de Grabación",
+            
+            // Transcripts
+            "no_transcripts": "Aún No Hay Transcripciones",
+            "transcript_available_premium": "Transcripción disponible con Premium",
+            "transcript_not_available": "Transcripción no disponible",
+            "synced": "Sincronizado",
+            "copy": "Copiar",
+            "copied": "¡Copiado!",
+            
+            // Settings
+            "profile": "Perfil",
+            "language": "Idioma",
+            "privacy_security": "Privacidad y Seguridad",
+            "subscription": "Suscripción",
+            "legal": "Legal",
+            "account": "Cuenta",
+            "notifications": "Notificaciones",
+            "push_notifications": "Notificaciones Push",
+            "email_notifications": "Notificaciones por Email",
+            "data_encryption": "Cifrado de Datos",
+            "end_to_end_encrypted": "Cifrado de extremo a extremo",
+            "privacy_policy": "Política de Privacidad",
+            "terms_service": "Términos de Servicio",
+            "current_plan": "Plan Actual",
+            "free_plan": "Plan Gratuito",
+            "premium_plan": "Plan Premium",
+            "upgrade_premium": "Actualizar a Premium",
+            "delete_data": "Eliminar Datos",
+            "done": "Hecho",
+            
+            // Auth
             "welcome_back": "Bienvenido de Nuevo",
             "sign_in_account": "Inicia sesión en tu cuenta",
             "create_account": "Crear Cuenta",

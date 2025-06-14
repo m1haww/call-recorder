@@ -2,9 +2,11 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel = AppViewModel.shared
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @Binding var navigationPath: NavigationPath
     
     @State private var searchText = ""
-    @State private var selectedFilter = "All"
+    @State private var selectedFilter = 0 // Index of selected filter
     @State private var selectedRecording: Recording?
     @State private var showPlayer = false
     @State private var showDeleteAlert = false
@@ -12,10 +14,15 @@ struct HomeView: View {
     @State private var showShareSheet = false
     @State private var recordingToShare: Recording?
     
-    let filters = ["All", "Today", "Week"]
+    var filters: [String] {
+        [localizationManager.localizedString("all"),
+         localizationManager.localizedString("today"),
+         localizationManager.localizedString("week")]
+    }
     
     var filteredRecordings: [Recording] {
-        viewModel.filterRecordings(by: selectedFilter, searchText: searchText)
+        let filterTypes = ["All", "Today", "Week"]
+        return viewModel.filterRecordings(by: filterTypes[selectedFilter], searchText: searchText)
     }
     
     var body: some View {
@@ -39,8 +46,7 @@ struct HomeView: View {
                                     recording: recording,
                                     onPlay: {
                                         HapticManager.shared.impact(.light)
-                                        selectedRecording = recording
-                                        showPlayer = true
+                                        navigationPath.append(NavigationDestination.player(recording))
                                     },
                                     onShare: {
                                         HapticManager.shared.impact(.light)
@@ -54,6 +60,10 @@ struct HomeView: View {
                                     }
                                 )
                                 .padding(.horizontal)
+                                .onTapGesture {
+                                    HapticManager.shared.impact(.light)
+                                    navigationPath.append(NavigationDestination.callDetails(recording))
+                                }
                             }
                         }
                         .padding(.top, 8)
@@ -63,19 +73,14 @@ struct HomeView: View {
                     }
                 }
             }
-            .navigationTitle("Recordings")
+            .navigationTitle(localized("recordings"))
             .navigationBarTitleDisplayMode(.large)
             .preferredColorScheme(.dark)
             .background(Color.darkBackground)
         }
-        .fullScreenCover(isPresented: $showPlayer) {
-            if let recording = selectedRecording {
-                RecordingPlayerView(recording: recording)
-            }
-        }
         .sheet(isPresented: $showShareSheet) {
             if let recording = recordingToShare {
-                ShareSheet(recording: recording)
+                ShareSheet(items: [recording])
             }
         }
         .alert("Delete Recording", isPresented: $showDeleteAlert) {
@@ -90,15 +95,9 @@ struct HomeView: View {
         } message: {
             Text("Are you sure you want to delete this recording? This action cannot be undone.")
         }
-        .overlay(
-            Group {
-                if viewModel.isLoading {
-                    LoadingView()
-                }
-            }
-        )
     }
 }
+
 
 struct SearchBar: View {
     @Binding var text: String
@@ -108,7 +107,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondaryText)
             
-            TextField("Search recordings...", text: $text)
+            TextField(localized("search_recordings"), text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .foregroundColor(.primaryText)
         }
@@ -123,16 +122,16 @@ struct SearchBar: View {
 }
 
 struct FilterBar: View {
-    @Binding var selectedFilter: String
+    @Binding var selectedFilter: Int
     let filters: [String]
     
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(filters, id: \.self) { filter in
+            ForEach(0..<filters.count, id: \.self) { index in
                 FilterButton(
-                    title: filter,
-                    isSelected: selectedFilter == filter,
-                    action: { selectedFilter = filter }
+                    title: filters[index],
+                    isSelected: selectedFilter == index,
+                    action: { selectedFilter = index }
                 )
             }
             Spacer()
@@ -174,75 +173,56 @@ struct RecordingCard: View {
     var onDelete: () -> Void = {}
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(recording.contactName)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primaryText)
-                    
-                    Text(recording.phoneNumber)
-                        .font(.subheadline)
+        HStack(spacing: 16) {
+            Image(systemName: "phone.fill")
+                .foregroundColor(.primaryGreen)
+                .font(.system(size: 20))
+                .frame(width: 44, height: 44)
+                .background(Color.primaryGreen.opacity(0.15))
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(recording.contactName)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primaryText)
+                    .lineLimit(1)
+                
+                HStack(spacing: 12) {
+                    Text(formatTime(recording.date))
+                        .font(.system(size: 13))
                         .foregroundColor(.secondaryText)
-                }
-                
-                Spacer()
-                
-                if recording.isUploaded {
-                    Image(systemName: "checkmark.icloud")
+                    
+                    Text(formatDuration(recording.duration))
+                        .font(.system(size: 13))
                         .foregroundColor(.primaryGreen)
-                        .font(.footnote)
                 }
             }
             
-            HStack {
-                Label(formatDate(recording.date), systemImage: "calendar")
-                    .font(.caption)
-                    .foregroundColor(.tertiaryText)
-                
-                Spacer()
-                
-                Text(formatDuration(recording.duration))
-                    .font(.caption)
-                    .foregroundColor(.tertiaryText)
-            }
+            Spacer()
             
-            Divider()
-                .background(Color.surfaceBackground)
-            
-            HStack(spacing: 20) {
+            Menu {
                 Button(action: onPlay) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.primaryGreen)
+                    Label(localized("play"), systemImage: "play.fill")
                 }
-                .frame(minWidth: 44, minHeight: 44)
-                
                 Button(action: onShare) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title3)
-                        .foregroundColor(.primaryGreen)
+                    Label(localized("share"), systemImage: "square.and.arrow.up")
                 }
-                .frame(minWidth: 44, minHeight: 44)
-                
-                Spacer()
-                
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .font(.title3)
-                        .foregroundColor(.red)
+                Button(role: .destructive, action: onDelete) {
+                    Label(localized("delete"), systemImage: "trash")
                 }
-                .frame(minWidth: 44, minHeight: 44)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondaryText)
+                    .frame(width: 32, height: 32)
             }
-            .padding(.top, 4)
         }
         .padding(16)
         .background(Color.cardBackground)
-        .cornerRadius(16)
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.surfaceBackground, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.surfaceBackground.opacity(0.5), lineWidth: 0.5)
         )
     }
     
@@ -250,6 +230,18 @@ struct RecordingCard: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    func formatSimpleDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM yyyy"
         return formatter.string(from: date)
     }
     

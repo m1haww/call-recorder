@@ -2,8 +2,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var viewModel = AppViewModel.shared
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var notificationsEnabled = true
-    @State private var selectedLanguage = "English"
     @State private var selectedPlan = "monthly"
     @State private var showSubscriptionDetails = false
     @State private var showSignOutAlert = false
@@ -11,8 +11,6 @@ struct SettingsView: View {
     @State private var userEmail = ""
     @State private var userName = ""
     @State private var userPhoneNumber = ""
-    
-    let languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese"]
     
     var body: some View {
         NavigationView {
@@ -22,7 +20,7 @@ struct SettingsView: View {
                     
                     NotificationsSection(notificationsEnabled: $notificationsEnabled)
                     
-                    LanguageSection(selectedLanguage: $selectedLanguage, languages: languages)
+                    LanguageSection()
                     
                     PrivacySection()
                     
@@ -40,7 +38,7 @@ struct SettingsView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Settings")
+            .navigationTitle(localized("settings"))
             .navigationBarTitleDisplayMode(.large)
             .preferredColorScheme(.dark)
             .background(Color.darkBackground)
@@ -151,19 +149,18 @@ struct NotificationsSection: View {
 }
 
 struct LanguageSection: View {
-    @Binding var selectedLanguage: String
-    let languages: [String]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var showLanguagePicker = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Language", icon: "globe")
+            SectionHeader(title: localized("language"), icon: "globe")
             
             Button(action: {
                 showLanguagePicker = true
             }) {
                 HStack {
-                    Text(selectedLanguage)
+                    Text(localizationManager.currentLanguage.displayName)
                         .font(.subheadline)
                         .foregroundColor(.primaryText)
                     
@@ -180,7 +177,7 @@ struct LanguageSection: View {
         }
         .padding(.horizontal)
         .sheet(isPresented: $showLanguagePicker) {
-            LanguagePickerView(selectedLanguage: $selectedLanguage, languages: languages)
+            LanguagePickerView()
         }
     }
 }
@@ -517,27 +514,32 @@ struct FeatureRow: View {
 }
 
 struct LanguagePickerView: View {
-    @Binding var selectedLanguage: String
-    let languages: [String]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                ForEach(languages, id: \.self) { language in
+                ForEach(LocalizationManager.Language.allCases) { language in
                     Button(action: {
-                        selectedLanguage = language
+                        localizationManager.setLanguage(language)
                         HapticManager.shared.selection()
                         dismiss()
                     }) {
                         HStack {
-                            Text(language)
-                                .font(.body)
-                                .foregroundColor(.primaryText)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(language.displayName)
+                                    .font(.body)
+                                    .foregroundColor(.primaryText)
+                                
+                                Text(language.nativeName)
+                                    .font(.caption)
+                                    .foregroundColor(.secondaryText)
+                            }
                             
                             Spacer()
                             
-                            if selectedLanguage == language {
+                            if localizationManager.currentLanguage == language {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.primaryGreen)
                                     .font(.body)
@@ -547,7 +549,7 @@ struct LanguagePickerView: View {
                         .padding()
                     }
                     
-                    if language != languages.last {
+                    if language != LocalizationManager.Language.allCases.last {
                         Divider()
                             .background(Color.darkGrey.opacity(0.3))
                             .padding(.leading)
@@ -557,7 +559,7 @@ struct LanguagePickerView: View {
                 Spacer()
             }
             .background(Color.darkBackground)
-            .navigationTitle("Language")
+            .navigationTitle(localized("settings"))
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.dark)
             .toolbar {

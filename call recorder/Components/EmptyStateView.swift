@@ -32,30 +32,6 @@ struct EmptyStateView: View {
     }
 }
 
-struct LoadingView: View {
-    @State private var isAnimating = false
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Circle()
-                .trim(from: 0, to: 0.7)
-                .stroke(Color.primaryGreen, lineWidth: 3)
-                .frame(width: 40, height: 40)
-                .rotationEffect(Angle(degrees: isAnimating ? 360 : 0))
-                .animation(.linear(duration: 1).repeatForever(autoreverses: false), value: isAnimating)
-            
-            Text("Loading...")
-                .font(.subheadline)
-                .foregroundColor(.secondaryText)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.opacity(0.3))
-        .onAppear {
-            isAnimating = true
-        }
-    }
-}
-
 struct RefreshControl: View {
     let action: () -> Void
     

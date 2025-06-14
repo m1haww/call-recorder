@@ -64,4 +64,22 @@ struct Recording: Identifiable, Codable {
     var isUploaded: Bool {
         return recordingUrl != nil
     }
+    
+    var localFileURL: URL? {
+        // First check if we have a remote URL to use
+        if let urlString = recordingUrl, let url = URL(string: urlString) {
+            return url
+        }
+        
+        // Otherwise check for local file
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let localPath = documentsPath?.appendingPathComponent("\(id).m4a")
+        
+        // Check if file exists
+        if let path = localPath, FileManager.default.fileExists(atPath: path.path) {
+            return path
+        }
+        
+        return nil
+    }
 }

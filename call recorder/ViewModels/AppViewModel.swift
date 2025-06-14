@@ -51,10 +51,6 @@ final class AppViewModel: ObservableObject {
         showToast("Sharing recording...")
     }
     
-    func refreshRecordings() {
-        fetchCallsFromServer()
-    }
-    
     func showToast(_ message: String) {
         alertMessage = message
         showAlert = true
@@ -104,7 +100,10 @@ final class AppViewModel: ObservableObject {
     }
     
     func loadUserData() {
-        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? ""
+        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? "+15202445872"
+        print("-------------------------------")
+        print(userPhoneNumber)
+        print("-------------------------------")
         userCountryCode = UserDefaults.standard.string(forKey: "userCountryCode") ?? ""
         userCountryName = UserDefaults.standard.string(forKey: "userCountryName") ?? ""
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
@@ -127,30 +126,6 @@ final class AppViewModel: ObservableObject {
         UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
     }
     
-    func fetchCallsFromServer() {
-        guard !userPhoneNumber.isEmpty else {
-            showToast("Phone number required")
-            return
-        }
-        
-        isLoading = true
-        
-        ServerManager.shared.fetchCallsForUser(phoneNumber: userPhoneNumber) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                
-                switch result {
-                case .success(let recordings):
-                    self?.recordings = recordings
-                    self?.showToast("\(recordings.count) recordings loaded")
-                    
-                case .failure(let error):
-                    self?.showToast("Failed to fetch calls: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    
     @MainActor
     func fetchCallsFromServerAsync() async {
         guard !userPhoneNumber.isEmpty else {
@@ -163,6 +138,10 @@ final class AppViewModel: ObservableObject {
         do {
             let recordings = try await ServerManager.shared.fetchCallsForUser(phoneNumber: userPhoneNumber)
             self.recordings = recordings
+            
+            for rec in recordings {
+                print(rec.date)
+            }
             showToast("\(recordings.count) recordings loaded")
         } catch {
             showToast("Failed to fetch calls: \(error.localizedDescription)")

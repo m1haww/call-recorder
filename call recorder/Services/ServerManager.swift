@@ -7,7 +7,6 @@ final class ServerManager: ObservableObject {
     
     init() {}
     
-    
     func registerUser(email: String, fullName: String, phoneNumber: String, appleID: String? = nil, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         let url = URL(string: "\(baseURL)/register_user")!
         var request = URLRequest(url: url)
@@ -125,6 +124,10 @@ final class ServerManager: ObservableObject {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
+        
+        print("----------------------------------------------")
+        print(String(data: data, encoding: .utf8) ?? "No data")
+        print("----------------------------------------------")
         
         if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
             let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }

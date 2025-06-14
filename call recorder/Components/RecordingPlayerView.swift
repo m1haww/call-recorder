@@ -45,12 +45,7 @@ struct RecordingPlayerView: View {
         .padding()
         .background(Color.lightGrey)
         .sheet(isPresented: $showShareSheet) {
-            ShareSheet(recording: recording)
-        }
-        .sheet(isPresented: $showTranscript) {
-            TranscriptDetailView(recording: recording, onBack: {
-                showTranscript = false
-            })
+//            ShareSheet(recording: recording)
         }
     }
     

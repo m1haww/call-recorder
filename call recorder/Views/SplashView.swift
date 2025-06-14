@@ -74,8 +74,9 @@ struct SplashView: View {
                 showAppName = true
                 showTagline = true
             }
-            
-            viewModel.fetchCallsFromServer()
+        }
+        .task {
+            await viewModel.fetchCallsFromServerAsync()
         }
     }
 }
