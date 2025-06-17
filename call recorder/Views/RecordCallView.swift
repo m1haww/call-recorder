@@ -1,8 +1,5 @@
 import SwiftUI
-#if !os(macOS)
-import AVFoundation
-import Contacts
-#endif
+import SuperwallKit
 
 struct RecordCallView: View {
     @ObservedObject var viewModel = AppViewModel.shared
@@ -25,14 +22,22 @@ struct RecordCallView: View {
                     IncomingCallSection(
                         onCallService: {
                             HapticManager.shared.impact(.medium)
-                            makePhoneCall(to: viewModel.recordingServiceNumber)
+                            if viewModel.isProUser {
+                                makePhoneCall(to: viewModel.recordingServiceNumber)
+                            } else {
+                                Superwall.shared.register(placement: "campaign_trigger")
+                            }
                         }
                     )
                 } else {
                     OutgoingCallSection(
                         onStartCall: {
                             HapticManager.shared.impact(.medium)
-                            makePhoneCall(to: viewModel.recordingServiceNumber)
+                            if viewModel.isProUser {
+                                makePhoneCall(to: viewModel.recordingServiceNumber)
+                            } else {
+                                Superwall.shared.register(placement: "campaign_trigger")
+                            }
                         }
                     )
                 }

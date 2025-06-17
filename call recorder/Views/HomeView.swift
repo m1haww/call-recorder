@@ -6,13 +6,13 @@ struct HomeView: View {
     @Binding var navigationPath: NavigationPath
     
     @State private var searchText = ""
-    @State private var selectedFilter = 0 // Index of selected filter
+    @State private var selectedFilter = 0
     @State private var selectedRecording: Recording?
     @State private var showPlayer = false
     @State private var showDeleteAlert = false
     @State private var recordingToDelete: Recording?
     @State private var showShareSheet = false
-    @State private var recordingToShare: Recording?
+    
     
     var filters: [String] {
         [localizationManager.localizedString("all"),
@@ -46,11 +46,11 @@ struct HomeView: View {
                                     recording: recording,
                                     onPlay: {
                                         HapticManager.shared.impact(.light)
-                                        navigationPath.append(NavigationDestination.player(recording))
+                                        navigationPath.append(NavigationDestination.callDetails(recording))
                                     },
                                     onShare: {
                                         HapticManager.shared.impact(.light)
-                                        recordingToShare = recording
+                                        viewModel.recordingToShare = recording
                                         showShareSheet = true
                                     },
                                     onDelete: {
@@ -69,7 +69,7 @@ struct HomeView: View {
                         .padding(.top, 8)
                     }
                     .refreshable {
-                        await viewModel.fetchCallsFromServerAsync()
+                        await viewModel.refreshRecordings()
                     }
                 }
             }
@@ -79,8 +79,8 @@ struct HomeView: View {
             .background(Color.darkBackground)
         }
         .sheet(isPresented: $showShareSheet) {
-            if let recording = recordingToShare {
-                ShareSheet(items: [recording])
+            if let recording = viewModel.recordingToShare {
+                ShareSheet(items: viewModel.getShareItems(for: recording))
             }
         }
         .alert("Delete Recording", isPresented: $showDeleteAlert) {
@@ -89,7 +89,10 @@ struct HomeView: View {
                 if let recording = recordingToDelete,
                    let index = viewModel.recordings.firstIndex(where: { $0.id == recording.id }) {
                     HapticManager.shared.notification(.warning)
-                    viewModel.deleteRecording(at: index)
+                    
+                    Task {
+                        await viewModel.deleteRecording(at: index)
+                    }
                 }
             }
         } message: {

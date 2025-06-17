@@ -7,50 +7,6 @@ final class ServerManager: ObservableObject {
     
     init() {}
     
-    func registerUser(email: String, fullName: String, phoneNumber: String, appleID: String? = nil, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        let url = URL(string: "\(baseURL)/register_user")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let userData: [String: Any] = [
-            "email": email,
-            "full_name": fullName,
-            "phone_number": phoneNumber,
-            "apple_id": appleID ?? "",
-            "created_at": ISO8601DateFormatter().string(from: Date())
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: userData)
-        } catch {
-            completion(.failure(error))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(ServerError.noData))
-                return
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    completion(.success(json))
-                } else {
-                    completion(.failure(ServerError.invalidResponse))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-    
     private func createRecording(from dictionary: [String: Any], userPhone: String) -> Recording? {
         let id = dictionary["id"] as? String ?? UUID().uuidString
         let callDate = dictionary["call_date"] as? String ?? ""
@@ -119,22 +75,60 @@ final class ServerManager: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0  // 30 second timeout
         
         let body = ["user_phone": phoneNumber]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, _) = try await URLSession.shared.data(for: request)
+        do {
+            let (data, req) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = req as? HTTPURLResponse {
+                print("Status code: \(httpResponse.statusCode)")
+            }
+            
+            print("----------------------------------------------")
+            print(String(data: data, encoding: .utf8) ?? "No data")
+            print("----------------------------------------------")
+            
+            if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+                let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
+                return recordings
+            } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
+                return []
+            } else {
+                throw ServerError.invalidResponse
+            }
+        } catch {
+            print("Network error: \(error)")
+            
+            // Re-throw the error instead of returning empty array
+            throw error
+        }
+    }
+    
+    func deleteRecording(recordingId: String, userPhone: String) async throws {
+        let url = URL(string: "\(baseURL)/delete_recording")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        print("----------------------------------------------")
-        print(String(data: data, encoding: .utf8) ?? "No data")
-        print("----------------------------------------------")
+        let body = [
+            "recording_id": recordingId,
+            "user_phone": userPhone
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-            let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
-            return recordings
-        } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
-            return []
-        } else {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServerError.invalidResponse
+        }
+        
+        if httpResponse.statusCode != 200 {
+            if let errorMessage = String(data: data, encoding: .utf8) {
+                print("Delete error: \(errorMessage)")
+            }
             throw ServerError.invalidResponse
         }
     }

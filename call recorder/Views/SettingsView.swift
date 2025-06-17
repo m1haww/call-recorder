@@ -1,11 +1,11 @@
 import SwiftUI
+import SuperwallKit
 
 struct SettingsView: View {
     @ObservedObject private var viewModel = AppViewModel.shared
     @ObservedObject private var localizationManager = LocalizationManager.shared
-    @State private var notificationsEnabled = true
+    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "pushNotificationsEnabled")
     @State private var selectedPlan = "monthly"
-    @State private var showSubscriptionDetails = false
     @State private var showSignOutAlert = false
     @State private var showDeleteAccountAlert = false
     @State private var userEmail = ""
@@ -25,8 +25,7 @@ struct SettingsView: View {
                     PrivacySection()
                     
                     SubscriptionSection(
-                        selectedPlan: $selectedPlan,
-                        showDetails: $showSubscriptionDetails
+                        selectedPlan: $selectedPlan
                     )
                     
                     LegalSection()
@@ -46,9 +45,6 @@ struct SettingsView: View {
                 loadUserData()
             }
         }
-        .sheet(isPresented: $showSubscriptionDetails) {
-            SubscriptionDetailsView()
-        }
         .alert("Delete Data", isPresented: $showDeleteAccountAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
@@ -66,7 +62,6 @@ struct SettingsView: View {
     }
     
     private func deleteUserData() {
-        // Clear all user data
         viewModel.recordings.removeAll()
         viewModel.showToast("All data deleted successfully")
     }
@@ -125,26 +120,67 @@ struct ProfileSection: View {
 
 struct NotificationsSection: View {
     @Binding var notificationsEnabled: Bool
+    @State private var isUpdating = false
+    @State private var showError = false
+    @State private var errorMessage = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Notifications", icon: "bell")
             
-            Toggle(isOn: $notificationsEnabled) {
-                HStack {
-                    Image(systemName: "bell.badge")
-                        .foregroundColor(.primaryGreen)
-                    Text("Push Notifications")
-                        .font(.subheadline)
-                        .foregroundColor(.primaryText)
+            HStack {
+                Toggle(isOn: Binding(
+                    get: { notificationsEnabled },
+                    set: { newValue in
+                        updateNotificationSettings(enabled: newValue)
+                    }
+                )) {
+                    HStack {
+                        Image(systemName: "bell.badge")
+                            .foregroundColor(.primaryGreen)
+                        Text("Push Notifications")
+                            .font(.subheadline)
+                            .foregroundColor(.primaryText)
+                    }
+                }
+                .tint(.primaryGreen)
+                .disabled(isUpdating)
+                
+                if isUpdating {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .padding(.leading, 8)
                 }
             }
-            .tint(.primaryGreen)
             .padding()
             .background(Color.cardBackground)
             .cornerRadius(12)
         }
         .padding(.horizontal)
+        .alert("Notification Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    private func updateNotificationSettings(enabled: Bool) {
+        isUpdating = true
+        let previousValue = notificationsEnabled
+        notificationsEnabled = enabled
+        
+        UserService.shared.updateNotificationSettings(enabled: enabled) { result in
+            isUpdating = false
+            
+            switch result {
+            case .success(_):
+                UserDefaults.standard.set(enabled, forKey: "pushNotificationsEnabled")
+            case .failure(let error):
+                notificationsEnabled = previousValue
+                errorMessage = error.localizedDescription
+                showError = true
+            }
+        }
     }
 }
 
@@ -198,21 +234,35 @@ struct PrivacySection: View {
                     .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
-                SettingsRow(
-                    icon: "hand.raised",
-                    title: "Privacy Policy",
-                    showChevron: true
-                )
+                Button(action: {
+                    if let url = URL(string: "https://docs.google.com/document/d/1uth_ytIH6sL8eJu1w2loQkPMonuRYz-c1yq5xkVK71k/edit?usp=sharing") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    SettingsRow(
+                        icon: "hand.raised",
+                        title: "Privacy Policy",
+                        showChevron: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
                 
                 Divider()
                     .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
-                SettingsRow(
-                    icon: "doc.text",
-                    title: "Data Usage",
-                    showChevron: true
-                )
+                Button(action: {
+                    if let url = URL(string: "https://docs.google.com/document/d/1uSdixI2AsQ32u3aMMekKI9M_eEJH2SNPcr8RLT_DS3Q/edit?usp=sharing") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    SettingsRow(
+                        icon: "doc.text",
+                        title: "Data Usage",
+                        showChevron: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
             }
             .background(Color.cardBackground)
             .cornerRadius(12)
@@ -223,7 +273,6 @@ struct PrivacySection: View {
 
 struct SubscriptionSection: View {
     @Binding var selectedPlan: String
-    @Binding var showDetails: Bool
     @ObservedObject var viewModel = AppViewModel.shared
     
     var planText: String {
@@ -253,14 +302,14 @@ struct SubscriptionSection: View {
                 
                 if viewModel.currentUser == .free {
                     Button("Upgrade") {
-                        showDetails = true
+                        Superwall.shared.register(placement: "campaign_trigger")
                     }
                     .font(.footnote)
                     .fontWeight(.medium)
                     .foregroundColor(.primaryGreen)
                 } else {
                     Button("Manage") {
-                        showDetails = true
+                        Superwall.shared.register(placement: "campaign_trigger")
                     }
                     .font(.footnote)
                     .fontWeight(.medium)
@@ -281,21 +330,35 @@ struct LegalSection: View {
             SectionHeader(title: "Legal", icon: "doc.text.magnifyingglass")
             
             VStack(spacing: 0) {
-                SettingsRow(
-                    icon: "doc.text",
-                    title: "Terms of Service",
-                    showChevron: true
-                )
+                Button(action: {
+                    if let url = URL(string: "https://docs.google.com/document/d/1VbemNFyZpawCaigbmEPzndAt3HN-iH4VsMH0Znsi-gU/edit?usp=sharing") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    SettingsRow(
+                        icon: "doc.text",
+                        title: "Terms of Service",
+                        showChevron: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
                 
                 Divider()
                     .background(Color.darkGrey.opacity(0.3))
                     .padding(.leading, 56)
                 
-                SettingsRow(
-                    icon: "questionmark.circle",
-                    title: "Help & Support",
-                    showChevron: true
-                )
+                Button(action: {
+                    if let url = URL(string: "mailto:easterparsons1994@gmail.com?subject=Call%20Recorder%20Support") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    SettingsRow(
+                        icon: "questionmark.circle",
+                        title: "Help & Support",
+                        showChevron: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
             }
             .background(Color.cardBackground)
             .cornerRadius(12)
@@ -452,7 +515,9 @@ struct SubscriptionDetailsView: View {
                 Spacer()
                 
                 VStack(spacing: 12) {
-                    Button(action: {}) {
+                    Button(action: {
+                        Superwall.shared.register(placement: "campaign_trigger")
+                    }) {
                         Text("Try 3 Days Free")
                             .font(.headline)
                             .frame(maxWidth: .infinity)

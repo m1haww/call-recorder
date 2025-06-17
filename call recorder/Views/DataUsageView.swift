@@ -207,7 +207,3 @@ struct DataManagementRow: View {
         }
     }
 }
-
-#Preview {
-    DataUsageView()
-}

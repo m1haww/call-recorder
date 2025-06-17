@@ -11,7 +11,6 @@ struct EditProfileView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Profile Icon
                 VStack(spacing: 16) {
                     Circle()
                         .fill(Color.primaryGreen.opacity(0.2))
@@ -29,9 +28,7 @@ struct EditProfileView: View {
                 }
                 .padding(.top, 20)
                 
-                // Form Fields
                 VStack(spacing: 16) {
-                    // Full Name Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Full Name")
                             .font(.subheadline)
@@ -54,7 +51,6 @@ struct EditProfileView: View {
                         )
                     }
                     
-                    // Phone Number Field (Read-only)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Phone Number")
                             .font(.subheadline)
@@ -83,7 +79,6 @@ struct EditProfileView: View {
                 
                 Spacer()
                 
-                // Save Button
                 Button(action: {
                     UserDefaults.standard.set(editedName, forKey: "userName")
                     showSaveAlert = true
@@ -131,11 +126,4 @@ struct EditProfileView: View {
             Text("Your profile has been updated successfully.")
         }
     }
-}
-
-#Preview {
-    EditProfileView(
-        userName: "John Doe",
-        phoneNumber: "+1234567890"
-    )
 }

@@ -92,7 +92,3 @@ struct PolicySection: View {
         )
     }
 }
-
-#Preview {
-    PrivacyPolicyView()
-}

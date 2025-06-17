@@ -1,11 +1,15 @@
 import Foundation
 import SwiftUI
 
-class LocalizationManager: ObservableObject {
+final class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
     
     @Published var currentLanguage: Language = .english
     @AppStorage("selectedLanguage") private var storedLanguage: String = "en"
+    
+    var hasUserSetLanguage: Bool {
+        UserDefaults.standard.string(forKey: "selectedLanguage") != nil
+    }
     
     enum Language: String, CaseIterable, Identifiable {
         case english = "en"
@@ -41,9 +45,17 @@ class LocalizationManager: ObservableObject {
     }
     
     private init() {
-        if let language = Language(rawValue: storedLanguage) {
+        if let savedLanguageCode = UserDefaults.standard.string(forKey: "selectedLanguage"),
+           let language = Language(rawValue: savedLanguageCode) {
             currentLanguage = language
+            storedLanguage = savedLanguageCode
+        } else {
+            currentLanguage = .english
+            storedLanguage = Language.english.rawValue
         }
+        
+        UserDefaults.standard.set([currentLanguage.rawValue], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
     }
     
     func setLanguage(_ language: Language) {
@@ -62,13 +74,11 @@ class LocalizationManager: ObservableObject {
     
     private let localizedStrings: [Language: [String: String]] = [
         .english: [
-            // Tab bar
             "recordings": "Recordings",
             "record_call": "Record Call",
             "transcripts": "Transcripts",
             "settings": "Settings",
             
-            // Home/Recordings
             "no_recordings": "No Recordings Yet",
             "your_recordings_appear": "Your recorded calls will appear here",
             "tap_record": "Tap the Record Call tab to get started",
@@ -77,7 +87,6 @@ class LocalizationManager: ObservableObject {
             "week": "Week",
             "search_recordings": "Search recordings...",
             
-            // Call Details
             "call_recording": "Call Recording",
             "date": "Date",
             "time": "Time",
@@ -94,7 +103,6 @@ class LocalizationManager: ObservableObject {
             "back": "Back",
             "recording_id": "Recording ID",
             
-            // Transcripts
             "no_transcripts": "No Transcripts Yet",
             "transcript_available_premium": "Transcript available with Premium",
             "transcript_not_available": "Transcript not available",
@@ -102,7 +110,6 @@ class LocalizationManager: ObservableObject {
             "copy": "Copy",
             "copied": "Copied!",
             
-            // Settings
             "profile": "Profile",
             "language": "Language",
             "privacy_security": "Privacy & Security",
@@ -123,7 +130,6 @@ class LocalizationManager: ObservableObject {
             "delete_data": "Delete Data",
             "done": "Done",
             
-            // Auth
             "welcome_back": "Welcome Back",
             "sign_in_account": "Sign in to your account",
             "create_account": "Create Account",
@@ -131,13 +137,11 @@ class LocalizationManager: ObservableObject {
             "continue_guest": "Continue as Guest"
         ],
         .spanish: [
-            // Tab bar
             "recordings": "Grabaciones",
             "record_call": "Grabar Llamada",
             "transcripts": "Transcripciones",
             "settings": "Configuración",
             
-            // Home/Recordings
             "no_recordings": "Aún No Hay Grabaciones",
             "your_recordings_appear": "Sus llamadas grabadas aparecerán aquí",
             "tap_record": "Toque la pestaña Grabar Llamada para comenzar",
@@ -146,7 +150,6 @@ class LocalizationManager: ObservableObject {
             "week": "Semana",
             "search_recordings": "Buscar grabaciones...",
             
-            // Call Details
             "call_recording": "Grabación de Llamada",
             "date": "Fecha",
             "time": "Hora",

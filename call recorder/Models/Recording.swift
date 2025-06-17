@@ -49,8 +49,37 @@ struct Recording: Identifiable, Codable {
     }
     
     var date: Date {
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: callDate) ?? Date()
+        // Try ISO8601 with fractional seconds first
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        if let date = formatter.date(from: callDate) {
+            return date
+        }
+        
+        // Try without fractional seconds
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        if let date = formatter.date(from: callDate) {
+            return date
+        }
+        
+        // Try simple format as fallback
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        if let date = formatter.date(from: callDate) {
+            return date
+        }
+        
+        // Use ISO8601DateFormatter as last resort
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFormatter.date(from: callDate) {
+            return date
+        }
+        
+        // Default to current date if all parsing fails
+        print("Failed to parse date: \(callDate)")
+        return Date()
     }
     
     var duration: TimeInterval {

@@ -10,31 +10,6 @@ struct TranscriptDetailView: View {
     @State private var selectedSegment = 0
     @Environment(\.dismiss) private var dismiss
     
-    private var transcriptSegments: [(speaker: String, text: String, timestamp: String)] {
-        guard let transcript = recording.transcript else { return [] }
-        
-        // Simple segmentation - in a real app, this would come from actual speaker diarization
-        let words = transcript.split(separator: " ")
-        var segments: [(String, String, String)] = []
-        var currentSegment = ""
-        var segmentIndex = 0
-        
-        for (index, word) in words.enumerated() {
-            currentSegment += word + " "
-            
-            // Create segments every 50 words or at sentence ends
-            if index % 50 == 49 || word.hasSuffix(".") || word.hasSuffix("?") || word.hasSuffix("!") || index == words.count - 1 {
-                let speaker = segmentIndex % 2 == 0 ? "Speaker 1" : "Speaker 2"
-                let timestamp = formatTimestamp(Double(segmentIndex) * 15.0)
-                segments.append((speaker, currentSegment.trimmingCharacters(in: .whitespaces), timestamp))
-                currentSegment = ""
-                segmentIndex += 1
-            }
-        }
-        
-        return segments
-    }
-    
     var body: some View {
         ZStack {
             Color.darkBackground.ignoresSafeArea()
@@ -88,7 +63,7 @@ struct TranscriptDetailView: View {
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.secondaryText)
                             
-                            Text(recording.contactName)
+                            Text(recording.title ?? recording.contactName)
                                 .font(.system(size: 20, weight: .semibold))
                                 .foregroundColor(.primaryText)
                             
@@ -116,9 +91,9 @@ struct TranscriptDetailView: View {
                         )
                         
                         TranscriptStatCard(
-                            icon: "person.2",
-                            value: "2",
-                            label: "Speakers",
+                            icon: "doc.text",
+                            value: recording.summary != nil ? "Yes" : "No",
+                            label: "Summary",
                             color: .purple
                         )
                         
@@ -163,7 +138,7 @@ struct TranscriptDetailView: View {
                 // View Mode Picker
                 Picker("View Mode", selection: $selectedSegment) {
                     Text("Full Text").tag(0)
-                    Text("Timeline").tag(1)
+                    Text("Summary").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
@@ -175,27 +150,57 @@ struct TranscriptDetailView: View {
                         if selectedSegment == 0 {
                             // Full Text View
                             if let transcript = recording.transcript, !transcript.isEmpty {
-                                VStack(alignment: .leading, spacing: 20) {
-                                    ForEach(transcriptSegments.indices, id: \.self) { index in
-                                        let segment = transcriptSegments[index]
-                                        TranscriptSegmentView(
-                                            speaker: segment.speaker,
-                                            text: segment.text,
-                                            timestamp: segment.timestamp,
-                                            searchText: searchText,
-                                            isAlternate: index % 2 == 1
-                                        )
-                                    }
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Text("Transcript")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Text(transcript)
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.primaryText)
+                                        .lineSpacing(6)
+                                        .textSelection(.enabled)
                                 }
                                 .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             } else {
                                 EmptyTranscriptView()
                                     .padding(.top, 80)
                             }
                         } else {
-                            // Timeline View
-                            TimelineTranscriptView(segments: transcriptSegments, searchText: searchText)
+                            // Summary View
+                            if let summary = recording.summary, !summary.isEmpty {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Text("Summary")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Text(summary)
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.primaryText)
+                                        .lineSpacing(6)
+                                        .textSelection(.enabled)
+                                }
                                 .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            } else {
+                                VStack(spacing: 20) {
+                                    Image(systemName: "doc.text")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.tertiaryText.opacity(0.5))
+                                    
+                                    Text("No summary available")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.tertiaryText)
+                                    
+                                    Text("A summary has not been generated for this recording")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.tertiaryText.opacity(0.7))
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 40)
+                                }
+                                .padding(.top, 80)
+                            }
                         }
                     }
                 }
@@ -232,25 +237,6 @@ struct TranscriptDetailView: View {
                         .frame(height: 40)
                         .background(Color.surfaceBackground)
                     
-                    TranscriptActionButton(
-                        icon: "square.and.pencil",
-                        title: "Note",
-                        action: {
-                            // Add note functionality
-                        }
-                    )
-                    
-                    Divider()
-                        .frame(height: 40)
-                        .background(Color.surfaceBackground)
-                    
-                    TranscriptActionButton(
-                        icon: "star",
-                        title: "Favorite",
-                        action: {
-                            // Add to favorites
-                        }
-                    )
                 }
                 .background(Color.cardBackground)
                 .overlay(
@@ -277,10 +263,17 @@ struct TranscriptDetailView: View {
     private func formatTranscriptForSharing() -> String {
         var output = "Call Recording Transcript\n"
         output += "========================\n\n"
+        output += "Title: \(recording.title ?? recording.contactName)\n"
         output += "Contact: \(recording.contactName)\n"
         output += "Date: \(formatDate(recording.date))\n"
         output += "Duration: \(formatDuration(recording.duration))\n\n"
-        output += "Transcript:\n\n"
+        
+        if let summary = recording.summary, !summary.isEmpty {
+            output += "Summary:\n"
+            output += summary + "\n\n"
+        }
+        
+        output += "Full Transcript:\n\n"
         output += recording.transcript ?? "No transcript available"
         return output
     }
@@ -331,107 +324,6 @@ struct TranscriptStatCard: View {
     }
 }
 
-struct TranscriptSegmentView: View {
-    let speaker: String
-    let text: String
-    let timestamp: String
-    let searchText: String
-    let isAlternate: Bool
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Speaker Avatar
-            ZStack {
-                Circle()
-                    .fill(isAlternate ? Color.purple.opacity(0.2) : Color.skyBlue.opacity(0.2))
-                    .frame(width: 36, height: 36)
-                
-                Text(speaker.prefix(1))
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(isAlternate ? .purple : .skyBlue)
-            }
-            
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text(speaker)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(isAlternate ? .purple : .skyBlue)
-                    
-                    Text("• \(timestamp)")
-                        .font(.system(size: 12))
-                        .foregroundColor(.tertiaryText)
-                    
-                    Spacer()
-                }
-                
-                Text(text)
-                    .font(.system(size: 15))
-                    .foregroundColor(.primaryText)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            Spacer()
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.cardBackground.opacity(0.5))
-        )
-    }
-}
-
-struct TimelineTranscriptView: View {
-    let segments: [(speaker: String, text: String, timestamp: String)]
-    let searchText: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(segments.indices, id: \.self) { index in
-                HStack(alignment: .top, spacing: 16) {
-                    // Timeline
-                    VStack(spacing: 0) {
-                        Circle()
-                            .fill(index % 2 == 0 ? Color.skyBlue : Color.purple)
-                            .frame(width: 12, height: 12)
-                        
-                        if index < segments.count - 1 {
-                            Rectangle()
-                                .fill(Color.tertiaryText.opacity(0.3))
-                                .frame(width: 2, height: 80)
-                        }
-                    }
-                    
-                    // Content
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(segments[index].timestamp)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.tertiaryText)
-                        
-                        HStack {
-                            Text(segments[index].speaker)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(index % 2 == 0 ? .skyBlue : .purple)
-                            Spacer()
-                        }
-                        
-                        Text(segments[index].text)
-                            .font(.system(size: 14))
-                            .foregroundColor(.primaryText)
-                            .lineSpacing(3)
-                            .lineLimit(3)
-                        
-                        if index < segments.count - 1 {
-                            Spacer(minLength: 20)
-                        }
-                    }
-                    
-                    Spacer()
-                }
-            }
-        }
-    }
-}
 
 struct TranscriptActionButton: View {
     let icon: String

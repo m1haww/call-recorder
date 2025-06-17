@@ -1,4 +1,5 @@
 import SwiftUI
+import SuperwallKit
 
 struct ContentView: View {
     @ObservedObject private var appManager = AppViewModel.shared
@@ -62,7 +63,11 @@ struct ContentView: View {
                         Spacer()
                         Button(action: {
                             HapticManager.shared.impact(.medium)
-                            makePhoneCall(to: appManager.recordingServiceNumber)
+                            if appManager.isProUser {
+                                makePhoneCall(to: appManager.recordingServiceNumber)
+                            } else {
+                                Superwall.shared.register(placement: "campaign_trigger")
+                            }
                         }) {
                             ZStack {
                                 Circle()
@@ -76,13 +81,13 @@ struct ContentView: View {
                         }
                         .shadow(color: Color.primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
                         .padding(.trailing, 20)
-                        .padding(.bottom, 90)
+                        .padding(.bottom, 70)
                     }
                 }
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
                     case .callDetails(let recording):
-                        CallDetailsView(recording: recording)
+                        CallDetailsView(recording: recording, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar(.hidden, for: .tabBar)
                     case .transcripts:

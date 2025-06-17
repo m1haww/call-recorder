@@ -36,7 +36,3 @@ struct RecordingActiveOverlay: View {
         }
     }
 }
-
-#Preview {
-    RecordingActiveOverlay()
-}

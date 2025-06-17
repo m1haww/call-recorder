@@ -4,12 +4,13 @@ import AVKit
 
 struct CallDetailsView: View {
     let recording: Recording
+    @Binding var navigationPath: NavigationPath
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @StateObject private var audioPlayer = AudioPlayerManager()
     @State private var showDeleteAlert = false
     @State private var showShareSheet = false
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var appViewModel: AppViewModel
+    @ObservedObject var appViewModel: AppViewModel = AppViewModel.shared
     
     var body: some View {
         ZStack {
@@ -18,9 +19,7 @@ struct CallDetailsView: View {
             
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header section
                     VStack(spacing: 0) {
-                        // Contact header
                         HStack(spacing: 16) {
                             Circle()
                                 .fill(Color.primaryGreen.opacity(0.15))
@@ -46,9 +45,10 @@ struct CallDetailsView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)
                         .background(Color.cardBackground)
+                        .cornerRadius(16)
                     }
+                    .padding(.horizontal)
                     
-                    // Quick stats cards
                     HStack(spacing: 12) {
                         StatCard(
                             icon: "calendar",
@@ -73,9 +73,7 @@ struct CallDetailsView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Player card
                     VStack(spacing: 20) {
-                        // Waveform visualization placeholder
                         HStack(spacing: 2) {
                             ForEach(0..<30) { _ in
                                 RoundedRectangle(cornerRadius: 2)
@@ -85,7 +83,6 @@ struct CallDetailsView: View {
                         }
                         .frame(height: 40)
                         
-                        // Progress and time
                         VStack(spacing: 8) {
                             GeometryReader { geometry in
                                 ZStack(alignment: .leading) {
@@ -124,11 +121,13 @@ struct CallDetailsView: View {
                             }
                             
                             Button(action: {
-                                if audioPlayer.isPlaying {
-                                    audioPlayer.pause()
-                                } else {
-                                    Task {
-                                        await audioPlayer.resume(recording: recording)
+                                Task {
+                                    if audioPlayer.isPlaying {
+                                        audioPlayer.pause()
+                                    } else if !audioPlayer.isInitialized {
+                                        await audioPlayer.play(recording: recording)
+                                    } else {
+                                        audioPlayer.resume()
                                     }
                                 }
                             }) {
@@ -158,7 +157,6 @@ struct CallDetailsView: View {
                     .cornerRadius(16)
                     .padding(.horizontal)
                     
-                    // Action buttons
                     HStack(spacing: 12) {
                         DetailActionButton(
                             icon: "square.and.arrow.up",
@@ -176,15 +174,20 @@ struct CallDetailsView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Additional info cards
                     VStack(spacing: 12) {
                         if let transcript = recording.transcript, !transcript.isEmpty {
-                            InfoCard(
-                                icon: "doc.text.fill",
-                                title: "Transcript",
-                                value: "Available",
-                                color: .primaryGreen
-                            )
+                            Button(action: {
+                                navigationPath.append(NavigationDestination.transcriptDetail(recording))
+                            }) {
+                                InfoCard(
+                                    icon: "doc.text.fill",
+                                    title: "Transcript",
+                                    value: "Available",
+                                    color: .primaryGreen,
+                                    isClickable: true
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         
                         if recording.isUploaded {
@@ -208,6 +211,7 @@ struct CallDetailsView: View {
                 .padding()
             }
         }
+        .navigationTitle("Recording")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -229,7 +233,7 @@ struct CallDetailsView: View {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 Task {
-//                    await appViewModel.deleteRecording(at: )
+                    await appViewModel.deleteRecording(recording)
                     dismiss()
                 }
             }
@@ -237,7 +241,7 @@ struct CallDetailsView: View {
             Text("Are you sure you want to delete this recording?")
         }
         .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: [recording])
+            ShareSheet(items: appViewModel.getShareItems(for: recording))
         }
         .onDisappear {
             audioPlayer.stop()
@@ -334,6 +338,7 @@ struct InfoCard: View {
     let title: String
     let value: String
     let color: Color
+    var isClickable: Bool = false
     
     var body: some View {
         HStack {
@@ -351,6 +356,12 @@ struct InfoCard: View {
             Text(value)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.primaryText)
+            
+            if isClickable {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(.tertiaryText)
+            }
         }
         .padding(16)
         .background(Color.cardBackground)
@@ -365,11 +376,16 @@ class AudioPlayerManager: NSObject, ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var progress: Double = 0
     @Published var duration: TimeInterval = 0
+    @Published var isInitialized = false
     
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var timeObserver: Any?
-    private var isInitialized = false
+    
+    func resume() {
+        player?.play()
+        isPlaying = true
+    }
     
     @MainActor
     func resume(recording: Recording) async {

@@ -1,11 +1,11 @@
 import SwiftUI
 import UIKit
+import SuperwallKit
 
 struct TranscriptsView: View {
     @ObservedObject var viewModel = AppViewModel.shared
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Binding var navigationPath: NavigationPath
-    @State private var showSubscriptionPrompt = false
     
     var recordingsWithTranscripts: [Recording] {
         return viewModel.recordings.filter { $0.transcript != nil && !$0.transcript!.isEmpty }
@@ -15,8 +15,8 @@ struct TranscriptsView: View {
         NavigationView {
             VStack(spacing: 0) {
                 if recordingsWithTranscripts.isEmpty {
-                    TranscriptEmptyState(userType: viewModel.currentUser) {
-                        showSubscriptionPrompt = true
+                    TranscriptEmptyState(userType: viewModel.isProUser ? .premium : .free) {
+                        Superwall.shared.register(placement: "campaign_trigger")
                     }
                 } else {
                     ScrollView {
@@ -28,7 +28,7 @@ struct TranscriptsView: View {
                                         if recording.transcript != nil && !recording.transcript!.isEmpty {
                                             navigationPath.append(NavigationDestination.transcriptDetail(recording))
                                         } else if viewModel.currentUser == .free {
-                                            showSubscriptionPrompt = true
+                                            Superwall.shared.register(placement: "campaign_trigger")
                                         }
                                     }
                                     .padding(.horizontal)
@@ -42,9 +42,6 @@ struct TranscriptsView: View {
             .background(Color.darkBackground)
         }
         .preferredColorScheme(.dark)
-        .sheet(isPresented: $showSubscriptionPrompt) {
-            SubscriptionDetailsView()
-        }
     }
 }
 
