@@ -13,14 +13,12 @@
 		813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */; };
 		813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB52DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB92DFEE8B800DD153F /* FirebaseMessaging */; };
-		814CA4D72E01722900B02293 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 814CA4D62E01722900B02293 /* StoreKit.framework */; };
 		E1531074C91D6DC467771821 /* Pods_call_recorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5C6BDBB35CD0D516888B8345 /* Pods-call recorder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-call recorder.debug.xcconfig"; path = "Target Support Files/Pods-call recorder/Pods-call recorder.debug.xcconfig"; sourceTree = "<group>"; };
 		5CAE45272DF1E4F200CDE306 /* call recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "call recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		814CA4D62E01722900B02293 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_call_recorder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8A8D6BF77EE6FCDEFDA3BC1 /* Pods-call recorder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-call recorder.release.xcconfig"; path = "Target Support Files/Pods-call recorder/Pods-call recorder.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -41,7 +39,6 @@
 				813DEDAF2DFEE84800DD153F /* RevenueCat in Frameworks */,
 				813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */,
-				814CA4D72E01722900B02293 /* StoreKit.framework in Frameworks */,
 				813DEDAC2DFEE82600DD153F /* SuperwallKit in Frameworks */,
 				813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */,
 				813DEDB12DFEE84800DD153F /* RevenueCatUI in Frameworks */,
@@ -73,7 +70,6 @@
 		812DC42E2DF5A9E500BD82A1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				814CA4D62E01722900B02293 /* StoreKit.framework */,
 				B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */,
 			);
 			name = Frameworks;
@@ -335,9 +331,9 @@
 				CODE_SIGN_ENTITLEMENTS = "call recorder/call recorder.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3X5F4PJL63;
+				DEVELOPMENT_TEAM = LFM9U35578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "call-recorder-Info.plist";
@@ -355,8 +351,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.call.recorder.phone.audio;
+				MARKETING_VERSION = 1.0.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.patt.test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -374,9 +370,9 @@
 				CODE_SIGN_ENTITLEMENTS = "call recorder/call recorder.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3X5F4PJL63;
+				DEVELOPMENT_TEAM = LFM9U35578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "call-recorder-Info.plist";
@@ -394,8 +390,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.call.recorder.phone.audio;
+				MARKETING_VERSION = 1.0.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.patt.test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;

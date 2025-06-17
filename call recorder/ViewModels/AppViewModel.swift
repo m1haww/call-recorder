@@ -156,7 +156,7 @@ final class AppViewModel: ObservableObject {
     }
     
     func loadUserData() {
-        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? "+15202445872"
+        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? ""
         userCountryCode = UserDefaults.standard.string(forKey: "userCountryCode") ?? ""
         userCountryName = UserDefaults.standard.string(forKey: "userCountryName") ?? ""
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
