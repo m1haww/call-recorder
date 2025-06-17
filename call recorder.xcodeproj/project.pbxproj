@@ -28,8 +28,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5CAE45292DF1E4F200CDE306 /* call recorder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "call recorder";
 			sourceTree = "<group>";
 		};
@@ -87,7 +85,6 @@
 				5C6BDBB35CD0D516888B8345 /* Pods-call recorder.debug.xcconfig */,
 				C8A8D6BF77EE6FCDEFDA3BC1 /* Pods-call recorder.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -338,7 +335,7 @@
 				CODE_SIGN_ENTITLEMENTS = "call recorder/call recorder.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
 				DEVELOPMENT_TEAM = 3X5F4PJL63;
 				ENABLE_PREVIEWS = YES;
@@ -358,7 +355,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.call.recorder.phone.audio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -377,7 +374,7 @@
 				CODE_SIGN_ENTITLEMENTS = "call recorder/call recorder.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
 				DEVELOPMENT_TEAM = 3X5F4PJL63;
 				ENABLE_PREVIEWS = YES;
@@ -397,7 +394,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.call.recorder.phone.audio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
