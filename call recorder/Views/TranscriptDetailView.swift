@@ -16,29 +16,32 @@ struct TranscriptDetailView: View {
             
             VStack(spacing: 0) {
                 // Custom Navigation Bar
-                HStack {
-                    Button(action: { dismiss() }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 17, weight: .medium))
-                            Text("Back")
-                                .font(.system(size: 17))
-                        }
-                        .foregroundColor(.skyBlue)
-                    }
-                    
-                    Spacer()
-                    
+                ZStack {
+                    // Center title
                     Text("Transcript")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primaryText)
+                        .frame(maxWidth: .infinity)
                     
-                    Spacer()
-                    
-                    Button(action: { isSearching.toggle() }) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 17))
+                    // Left and right buttons
+                    HStack {
+                        Button(action: { dismiss() }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 17, weight: .medium))
+                                Text("Back")
+                                    .font(.system(size: 17))
+                            }
                             .foregroundColor(.skyBlue)
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: { isSearching.toggle() }) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 17))
+                                .foregroundColor(.skyBlue)
+                        }
                     }
                 }
                 .padding(.horizontal)
