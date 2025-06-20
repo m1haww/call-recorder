@@ -1,5 +1,4 @@
 import SwiftUI
-import SuperwallKit
 
 struct SettingsView: View {
     @ObservedObject private var viewModel = AppViewModel.shared
@@ -24,9 +23,9 @@ struct SettingsView: View {
                     
                     PrivacySection()
                     
-                    SubscriptionSection(
-                        selectedPlan: $selectedPlan
-                    )
+//                    SubscriptionSection(
+//                        selectedPlan: $selectedPlan
+//                    )
                     
                     LegalSection()
                     
@@ -56,9 +55,9 @@ struct SettingsView: View {
     }
     
     private func loadUserData() {
-        userPhoneNumber = viewModel.userPhoneNumber
         userEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
         userName = UserDefaults.standard.string(forKey: "userName") ?? "User"
+        userPhoneNumber = viewModel.userPhoneNumber
     }
     
     private func deleteUserData() {
@@ -271,58 +270,58 @@ struct PrivacySection: View {
     }
 }
 
-struct SubscriptionSection: View {
-    @Binding var selectedPlan: String
-    @ObservedObject var viewModel = AppViewModel.shared
-    
-    var planText: String {
-        switch viewModel.currentUser {
-        case .free:
-            return "Free Plan"
-        case .premium:
-            return "Premium Plan"
-        }
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Subscription", icon: "creditcard")
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Current Plan")
-                        .font(.caption)
-                        .foregroundColor(.secondaryText)
-                    Text(planText)
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
-                }
-                
-                Spacer()
-                
-                if viewModel.currentUser == .free {
-                    Button("Upgrade") {
-                        Superwall.shared.register(placement: "campaign_trigger")
-                    }
-                    .font(.footnote)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primaryGreen)
-                } else {
-                    Button("Manage") {
-                        Superwall.shared.register(placement: "campaign_trigger")
-                    }
-                    .font(.footnote)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primaryGreen)
-                }
-            }
-            .padding()
-            .background(Color.cardBackground)
-            .cornerRadius(12)
-        }
-        .padding(.horizontal)
-    }
-}
+//struct SubscriptionSection: View {
+//    @Binding var selectedPlan: String
+//    @ObservedObject var viewModel = AppViewModel.shared
+//    
+//    var planText: String {
+//        switch viewModel.currentUser {
+//        case .free:
+//            return "Free Plan"
+//        case .premium:
+//            return "Premium Plan"
+//        }
+//    }
+//    
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 12) {
+//            SectionHeader(title: "Subscription", icon: "creditcard")
+//            
+//            HStack {
+//                VStack(alignment: .leading, spacing: 4) {
+//                    Text("Current Plan")
+//                        .font(.caption)
+//                        .foregroundColor(.secondaryText)
+//                    Text(planText)
+//                        .font(.headline)
+//                        .foregroundColor(.primaryText)
+//                }
+//                
+//                Spacer()
+//                
+//                if viewModel.currentUser == .free {
+//                    Button("Upgrade") {
+//                        //TODO: show the paywall
+//                    }
+//                    .font(.footnote)
+//                    .fontWeight(.medium)
+//                    .foregroundColor(.primaryGreen)
+//                } else {
+//                    Button("Manage") {
+//                        //TODO: show the paywall
+//                    }
+//                    .font(.footnote)
+//                    .fontWeight(.medium)
+//                    .foregroundColor(.primaryGreen)
+//                }
+//            }
+//            .padding()
+//            .background(Color.cardBackground)
+//            .cornerRadius(12)
+//        }
+//        .padding(.horizontal)
+//    }
+//}
 
 struct LegalSection: View {
     var body: some View {
@@ -516,7 +515,7 @@ struct SubscriptionDetailsView: View {
                 
                 VStack(spacing: 12) {
                     Button(action: {
-                        Superwall.shared.register(placement: "campaign_trigger")
+                        AppViewModel.shared.showPaywall = true
                     }) {
                         Text("Try 3 Days Free")
                             .font(.headline)

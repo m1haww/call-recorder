@@ -5,8 +5,12 @@ final class ServerManager: ObservableObject {
     
     private let baseURL = "https://api-57018476417.europe-west1.run.app"
     
-    init() {}
+    private init() {}
     
+    struct PhoneServiceInfo: Codable {
+        let phoneNumber: String
+    }
+
     private func createRecording(from dictionary: [String: Any], userPhone: String) -> Recording? {
         let id = dictionary["id"] as? String ?? UUID().uuidString
         let callDate = dictionary["call_date"] as? String ?? ""
@@ -35,49 +39,14 @@ final class ServerManager: ObservableObject {
         )
     }
     
-    func fetchCallsForUser(phoneNumber: String, completion: @escaping (Result<[Recording], Error>) -> Void) {
+    func fetchCallsForUser(userId: String) async throws -> [Recording] {
         let url = URL(string: "\(baseURL)/get_calls_for_user")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
         
-        let body = ["user_phone": phoneNumber]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(ServerError.noData))
-                return
-            }
-            
-            do {
-                if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                    let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
-                    completion(.success(recordings))
-                } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
-                    completion(.success([]))
-                } else {
-                    completion(.failure(ServerError.invalidResponse))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-    
-    func fetchCallsForUser(phoneNumber: String) async throws -> [Recording] {
-        let url = URL(string: "\(baseURL)/get_calls_for_user")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 30.0  // 30 second timeout
-        
-        let body = ["user_phone": phoneNumber]
+        let body = ["user_id": userId]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         do {
@@ -87,12 +56,8 @@ final class ServerManager: ObservableObject {
                 print("Status code: \(httpResponse.statusCode)")
             }
             
-            print("----------------------------------------------")
-            print(String(data: data, encoding: .utf8) ?? "No data")
-            print("----------------------------------------------")
-            
             if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: phoneNumber) }
+                let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: "") }
                 return recordings
             } else if let _ = try JSONSerialization.jsonObject(with: data) as? [Any] {
                 return []
@@ -101,13 +66,12 @@ final class ServerManager: ObservableObject {
             }
         } catch {
             print("Network error: \(error)")
-            
-            // Re-throw the error instead of returning empty array
+        
             throw error
         }
     }
     
-    func deleteRecording(recordingId: String, userPhone: String) async throws {
+    func deleteRecording(recordingId: String, userId: String) async throws {
         let url = URL(string: "\(baseURL)/delete_recording")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -115,7 +79,7 @@ final class ServerManager: ObservableObject {
         
         let body = [
             "recording_id": recordingId,
-            "user_phone": userPhone
+            "user_id": userId
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
@@ -130,6 +94,58 @@ final class ServerManager: ObservableObject {
                 print("Delete error: \(errorMessage)")
             }
             throw ServerError.invalidResponse
+        }
+    }
+    
+    func deleteAllRecordings(userId: String) async throws {
+        let url = URL(string: "\(baseURL)/delete_all_recordings")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
+        
+        let body = ["user_id": userId]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServerError.invalidResponse
+        }
+        
+        if httpResponse.statusCode != 200 {
+            if let errorMessage = String(data: data, encoding: .utf8) {
+                print("Delete all recordings error: \(errorMessage)")
+            }
+            throw ServerError.invalidResponse
+        }
+        
+        print("Successfully deleted all recordings for user: \(userId)")
+    }
+    
+    func fetchPhoneServiceNumber() async throws -> PhoneServiceInfo {
+        let url = URL(string: "https://firebasestorage.googleapis.com/v0/b/social-media-finder-4869f.appspot.com/o/service.json?alt=media&token=6f28dbff-3210-428f-a92d-ad4e9488f274")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 30.0
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ServerError.invalidResponse
+            }
+            
+            if httpResponse.statusCode != 200 {
+                throw ServerError.invalidResponse
+            }
+            
+            let decoder = JSONDecoder()
+            let phoneServiceInfo = try decoder.decode(PhoneServiceInfo.self, from: data)
+            return phoneServiceInfo
+        } catch {
+            print("Error fetching phone service number: \(error)")
+            throw error
         }
     }
 }

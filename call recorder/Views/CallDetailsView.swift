@@ -9,6 +9,7 @@ struct CallDetailsView: View {
     @StateObject private var audioPlayer = AudioPlayerManager()
     @State private var showDeleteAlert = false
     @State private var showShareSheet = false
+    @State private var isLoadingRecording = false
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var appViewModel: AppViewModel = AppViewModel.shared
     
@@ -47,7 +48,7 @@ struct CallDetailsView: View {
                         .background(Color.cardBackground)
                         .cornerRadius(16)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     HStack(spacing: 12) {
                         StatCard(
@@ -71,7 +72,7 @@ struct CallDetailsView: View {
                             color: .primaryGreen
                         )
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     VStack(spacing: 20) {
                         HStack(spacing: 2) {
@@ -110,7 +111,6 @@ struct CallDetailsView: View {
                             }
                         }
                         
-                        // Play controls
                         HStack(spacing: 32) {
                             Button(action: {
                                 audioPlayer.skip(by: -15)
@@ -125,7 +125,9 @@ struct CallDetailsView: View {
                                     if audioPlayer.isPlaying {
                                         audioPlayer.pause()
                                     } else if !audioPlayer.isInitialized {
+                                        isLoadingRecording = true
                                         await audioPlayer.play(recording: recording)
+                                        isLoadingRecording = false
                                     } else {
                                         audioPlayer.resume()
                                     }
@@ -136,12 +138,19 @@ struct CallDetailsView: View {
                                         .fill(Color.primaryGreen)
                                         .frame(width: 64, height: 64)
                                     
-                                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                                        .font(.system(size: 28))
-                                        .foregroundColor(.white)
-                                        .offset(x: audioPlayer.isPlaying ? 0 : 2)
+                                    if isLoadingRecording || audioPlayer.isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            .scaleEffect(0.8)
+                                    } else {
+                                        Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(.white)
+                                            .offset(x: audioPlayer.isPlaying ? 0 : 2)
+                                    }
                                 }
                             }
+                            .disabled(isLoadingRecording || audioPlayer.isLoading)
                             
                             Button(action: {
                                 audioPlayer.skip(by: 15)
@@ -155,7 +164,7 @@ struct CallDetailsView: View {
                     .padding(24)
                     .background(Color.cardBackground)
                     .cornerRadius(16)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     HStack(spacing: 12) {
                         DetailActionButton(
@@ -172,7 +181,7 @@ struct CallDetailsView: View {
                             action: { showDeleteAlert = true }
                         )
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     VStack(spacing: 12) {
                         if let transcript = recording.transcript, !transcript.isEmpty {
@@ -206,9 +215,9 @@ struct CallDetailsView: View {
                             color: .secondaryText
                         )
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 }
-                .padding()
+                .padding(.vertical)
             }
         }
         .navigationTitle("Recording")
@@ -241,7 +250,12 @@ struct CallDetailsView: View {
             Text("Are you sure you want to delete this recording?")
         }
         .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: appViewModel.getShareItems(for: recording))
+            ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.google.com")!])
+        }
+        .onAppear {
+            Task {
+                await audioPlayer.preloadRecording(recording: recording)
+            }
         }
         .onDisappear {
             audioPlayer.stop()
@@ -369,18 +383,19 @@ struct InfoCard: View {
     }
 }
 
-
-// Audio Player Manager
-class AudioPlayerManager: NSObject, ObservableObject {
+final class AudioPlayerManager: NSObject, ObservableObject {
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
     @Published var progress: Double = 0
     @Published var duration: TimeInterval = 0
     @Published var isInitialized = false
+    @Published var isLoading = false
+    @Published var isPreloaded = false
     
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var timeObserver: Any?
+    private var preloadedRecording: Recording?
     
     func resume() {
         player?.play()
@@ -390,60 +405,120 @@ class AudioPlayerManager: NSObject, ObservableObject {
     @MainActor
     func resume(recording: Recording) async {
         if isInitialized && player != nil {
-            // Just resume playback
             player?.play()
             isPlaying = true
         } else {
-            // First time playing, initialize
             await play(recording: recording)
         }
     }
     
     @MainActor
+    func preloadRecording(recording: Recording) async {
+        guard !isPreloaded && preloadedRecording?.id != recording.id else { return }
+        
+        isLoading = true
+        preloadedRecording = recording
+        
+        guard let url = recording.localFileURL else {
+            print("No URL available for recording")
+            isLoading = false
+            return
+        }
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            playerItem = AVPlayerItem(url: url)
+            player = AVPlayer(playerItem: playerItem)
+            
+            if let playerItem = playerItem {
+                while playerItem.status != .readyToPlay && playerItem.status != .failed {
+                    try await Task.sleep(nanoseconds: 100_000_000)
+                }
+                
+                if playerItem.status == .readyToPlay {
+                    if let assetDuration = try? await playerItem.asset.load(.duration) {
+                        if assetDuration.isValid && !assetDuration.isIndefinite {
+                            self.duration = CMTimeGetSeconds(assetDuration)
+                        }
+                    }
+                    isPreloaded = true
+                    print("Recording preloaded successfully")
+                } else {
+                    print("Failed to preload recording")
+                }
+            }
+        } catch {
+            print("Error preloading recording: \\(error)")
+        }
+        
+        isLoading = false
+    }
+    
+    @MainActor
     func play(recording: Recording) async {
+        if isPreloaded && preloadedRecording?.id == recording.id && player != nil {
+            setupTimeObserver()
+            setupNotificationObserver()
+            player?.play()
+            isPlaying = true
+            isInitialized = true
+            return
+        }
+        
         guard let url = recording.localFileURL else { 
             print("No URL available for recording")
             return 
         }
         
+        isLoading = true
+        
         do {
-            // Configure audio session
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
             
-            // Create player item and player
             playerItem = AVPlayerItem(url: url)
             player = AVPlayer(playerItem: playerItem)
             
-            // Observe time
-            let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-                Task { @MainActor in
-                    self?.updateProgress(time: time)
-                }
-            }
+            setupTimeObserver()
+            setupNotificationObserver()
             
-            // Observe when playback ends
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(playerDidFinishPlaying),
-                name: .AVPlayerItemDidPlayToEndTime,
-                object: playerItem
-            )
-            
-            // Start playing
             player?.play()
             isPlaying = true
             isInitialized = true
             
-            // Get duration
-            if let duration = playerItem?.asset.duration {
-                self.duration = CMTimeGetSeconds(duration)
+            if let item = playerItem {
+                if let assetDuration = try? await item.asset.load(.duration) {
+                    if assetDuration.isValid && !assetDuration.isIndefinite {
+                        self.duration = CMTimeGetSeconds(assetDuration)
+                    }
+                }
             }
             
         } catch {
             print("Error setting up audio player: \(error)")
         }
+        
+        isLoading = false
+    }
+    
+    private func setupTimeObserver() {
+        let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+            Task { @MainActor in
+                self?.updateProgress(time: time)
+            }
+        }
+    }
+    
+    private func setupNotificationObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerDidFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem
+        )
     }
     
     func pause() {
@@ -466,6 +541,8 @@ class AudioPlayerManager: NSObject, ObservableObject {
         currentTime = 0
         progress = 0
         isInitialized = false
+        isPreloaded = false
+        isLoading = false
         
         if let observer = timeObserver {
             player?.removeTimeObserver(observer)
@@ -475,6 +552,7 @@ class AudioPlayerManager: NSObject, ObservableObject {
         NotificationCenter.default.removeObserver(self)
         player = nil
         playerItem = nil
+        preloadedRecording = nil
     }
     
     private func updateProgress(time: CMTime) {

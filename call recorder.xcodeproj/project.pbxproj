@@ -7,20 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		813DEDAC2DFEE82600DD153F /* SuperwallKit in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDAB2DFEE82600DD153F /* SuperwallKit */; };
 		813DEDAF2DFEE84800DD153F /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDAE2DFEE84800DD153F /* RevenueCat */; };
 		813DEDB12DFEE84800DD153F /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB02DFEE84800DD153F /* RevenueCatUI */; };
 		813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */; };
 		813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB52DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB92DFEE8B800DD153F /* FirebaseMessaging */; };
-		817EB88F2E029EC0008E2F4B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 817EB88E2E029EC0008E2F4B /* StoreKit.framework */; };
+		817563E92E055B5200EC2F32 /* config.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 817563E82E055B5200EC2F32 /* config.storekit */; };
+		817563EB2E055F0500EC2F32 /* StoreKitTestCertificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = 817563EA2E055F0500EC2F32 /* StoreKitTestCertificate.cer */; };
 		E1531074C91D6DC467771821 /* Pods_call_recorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5C6BDBB35CD0D516888B8345 /* Pods-call recorder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-call recorder.debug.xcconfig"; path = "Target Support Files/Pods-call recorder/Pods-call recorder.debug.xcconfig"; sourceTree = "<group>"; };
 		5CAE45272DF1E4F200CDE306 /* call recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "call recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		817EB88E2E029EC0008E2F4B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		817563E82E055B5200EC2F32 /* config.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = config.storekit; sourceTree = "<group>"; };
+		817563EA2E055F0500EC2F32 /* StoreKitTestCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreKitTestCertificate.cer; sourceTree = "<group>"; };
 		B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_call_recorder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8A8D6BF77EE6FCDEFDA3BC1 /* Pods-call recorder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-call recorder.release.xcconfig"; path = "Target Support Files/Pods-call recorder/Pods-call recorder.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -41,8 +42,6 @@
 				813DEDAF2DFEE84800DD153F /* RevenueCat in Frameworks */,
 				813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */,
-				817EB88F2E029EC0008E2F4B /* StoreKit.framework in Frameworks */,
-				813DEDAC2DFEE82600DD153F /* SuperwallKit in Frameworks */,
 				813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */,
 				813DEDB12DFEE84800DD153F /* RevenueCatUI in Frameworks */,
 				E1531074C91D6DC467771821 /* Pods_call_recorder.framework in Frameworks */,
@@ -55,6 +54,8 @@
 		5CAE451E2DF1E4F200CDE306 = {
 			isa = PBXGroup;
 			children = (
+				817563E82E055B5200EC2F32 /* config.storekit */,
+				817563EA2E055F0500EC2F32 /* StoreKitTestCertificate.cer */,
 				5CAE45292DF1E4F200CDE306 /* call recorder */,
 				812DC42E2DF5A9E500BD82A1 /* Frameworks */,
 				5CAE45282DF1E4F200CDE306 /* Products */,
@@ -73,7 +74,6 @@
 		812DC42E2DF5A9E500BD82A1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				817EB88E2E029EC0008E2F4B /* StoreKit.framework */,
 				B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */,
 			);
 			name = Frameworks;
@@ -109,7 +109,6 @@
 			);
 			name = "call recorder";
 			packageProductDependencies = (
-				813DEDAB2DFEE82600DD153F /* SuperwallKit */,
 				813DEDAE2DFEE84800DD153F /* RevenueCat */,
 				813DEDB02DFEE84800DD153F /* RevenueCatUI */,
 				813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */,
@@ -145,7 +144,6 @@
 			mainGroup = 5CAE451E2DF1E4F200CDE306;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				813DEDAA2DFEE82600DD153F /* XCRemoteSwiftPackageReference "Superwall-iOS" */,
 				813DEDAD2DFEE84800DD153F /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				813DEDB22DFEE8B800DD153F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
@@ -164,6 +162,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				817563E92E055B5200EC2F32 /* config.storekit in Resources */,
+				817563EB2E055F0500EC2F32 /* StoreKitTestCertificate.cer in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,7 +337,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3X5F4PJL63;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "call-recorder-Info.plist";
@@ -376,7 +376,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"call recorder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3X5F4PJL63;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "call-recorder-Info.plist";
@@ -428,14 +428,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		813DEDAA2DFEE82600DD153F /* XCRemoteSwiftPackageReference "Superwall-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/superwall/Superwall-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.5.1;
-			};
-		};
 		813DEDAD2DFEE84800DD153F /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm";
@@ -455,11 +447,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		813DEDAB2DFEE82600DD153F /* SuperwallKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 813DEDAA2DFEE82600DD153F /* XCRemoteSwiftPackageReference "Superwall-iOS" */;
-			productName = SuperwallKit;
-		};
 		813DEDAE2DFEE84800DD153F /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 813DEDAD2DFEE84800DD153F /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;

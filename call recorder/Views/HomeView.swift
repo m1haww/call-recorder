@@ -77,10 +77,15 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.large)
             .preferredColorScheme(.dark)
             .background(Color.darkBackground)
+            .task {
+                if viewModel.recordings.isEmpty {
+                    await viewModel.fetchCallsFromServerAsync()
+                }
+            }
         }
         .sheet(isPresented: $showShareSheet) {
             if let recording = viewModel.recordingToShare {
-                ShareSheet(items: viewModel.getShareItems(for: recording))
+                ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.youtube.com")!])
             }
         }
         .alert("Delete Recording", isPresented: $showDeleteAlert) {

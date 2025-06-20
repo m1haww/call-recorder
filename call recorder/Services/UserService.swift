@@ -1,5 +1,12 @@
 import Foundation
 
+struct UserData {
+    let userId: String
+    let phoneNumber: String
+    let countryCode: String
+    let notificationsEnabled: Bool
+}
+
 final class UserService {
     static let shared = UserService()
     
@@ -9,7 +16,6 @@ final class UserService {
     
     private let fcmTokenKey = "user_fcm_token"
     private let userIdKey = "user_id"
-    private let phoneNumberKey = "user_phone_number"
     
     func saveFCMToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: fcmTokenKey)
@@ -29,16 +35,7 @@ final class UserService {
         return UserDefaults.standard.string(forKey: userIdKey)
     }
     
-    func savePhoneNumber(_ phoneNumber: String) {
-        UserDefaults.standard.set(phoneNumber, forKey: phoneNumberKey)
-        UserDefaults.standard.synchronize()
-    }
-    
-    func getPhoneNumber() -> String? {
-        return UserDefaults.standard.string(forKey: phoneNumberKey)
-    }
-    
-    func registerUser(phoneNumber: String) async throws -> String {
+    func registerUser(phoneNumber: String, countryCode: String) async throws -> String {
         let fcmToken = getFCMToken()
         
         guard let url = URL(string: "\(baseURL)/api/users/register") else {
@@ -51,6 +48,7 @@ final class UserService {
         request.timeoutInterval = 30.0
         
         let requestBody: [String: Any] = [
+            "countryCode": countryCode,
             "phoneNumber": phoneNumber,
             "fcmToken": fcmToken
         ]
@@ -64,19 +62,16 @@ final class UserService {
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        // Log response details
         if let httpResponse = response as? HTTPURLResponse {
             print("📥 Register User Response:")
             print("   Status Code: \(httpResponse.statusCode)")
             print("   Headers: \(httpResponse.allHeaderFields)")
         }
         
-        // Log response data
         if let responseString = String(data: data, encoding: .utf8) {
             print("   Body: \(responseString)")
         }
         
-        // Check status code
         guard let httpResponse = response as? HTTPURLResponse else {
             throw UserServiceError.invalidResponse
         }
@@ -85,12 +80,10 @@ final class UserService {
             throw UserServiceError.serverError(statusCode: httpResponse.statusCode)
         }
         
-        // Parse response
         if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
            let userId = json["userId"] as? String {
             
             saveUserId(userId)
-            savePhoneNumber(phoneNumber)
             
             print("✅ Registration successful - User ID: \(userId)")
             return userId
@@ -100,11 +93,10 @@ final class UserService {
         }
     }
     
-    // Keep the completion handler version for backward compatibility
-    func registerUser(phoneNumber: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func registerUser(phoneNumber: String, countryCode: String, completion: @escaping (Result<String, Error>) -> Void) {
         Task {
             do {
-                let userId = try await registerUser(phoneNumber: phoneNumber)
+                let userId = try await registerUser(phoneNumber: phoneNumber, countryCode: countryCode)
                 DispatchQueue.main.async {
                     completion(.success(userId))
                 }
@@ -171,6 +163,40 @@ final class UserService {
         }.resume()
     }
     
+    func updateUserPhoneNumber(newPhoneNumber: String, countryCode: String) async throws -> Bool {
+        guard let userId = getUserId() else {
+            throw UserServiceError.missingUserId
+        }
+        
+        guard let url = URL(string: "\(baseURL)/api/users/update-phone") else {
+            throw UserServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let requestBody: [String: Any] = [
+            "userId": userId,
+            "phoneNumber": newPhoneNumber,
+            "countryCode": countryCode
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw UserServiceError.invalidResponse
+        }
+        
+        if httpResponse.statusCode == 200 {
+            return true
+        } else {
+            throw UserServiceError.serverError(statusCode: httpResponse.statusCode)
+        }
+    }
+    
     func updateNotificationSettings(enabled: Bool) async throws -> Bool {
         guard let userId = getUserId() else {
             throw UserServiceError.missingUserId
@@ -204,10 +230,78 @@ final class UserService {
         }
     }
     
+    func loadUserData() async throws -> UserData {
+        guard let userId = getUserId() else {
+            throw UserServiceError.missingUserId
+        }
+        
+        guard let url = URL(string: "\(baseURL)/api/users/\(userId)") else {
+            throw UserServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
+        
+        print("📤 Load User Data Request:")
+        print("   URL: \(url)")
+        print("   Method: GET")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("📥 Load User Data Response:")
+            print("   Status Code: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("   Body: \(responseString)")
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw UserServiceError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw UserServiceError.serverError(statusCode: httpResponse.statusCode)
+        }
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let phoneNumber = json["phoneNumber"] as? String,
+              let countryCode = json["countryCode"] as? String else {
+            throw UserServiceError.invalidResponse
+        }
+        
+        let notificationsEnabled = json["notificationsEnabled"] as? Bool ?? true
+        
+        return UserData(
+            userId: userId,
+            phoneNumber: phoneNumber,
+            countryCode: countryCode,
+            notificationsEnabled: notificationsEnabled
+        )
+    }
+    
+    func loadUserData(completion: @escaping (Result<UserData, Error>) -> Void) {
+        Task {
+            do {
+                let userData = try await loadUserData()
+                DispatchQueue.main.async {
+                    completion(.success(userData))
+                }
+            } catch {
+                print("❌ Load user data error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+    
     func clearUserData() {
         UserDefaults.standard.removeObject(forKey: fcmTokenKey)
         UserDefaults.standard.removeObject(forKey: userIdKey)
-        UserDefaults.standard.removeObject(forKey: phoneNumberKey)
         UserDefaults.standard.synchronize()
     }
 }

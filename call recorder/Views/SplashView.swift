@@ -7,13 +7,12 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             Color.darkBackground
-                .ignoresSafeArea()
             
             Image("icon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 150, height: 150)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .frame(width: 140, height: 140)
+                .clipShape(RoundedRectangle(cornerRadius: 17))
             
             VStack {
                 Spacer()
@@ -24,11 +23,24 @@ struct SplashView: View {
                     .padding(.bottom, 80)
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             AnalyticsManager.shared.logEvent(name: "App Launched")
             
             fetchTask = Task {
-                await viewModel.fetchCallsFromServerAsync()
+                await withTaskGroup(of: Void.self) { group in
+                    group.addTask {
+                        await viewModel.loadUserDataFromServer()
+                    }
+                    
+                    group.addTask {
+                        await viewModel.fetchCallsFromServerAsync()
+                    }
+                    
+                    group.addTask {
+                        await viewModel.fetchPhoneServiceNumber()
+                    }
+                }
             }
         }
         .onDisappear {

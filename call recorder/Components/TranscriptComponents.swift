@@ -1,16 +1,13 @@
 import SwiftUI
-import SuperwallKit
 
 struct TranscriptEmptyState: View {
-    let userType: AppViewModel.UserType
-    let onUpgrade: () -> Void
+    let isProUser: Bool
     
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
                 .frame(minHeight: 40, maxHeight: 60)
             
-            // Icon and Title Section
             VStack(spacing: 16) {
                 ZStack {
                     Circle()
@@ -32,7 +29,7 @@ struct TranscriptEmptyState: View {
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.primaryText)
                     
-                    Text(userType == .free ? "Unlock the power of AI transcription" : "Your transcripts will appear here")
+                    Text(isProUser ? "Unlock the power of AI transcription" : "Your transcripts will appear here")
                         .font(.system(size: 14))
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
@@ -40,8 +37,7 @@ struct TranscriptEmptyState: View {
                 }
             }
             
-            if userType == .free {
-                // Features Section
+            if !isProUser {
                 VStack(spacing: 14) {
                     TranscriptFeatureRow(
                         icon: "waveform.badge.mic",
@@ -67,10 +63,9 @@ struct TranscriptEmptyState: View {
                 Spacer()
                     .frame(minHeight: 20, maxHeight: 40)
                 
-                // Upgrade Button
                 VStack(spacing: 10) {
                     Button(action: {
-                        Superwall.shared.register(placement: "campaign_trigger")
+                        AppViewModel.shared.showPaywall = true
                     }) {
                         HStack(spacing: 8) {
                             Image(systemName: "crown.fill")
@@ -101,7 +96,6 @@ struct TranscriptEmptyState: View {
                         .foregroundColor(.tertiaryText)
                 }
             } else {
-                // Pro User Empty State
                 Spacer()
                     .frame(minHeight: 30, maxHeight: 50)
                 

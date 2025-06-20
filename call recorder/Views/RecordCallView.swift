@@ -1,5 +1,4 @@
 import SwiftUI
-import SuperwallKit
 
 struct RecordCallView: View {
     @ObservedObject var viewModel = AppViewModel.shared
@@ -22,10 +21,12 @@ struct RecordCallView: View {
                     IncomingCallSection(
                         onCallService: {
                             HapticManager.shared.impact(.medium)
-                            if viewModel.isProUser {
+                            if viewModel.recordingServiceNumber.isEmpty {
+                                viewModel.showToast("Loading service number...")
+                            } else if viewModel.isProUser {
                                 makePhoneCall(to: viewModel.recordingServiceNumber)
                             } else {
-                                Superwall.shared.register(placement: "campaign_trigger")
+                                viewModel.showPaywall = true
                             }
                         }
                     )
@@ -33,10 +34,12 @@ struct RecordCallView: View {
                     OutgoingCallSection(
                         onStartCall: {
                             HapticManager.shared.impact(.medium)
-                            if viewModel.isProUser {
+                            if viewModel.recordingServiceNumber.isEmpty {
+                                viewModel.showToast("Loading service number...")
+                            } else if viewModel.isProUser {
                                 makePhoneCall(to: viewModel.recordingServiceNumber)
                             } else {
-                                Superwall.shared.register(placement: "campaign_trigger")
+                                //TODO: show the paywall
                             }
                         }
                     )

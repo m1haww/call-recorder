@@ -10,26 +10,22 @@ final class AppViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var showAlert = false
     @Published var alertMessage = ""
-    @Published var hasPermissions = false
-    
-    @Published var isRecording = false
-    @Published var currentUser: UserType = .free
     
     @Published var isProUser: Bool = false
     
     @Published var selectedLanguage = "English"
     @Published var notificationsEnabled = true
     @Published var showPermissionAlert = false
+    @Published var showPaywall = false
     
-    @Published var permissionType: PermissionType = .microphone
-    @Published var userPhoneNumber = ""
-    @Published var userCountryCode = ""
-    @Published var userCountryName = ""
     @Published var isOnboardingComplete = false
+    @Published var userId: String = ""
+    @Published var userPhoneNumber: String = ""
+    @Published var userCountryCode: String = ""
     
     @Published var recordingToShare: Recording?
     
-    let recordingServiceNumber = "+15205935701"
+    @Published var recordingServiceNumber: String = ""
     
     enum UserType {
         case free, premium
@@ -54,7 +50,7 @@ final class AppViewModel: ObservableObject {
         }
         
         do {
-            try await ServerManager.shared.deleteRecording(recordingId: recording.id, userPhone: userPhoneNumber)
+            try await ServerManager.shared.deleteRecording(recordingId: recording.id, userId: userId)
             await MainActor.run {
                 showToast("Recording deleted")
             }
@@ -71,27 +67,25 @@ final class AppViewModel: ObservableObject {
         await deleteRecording(at: index)
     }
     
-    func getShareItems(for recording: Recording) -> [Any] {
-        var items: [Any] = []
-        
-        if let url = recording.recordingUrl, let shareURL = URL(string: url) {
-            items.append(shareURL)
-        } else if let localURL = recording.localFileURL {
-            items.append(localURL)
+    @MainActor
+    func deleteAllRecordings() async {
+        guard !userId.isEmpty else {
+            showToast("User not logged in")
+            return
         }
         
-        var shareText = "Call Recording\n"
-        shareText += "Title: \(recording.title ?? recording.contactName)\n"
-        shareText += "Date: \(formatShareDate(recording.date))\n"
-        shareText += "Duration: \(formatShareDuration(recording.duration))\n"
+        isLoading = true
         
-        if let transcript = recording.transcript, !transcript.isEmpty {
-            shareText += "\nTranscript available"
+        do {
+            try await ServerManager.shared.deleteAllRecordings(userId: userId)
+            
+            recordings.removeAll()
+            showToast("All recordings deleted")
+        } catch {
+            showToast("Failed to delete all recordings: \(error.localizedDescription)")
         }
         
-        items.append(shareText)
-        
-        return items
+        isLoading = false
     }
     
     private func formatShareDate(_ date: Date) -> String {
@@ -112,20 +106,49 @@ final class AppViewModel: ObservableObject {
         showAlert = true
     }
     
-    func upgradeToPremium() {
-        currentUser = .premium
-        showToast("Upgraded to Premium!")
-    }
-    
-    func logout() {
-        recordings.removeAll()
-        currentUser = .free
-        showToast("Logged out successfully")
-    }
-    
     func deleteAccount() {
         recordings.removeAll()
         showToast("Account deleted")
+    }
+    
+    @MainActor
+    func updatePhoneNumber(newPhoneNumber: String, countryCode: String) async {
+        isLoading = true
+        
+        do {
+            let success = try await UserService.shared.updateUserPhoneNumber(newPhoneNumber: newPhoneNumber, countryCode: countryCode)
+            if success {
+                userPhoneNumber = newPhoneNumber
+                userCountryCode = countryCode
+                showToast("Phone number updated successfully")
+            } else {
+                showToast("Failed to update phone number")
+            }
+        } catch {
+            showToast("Error updating phone number: \(error.localizedDescription)")
+        }
+        
+        isLoading = false
+    }
+    
+    @MainActor
+    func loadUserDataFromServer() async {
+        guard !userId.isEmpty else {
+            print("No userId available to load user data")
+            return
+        }
+        
+        do {
+            let userData = try await UserService.shared.loadUserData()
+            
+            userPhoneNumber = userData.phoneNumber
+            userCountryCode = userData.countryCode
+            notificationsEnabled = userData.notificationsEnabled
+            
+            print("User data loaded successfully")
+        } catch {
+            print("Failed to load user data: \(error.localizedDescription)")
+        }
     }
     
     func filterRecordings(by filter: String, searchText: String = "") -> [Recording] {
@@ -156,22 +179,16 @@ final class AppViewModel: ObservableObject {
     }
     
     func loadUserData() {
-        userPhoneNumber = UserDefaults.standard.string(forKey: "userPhoneNumber") ?? ""
-        userCountryCode = UserDefaults.standard.string(forKey: "userCountryCode") ?? ""
-        userCountryName = UserDefaults.standard.string(forKey: "userCountryName") ?? ""
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
+        
+        if let savedUserId = UserService.shared.getUserId() {
+            userId = savedUserId
+        }
     }
     
-    func saveUserPhoneNumber(_ phoneNumber: String) {
-        userPhoneNumber = phoneNumber
-        UserDefaults.standard.set(phoneNumber, forKey: "userPhoneNumber")
-    }
-    
-    func saveUserCountry(code: String, name: String) {
-        userCountryCode = code
-        userCountryName = name
-        UserDefaults.standard.set(code, forKey: "userCountryCode")
-        UserDefaults.standard.set(name, forKey: "userCountryName")
+    func saveUserId(_ id: String) {
+        userId = id
+        UserService.shared.saveUserId(id)
     }
     
     func completeOnboarding() {
@@ -181,8 +198,8 @@ final class AppViewModel: ObservableObject {
     
     @MainActor
     func fetchCallsFromServerAsync() async {
-        guard !userPhoneNumber.isEmpty else {
-            showToast("Phone number required")
+        guard !userId.isEmpty else {
+            showToast("User not logged in")
             return
         }
         
@@ -191,7 +208,7 @@ final class AppViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let recordings = try await ServerManager.shared.fetchCallsForUser(phoneNumber: userPhoneNumber)
+            let recordings = try await ServerManager.shared.fetchCallsForUser(userId: userId)
             
             if Task.isCancelled {
                 isLoading = false
@@ -200,9 +217,6 @@ final class AppViewModel: ObservableObject {
             
             self.recordings = recordings
             
-            for rec in recordings {
-                print(rec.date)
-            }
             showToast("\(recordings.count) recordings loaded")
         } catch {
             if error._code == NSURLErrorCancelled {
@@ -217,18 +231,15 @@ final class AppViewModel: ObservableObject {
     
     @MainActor
     func refreshRecordings() async {
-        guard !userPhoneNumber.isEmpty else { return }
+        guard !userId.isEmpty else { return }
         
-        // Don't show loading indicator for refresh
         do {
-            let recordings = try await ServerManager.shared.fetchCallsForUser(phoneNumber: userPhoneNumber)
-            
-            // Only update if not cancelled
+            let recordings = try await ServerManager.shared.fetchCallsForUser(userId: userId)
+        
             if !Task.isCancelled {
                 self.recordings = recordings
             }
         } catch {
-            // Silently ignore cancellation errors during refresh
             if error._code != NSURLErrorCancelled {
                 print("Refresh error: \(error.localizedDescription)")
             }
@@ -236,7 +247,6 @@ final class AppViewModel: ObservableObject {
     }
     
     private func parseDate(_ dateString: String) -> Date? {
-        // Try ISO8601 with fractional seconds first
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
@@ -245,14 +255,24 @@ final class AppViewModel: ObservableObject {
             return date
         }
         
-        // Try without fractional seconds
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if let date = formatter.date(from: dateString) {
             return date
         }
         
-        // Try simple format as fallback
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter.date(from: dateString)
+    }
+    
+    @MainActor
+    func fetchPhoneServiceNumber() async {
+        do {
+            let phoneService = try await ServerManager.shared.fetchPhoneServiceNumber()
+
+            self.recordingServiceNumber = phoneService.phoneNumber
+        } catch {
+            print("Failed to fetch phone service number: \(error.localizedDescription)")
+            self.recordingServiceNumber = "+19865294217"
+        }
     }
 }

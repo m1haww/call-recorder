@@ -1,5 +1,4 @@
 import SwiftUI
-import SuperwallKit
 
 struct ContentView: View {
     @ObservedObject private var appManager = AppViewModel.shared
@@ -63,10 +62,12 @@ struct ContentView: View {
                         Spacer()
                         Button(action: {
                             HapticManager.shared.impact(.medium)
-                            if appManager.isProUser {
+                            if appManager.recordingServiceNumber.isEmpty {
+                                appManager.showToast("Loading service number...")
+                            } else if appManager.isProUser {
                                 makePhoneCall(to: appManager.recordingServiceNumber)
                             } else {
-                                Superwall.shared.register(placement: "campaign_trigger")
+                                AppViewModel.shared.showPaywall = true
                             }
                         }) {
                             ZStack {
@@ -119,18 +120,6 @@ struct ContentView: View {
                     showToast = true
                     appManager.showAlert = false
                 }
-            }
-            .alert("Permission Required", isPresented: $appManager.showPermissionAlert) {
-                Button("Settings") {
-                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(settingsUrl)
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text(appManager.permissionType == .microphone ?
-                     "Microphone access is required to record calls. Please enable it in Settings." :
-                        "Phone access is required to make calls. Please enable it in Settings.")
             }
         }
     }

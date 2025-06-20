@@ -1,6 +1,5 @@
 import SwiftUI
 import UIKit
-import SuperwallKit
 
 struct TranscriptsView: View {
     @ObservedObject var viewModel = AppViewModel.shared
@@ -15,20 +14,18 @@ struct TranscriptsView: View {
         NavigationView {
             VStack(spacing: 0) {
                 if recordingsWithTranscripts.isEmpty {
-                    TranscriptEmptyState(userType: viewModel.isProUser ? .premium : .free) {
-                        Superwall.shared.register(placement: "campaign_trigger")
-                    }
+                    TranscriptEmptyState(isProUser: viewModel.isProUser)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(recordingsWithTranscripts) { recording in
-                                TranscriptCard(recording: recording, userType: viewModel.currentUser)
+                                TranscriptCard(recording: recording, isProUser: viewModel.isProUser)
                                     .onTapGesture {
                                         HapticManager.shared.impact(.light)
                                         if recording.transcript != nil && !recording.transcript!.isEmpty {
                                             navigationPath.append(NavigationDestination.transcriptDetail(recording))
-                                        } else if viewModel.currentUser == .free {
-                                            Superwall.shared.register(placement: "campaign_trigger")
+                                        } else if !viewModel.isProUser {
+                                            AppViewModel.shared.showPaywall = true
                                         }
                                     }
                                     .padding(.horizontal)
@@ -77,7 +74,7 @@ struct LanguagePicker: View {
 
 struct TranscriptCard: View {
     let recording: Recording
-    let userType: AppViewModel.UserType
+    let isProUser: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -105,7 +102,7 @@ struct TranscriptCard: View {
                     .foregroundColor(.secondaryText)
                     .lineLimit(2)
                     .padding(.top, 2)
-            } else if userType == .free {
+            } else if !isProUser {
                 HStack(spacing: 6) {
                     Image(systemName: "lock.fill")
                         .foregroundColor(.orange)

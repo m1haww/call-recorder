@@ -2,17 +2,14 @@ import SwiftUI
 import Firebase
 import FirebaseMessaging
 import RevenueCat
-import SuperwallKit
+import RevenueCatUI
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
         
-        Purchases.logLevel = .debug
+        Purchases.logLevel = .info
         Purchases.configure(withAPIKey: revenueCatApiKey)
-        
-        Superwall.configure(apiKey: superwallApiKey, purchaseController: purchaseController)
-        purchaseController.syncSubscriptionStatus()
         
         UNUserNotificationCenter.current().delegate = self
         
@@ -62,6 +59,17 @@ struct call_recorderApp: App {
                 }
                 .opacity(showSplash ? 0 : 1)
                 .animation(.easeIn(duration: 0.5), value: showSplash)
+                .fullScreenCover(isPresented: $viewModel.showPaywall) {
+                    PaywallView(displayCloseButton: false)
+                        .onPurchaseCompleted { _ in
+                            viewModel.isProUser = true
+                            viewModel.showPaywall = false
+                        }
+                        .onRestoreCompleted { _ in
+                            viewModel.isProUser = true
+                            viewModel.showPaywall = false
+                        }
+                }
                 
                 if showSplash {
                     SplashView()
@@ -71,6 +79,12 @@ struct call_recorderApp: App {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                                 withAnimation {
                                     showSplash = false
+                                }
+                                
+                                if viewModel.isOnboardingComplete && !viewModel.isProUser {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        viewModel.showPaywall = true
+                                    }
                                 }
                             }
                         }
@@ -93,16 +107,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         
         print(userInfo)
         
-//        guard let jobId = userInfo["jobId"] as? String,
-//              let stringType = userInfo["type"] as? String,
-//              let type = GenerationType(rawValue: stringType.lowercased()) else {
-//            print("❌ Invalid or missing data in notification payload.")
-//            return
-//        }
-//        
-//        try? await Task.sleep(nanoseconds: 500_000_000)
-//        
-//        GlobalState.shared.navigationPath.append(.imageFilter(jobId: jobId, type: type))
+        //        guard let jobId = userInfo["jobId"] as? String,
+        //              let stringType = userInfo["type"] as? String,
+        //              let type = GenerationType(rawValue: stringType.lowercased()) else {
+        //            print("❌ Invalid or missing data in notification payload.")
+        //            return
+        //        }
+        //
+        //        try? await Task.sleep(nanoseconds: 500_000_000)
+        //
+        //        GlobalState.shared.navigationPath.append(.imageFilter(jobId: jobId, type: type))
     }
 }
 
