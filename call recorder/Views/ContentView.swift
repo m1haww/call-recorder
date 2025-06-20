@@ -6,7 +6,6 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
     
     @State private var showToast = false
-    @State private var navigationPath = NavigationPath()
     
     private func makePhoneCall(to number: String) {
         let phoneNumber = "tel://\(number)"
@@ -18,10 +17,10 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: $appManager.navigationPath) {
             ZStack {
                 TabView(selection: $viewModel.selectedTab) {
-                    HomeView(navigationPath: $navigationPath)
+                    HomeView(navigationPath: $appManager.navigationPath)
                         .tabItem {
                             Label(localized("recordings"), systemImage: viewModel.selectedTab == 0 ? "house.fill" : "house")
                         }
@@ -33,7 +32,7 @@ struct ContentView: View {
                         }
                         .tag(1)
                     
-                    TranscriptsView(navigationPath: $navigationPath)
+                    TranscriptsView(navigationPath: $appManager.navigationPath)
                         .tabItem {
                             Label(localized("transcripts"), systemImage: viewModel.selectedTab == 2 ? "doc.text.fill" : "doc.text")
                         }
@@ -88,11 +87,11 @@ struct ContentView: View {
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
                     case .callDetails(let recording):
-                        CallDetailsView(recording: recording, navigationPath: $navigationPath)
+                        CallDetailsView(recording: recording, navigationPath: $appManager.navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar(.hidden, for: .tabBar)
                     case .transcripts:
-                        TranscriptsView(navigationPath: $navigationPath)
+                        TranscriptsView(navigationPath: $appManager.navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar(.hidden, for: .tabBar)
                     case .transcriptDetail(let recording):

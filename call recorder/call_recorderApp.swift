@@ -255,16 +255,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             // Handle OneLink navigation
         }
         
-        //        guard let jobId = userInfo["jobId"] as? String,
-        //              let stringType = userInfo["type"] as? String,
-        //              let type = GenerationType(rawValue: stringType.lowercased()) else {
-        //            print("❌ Invalid or missing data in notification payload.")
-        //            return
-        //        }
-        //
-        //        try? await Task.sleep(nanoseconds: 500_000_000)
-        //
-        //        GlobalState.shared.navigationPath.append(.imageFilter(jobId: jobId, type: type))
+        // Try to decode as Recording for navigation
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
+            let recording = try JSONDecoder().decode(Recording.self, from: jsonData)
+            
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            
+            AppViewModel.shared.navigateTo(.callDetails(recording))
+        } catch {
+            print("Can't decode userInfo: \(error)")
+        }
     }
 }
 

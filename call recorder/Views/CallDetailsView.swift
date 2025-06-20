@@ -186,7 +186,7 @@ struct CallDetailsView: View {
                     VStack(spacing: 12) {
                         if let transcript = recording.transcript, !transcript.isEmpty {
                             Button(action: {
-                                navigationPath.append(NavigationDestination.transcriptDetail(recording))
+                                appViewModel.navigateTo(.transcriptDetail(recording))
                             }) {
                                 InfoCard(
                                     icon: "doc.text.fill",

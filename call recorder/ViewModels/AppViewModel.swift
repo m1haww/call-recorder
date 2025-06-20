@@ -27,8 +27,24 @@ final class AppViewModel: ObservableObject {
     
     @Published var recordingServiceNumber: String = ""
     
+    @Published var navigationPath = NavigationPath()
+    
     enum UserType {
         case free, premium
+    }
+    
+    func navigateTo(_ destination: NavigationDestination) {
+        navigationPath.append(destination)
+    }
+    
+    func navigateBack() {
+        if !navigationPath.isEmpty {
+            navigationPath.removeLast()
+        }
+    }
+    
+    func navigateToRoot() {
+        navigationPath.removeLast(navigationPath.count)
     }
     
     enum PermissionType {

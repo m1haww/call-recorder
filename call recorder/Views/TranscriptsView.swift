@@ -23,7 +23,7 @@ struct TranscriptsView: View {
                                     .onTapGesture {
                                         HapticManager.shared.impact(.light)
                                         if recording.transcript != nil && !recording.transcript!.isEmpty {
-                                            navigationPath.append(NavigationDestination.transcriptDetail(recording))
+                                            viewModel.navigateTo(.transcriptDetail(recording))
                                         } else if !viewModel.isProUser {
                                             AppViewModel.shared.showPaywall = true
                                         }
