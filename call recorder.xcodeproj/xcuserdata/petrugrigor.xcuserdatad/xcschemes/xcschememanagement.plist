@@ -4,15 +4,18 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Copy of call recorder.xcscheme</key>
+		<key>call recorder.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>6</integer>
 		</dict>
-		<key>call recorder.xcscheme_^#shared#^_</key>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>5CAE45262DF1E4F200CDE306</key>
 		<dict>
-			<key>orderHint</key>
-			<integer>5</integer>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

@@ -13,7 +13,6 @@ struct HomeView: View {
     @State private var recordingToDelete: Recording?
     @State private var showShareSheet = false
     
-    
     var filters: [String] {
         [localizationManager.localizedString("all"),
          localizationManager.localizedString("today"),
@@ -46,7 +45,7 @@ struct HomeView: View {
                                     recording: recording,
                                     onPlay: {
                                         HapticManager.shared.impact(.light)
-                                        navigationPath.append(NavigationDestination.callDetails(recording))
+                                        viewModel.navigateTo(.callDetails(recording))
                                     },
                                     onShare: {
                                         HapticManager.shared.impact(.light)
@@ -62,7 +61,7 @@ struct HomeView: View {
                                 .padding(.horizontal)
                                 .onTapGesture {
                                     HapticManager.shared.impact(.light)
-                                    navigationPath.append(NavigationDestination.callDetails(recording))
+                                    viewModel.navigateTo(.callDetails(recording))
                                 }
                             }
                         }
