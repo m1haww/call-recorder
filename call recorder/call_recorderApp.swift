@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, AppsFlyerLibDelegate {
         }
         
         Purchases.shared.getCustomerInfo { (customerInfo, error) in
-            AppViewModel.shared.isProUser = customerInfo?.entitlements.all["Pro"]?.isActive == true
+            AppViewModel.shared.isProUser = customerInfo?.entitlements.all["Main"]?.isActive == true
         }
         
         return true
@@ -129,6 +129,7 @@ struct call_recorderApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @State private var showSplash = true
+    @State private var isDataLoaded = false
     
     var body: some Scene {
         WindowGroup {
@@ -213,7 +214,7 @@ struct call_recorderApp: App {
                             }
                         }
                         .onRestoreCompleted { customerInfo in
-                            viewModel.isProUser = customerInfo.entitlements.all["Pro"]?.isActive == true
+                            viewModel.isProUser = customerInfo.entitlements.all["Main"]?.isActive == true
                             viewModel.showPaywall = false
                         }
                         .onPurchaseStarted { _ in
@@ -225,19 +226,13 @@ struct call_recorderApp: App {
                 }
                 
                 if showSplash {
-                    SplashView()
+                    SplashView(isDataLoaded: $isDataLoaded)
                         .transition(.opacity)
                         .zIndex(1)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        .onChange(of: isDataLoaded) { loaded in
+                            if loaded {
                                 withAnimation {
                                     showSplash = false
-                                }
-                                
-                                if viewModel.isOnboardingComplete && !viewModel.isProUser {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        viewModel.showPaywall = true
-                                    }
                                 }
                             }
                         }

@@ -110,6 +110,9 @@ struct OnboardingView: View {
                                     }
                                     
                                     Button(action: {
+                                        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                        impactFeedback.impactOccurred()
+                                        
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                                             buttonScale = 0.95
                                         }
@@ -205,7 +208,11 @@ struct OnboardingView: View {
                         })
                         
                         VStack(spacing: 16) {
-                            Button(action: nextStep) {
+                            Button(action: {
+                                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                impactFeedback.impactOccurred()
+                                nextStep()
+                            }) {
                                 HStack {
                                     if isLoading {
                                         ProgressView()
@@ -238,7 +245,10 @@ struct OnboardingView: View {
         }
         .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0), value: currentStep)
         .alert("Error", isPresented: $showError) {
-            Button("OK") {}
+            Button("OK") {
+                let notificationFeedback = UINotificationFeedbackGenerator()
+                notificationFeedback.notificationOccurred(.warning)
+            }
         } message: {
             Text(errorMessage)
         }
@@ -254,6 +264,9 @@ struct OnboardingView: View {
         case 3:
             VStack(spacing: 20) {
                 Button(action: {
+                    let selectionFeedback = UISelectionFeedbackGenerator()
+                    selectionFeedback.selectionChanged()
+                    
                     withAnimation {
                         showCountryPicker = true
                     }
@@ -351,6 +364,9 @@ struct OnboardingView: View {
             if isValidPhoneNumber(phoneNumber) {
                 registerUser()
             } else {
+                let notificationFeedback = UINotificationFeedbackGenerator()
+                notificationFeedback.notificationOccurred(.error)
+                
                 showError = true
                 errorMessage = "Please enter a valid phone number for \(selectedCountry.name)"
             }
@@ -376,6 +392,9 @@ struct OnboardingView: View {
                     viewModel.showPaywall = true
                     
                 case .failure(let error):
+                    let notificationFeedback = UINotificationFeedbackGenerator()
+                    notificationFeedback.notificationOccurred(.error)
+                    
                     self.showError = true
                     self.errorMessage = "Registration failed: \(error.localizedDescription)"
                 }

@@ -76,9 +76,11 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.large)
             .preferredColorScheme(.dark)
             .background(Color.darkBackground)
-            .task {
-                if viewModel.recordings.isEmpty {
-                    await viewModel.fetchCallsFromServerAsync()
+            .onAppear {
+                Task {
+                    if viewModel.recordings.isEmpty {
+                        await viewModel.fetchCallsFromServerAsync()
+                    }
                 }
             }
         }

@@ -10,7 +10,7 @@ struct UserData {
 final class UserService {
     static let shared = UserService()
     
-    private let baseURL = "https://api-57018476417.europe-west1.run.app"
+    private let baseURL = "https://call-recorder-api-164860087792.us-central1.run.app"
     
     private init() {}
     

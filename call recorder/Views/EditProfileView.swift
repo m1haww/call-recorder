@@ -128,6 +128,7 @@ struct EditProfileView: View {
                             Text("Save Changes")
                                 .font(.headline)
                                 .fontWeight(.semibold)
+                                .foregroundStyle(.black)
                         }
                     }
                     .foregroundColor(.white)

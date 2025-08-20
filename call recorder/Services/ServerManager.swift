@@ -3,7 +3,7 @@ import Foundation
 final class ServerManager: ObservableObject {
     static let shared = ServerManager()
     
-    private let baseURL = "https://api-57018476417.europe-west1.run.app"
+    private let baseURL = "https://call-recorder-api-164860087792.us-central1.run.app"
     
     private init() {}
     
@@ -124,7 +124,7 @@ final class ServerManager: ObservableObject {
     }
     
     func fetchPhoneServiceNumber() async throws -> PhoneServiceInfo {
-        let url = URL(string: "https://firebasestorage.googleapis.com/v0/b/social-media-finder-4869f.appspot.com/o/service.json?alt=media&token=6f28dbff-3210-428f-a92d-ad4e9488f274")!
+        let url = URL(string: "\(baseURL)/api/service/phone")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 30.0

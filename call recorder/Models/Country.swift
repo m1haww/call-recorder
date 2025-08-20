@@ -58,6 +58,7 @@ extension Country {
         Country(name: "Brazil", code: "BR", dialCode: "+55", flag: "🇧🇷"),
         Country(name: "Argentina", code: "AR", dialCode: "+54", flag: "🇦🇷"),
         Country(name: "Mexico", code: "MX", dialCode: "+52", flag: "🇲🇽"),
+        Country(name: "Moldova", code: "MD", dialCode: "+373", flag: "🇲🇩"),
         Country(name: "Chile", code: "CL", dialCode: "+56", flag: "🇨🇱"),
         Country(name: "Colombia", code: "CO", dialCode: "+57", flag: "🇨🇴"),
         Country(name: "Peru", code: "PE", dialCode: "+51", flag: "🇵🇪"),

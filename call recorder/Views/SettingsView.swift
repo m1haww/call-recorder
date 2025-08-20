@@ -23,10 +23,6 @@ struct SettingsView: View {
                     
                     PrivacySection()
                     
-//                    SubscriptionSection(
-//                        selectedPlan: $selectedPlan
-//                    )
-                    
                     LegalSection()
                     
                     AccountSection(
@@ -269,59 +265,6 @@ struct PrivacySection: View {
         .padding(.horizontal)
     }
 }
-
-//struct SubscriptionSection: View {
-//    @Binding var selectedPlan: String
-//    @ObservedObject var viewModel = AppViewModel.shared
-//    
-//    var planText: String {
-//        switch viewModel.currentUser {
-//        case .free:
-//            return "Free Plan"
-//        case .premium:
-//            return "Premium Plan"
-//        }
-//    }
-//    
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 12) {
-//            SectionHeader(title: "Subscription", icon: "creditcard")
-//            
-//            HStack {
-//                VStack(alignment: .leading, spacing: 4) {
-//                    Text("Current Plan")
-//                        .font(.caption)
-//                        .foregroundColor(.secondaryText)
-//                    Text(planText)
-//                        .font(.headline)
-//                        .foregroundColor(.primaryText)
-//                }
-//                
-//                Spacer()
-//                
-//                if viewModel.currentUser == .free {
-//                    Button("Upgrade") {
-//                        //TODO: show the paywall
-//                    }
-//                    .font(.footnote)
-//                    .fontWeight(.medium)
-//                    .foregroundColor(.primaryGreen)
-//                } else {
-//                    Button("Manage") {
-//                        //TODO: show the paywall
-//                    }
-//                    .font(.footnote)
-//                    .fontWeight(.medium)
-//                    .foregroundColor(.primaryGreen)
-//                }
-//            }
-//            .padding()
-//            .background(Color.cardBackground)
-//            .cornerRadius(12)
-//        }
-//        .padding(.horizontal)
-//    }
-//}
 
 struct LegalSection: View {
     var body: some View {

@@ -3,6 +3,9 @@ import SwiftUI
 struct SplashView: View {
     @ObservedObject var viewModel = AppViewModel.shared
     @State private var fetchTask: Task<Void, Never>?
+    @Binding var isDataLoaded: Bool
+    @State private var minimumTimeElapsed = false
+    @State private var dataLoadingComplete = false
     
     var body: some View {
         ZStack {
@@ -27,6 +30,11 @@ struct SplashView: View {
         .onAppear {
             AnalyticsManager.shared.logEvent(name: "App Launched")
             
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                minimumTimeElapsed = true
+                checkIfReadyToNavigate()
+            }
+            
             fetchTask = Task {
                 await withTaskGroup(of: Void.self) { group in
                     group.addTask {
@@ -41,10 +49,21 @@ struct SplashView: View {
                         await viewModel.fetchPhoneServiceNumber()
                     }
                 }
+                
+                await MainActor.run {
+                    dataLoadingComplete = true
+                    checkIfReadyToNavigate()
+                }
             }
         }
         .onDisappear {
             fetchTask?.cancel()
+        }
+    }
+    
+    private func checkIfReadyToNavigate() {
+        if minimumTimeElapsed && dataLoadingComplete {
+            isDataLoaded = true
         }
     }
 }
