@@ -138,7 +138,7 @@ struct call_recorderApp: App {
                     if viewModel.isOnboardingComplete {
                         ContentView()
                     } else {
-                        OnboardingView()
+                        OnboardingEntryView()
                     }
                 }
                 .opacity(showSplash ? 0 : 1)
