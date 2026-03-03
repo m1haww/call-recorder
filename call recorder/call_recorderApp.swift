@@ -211,6 +211,15 @@ struct call_recorderApp: App {
                                         AFEventParamCurrency: currency,
                                         "is_trial": isInTrialPeriod
                                     ])
+
+                                    // Firebase: pentru goal-ul experimentului A/B (onboarding → subscription)
+                                    AnalyticsManager.shared.logEvent(name: "subscription_start", params: [
+                                        "product_id": productId,
+                                        "currency": currency,
+                                        "value": revenue,
+                                        "price": price,
+                                        "is_trial": isInTrialPeriod
+                                    ])
                                 }
                             }
                         }
