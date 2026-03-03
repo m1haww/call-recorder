@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C6CBA152F57353E0076ACF4 /* config.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 5C6CBA142F57353E0076ACF4 /* config.storekit */; };
 		813DEDAF2DFEE84800DD153F /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDAE2DFEE84800DD153F /* RevenueCat */; };
 		813DEDB12DFEE84800DD153F /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB02DFEE84800DD153F /* RevenueCatUI */; };
 		813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		5C6BDBB35CD0D516888B8345 /* Pods-call recorder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-call recorder.debug.xcconfig"; path = "Target Support Files/Pods-call recorder/Pods-call recorder.debug.xcconfig"; sourceTree = "<group>"; };
+		5C6CBA142F57353E0076ACF4 /* config.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = config.storekit; sourceTree = "<group>"; };
 		5CAE45272DF1E4F200CDE306 /* call recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "call recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81BB258A2E560E400025DBC6 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_call_recorder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,6 +59,7 @@
 		5CAE451E2DF1E4F200CDE306 = {
 			isa = PBXGroup;
 			children = (
+				5C6CBA142F57353E0076ACF4 /* config.storekit */,
 				5CAE45292DF1E4F200CDE306 /* call recorder */,
 				812DC42E2DF5A9E500BD82A1 /* Frameworks */,
 				5CAE45282DF1E4F200CDE306 /* Products */,
@@ -167,6 +170,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C6CBA152F57353E0076ACF4 /* config.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
