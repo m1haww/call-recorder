@@ -12,6 +12,7 @@
 		813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */; };
 		813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB52DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDB92DFEE8B800DD153F /* FirebaseMessaging */; };
+		813DEDBB2DFEE8B800DD153F /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 813DEDBC2DFEE8B800DD153F /* FirebaseRemoteConfig */; };
 		81BB258B2E560E400025DBC6 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BB258A2E560E400025DBC6 /* StoreKit.framework */; };
 		81E68C302E0B0F500073A284 /* AppsFlyerLib-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 81E68C2F2E0B0F500073A284 /* AppsFlyerLib-Static */; };
 		E1531074C91D6DC467771821 /* Pods_call_recorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2941999BCB85361B8EE93AF /* Pods_call_recorder.framework */; };
@@ -41,6 +42,7 @@
 				813DEDAF2DFEE84800DD153F /* RevenueCat in Frameworks */,
 				813DEDB62DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				813DEDBA2DFEE8B800DD153F /* FirebaseMessaging in Frameworks */,
+				813DEDBB2DFEE8B800DD153F /* FirebaseRemoteConfig in Frameworks */,
 				81BB258B2E560E400025DBC6 /* StoreKit.framework in Frameworks */,
 				813DEDB42DFEE8B800DD153F /* FirebaseAnalytics in Frameworks */,
 				81E68C302E0B0F500073A284 /* AppsFlyerLib-Static in Frameworks */,
@@ -114,6 +116,7 @@
 				813DEDB32DFEE8B800DD153F /* FirebaseAnalytics */,
 				813DEDB52DFEE8B800DD153F /* FirebaseAnalyticsWithoutAdIdSupport */,
 				813DEDB92DFEE8B800DD153F /* FirebaseMessaging */,
+				813DEDBC2DFEE8B800DD153F /* FirebaseRemoteConfig */,
 				81E68C2F2E0B0F500073A284 /* AppsFlyerLib-Static */,
 			);
 			productName = "call recorder";
@@ -481,6 +484,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 813DEDB22DFEE8B800DD153F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		813DEDBC2DFEE8B800DD153F /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 813DEDB22DFEE8B800DD153F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 		81E68C2F2E0B0F500073A284 /* AppsFlyerLib-Static */ = {
 			isa = XCSwiftPackageProductDependency;

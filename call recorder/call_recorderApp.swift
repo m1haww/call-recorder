@@ -10,7 +10,8 @@ import AppsFlyerLib
 final class AppDelegate: NSObject, UIApplicationDelegate, AppsFlyerLibDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
-        
+        OnboardingRemoteConfigManager.fetchAndActivate()
+
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: revenueCatApiKey)
         
