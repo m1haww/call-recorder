@@ -4,7 +4,7 @@ struct EditProfileView: View {
     let userName: String
     let phoneNumber: String
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel = AppViewModel.shared
+    @StateObject var viewModel = AppViewModel.shared
     
     @State private var editedName: String = ""
     @State private var editedPhoneNumber: String = ""
@@ -205,6 +205,7 @@ struct EditProfileView: View {
         isLoading = true
         
         UserDefaults.standard.set(editedName, forKey: "userName")
+        viewModel.userName = editedName
         
         if phoneChanged {
             Task {
@@ -219,7 +220,7 @@ struct EditProfileView: View {
     @MainActor
     private func updatePhoneNumber(_ fullPhoneNumber: String) async {
         do {
-            let success = try await UserService.shared.updateUserPhoneNumber(newPhoneNumber: fullPhoneNumber, countryCode: selectedCountry.code)
+            let success = try await UserService.shared.updateUserPhoneNumber(userId: viewModel.userId,newPhoneNumber: fullPhoneNumber, countryCode: selectedCountry.code)
             
             if success {
                 viewModel.userPhoneNumber = fullPhoneNumber

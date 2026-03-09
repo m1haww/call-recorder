@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SplashView: View {
-    @ObservedObject var viewModel = AppViewModel.shared
+    @StateObject var viewModel = AppViewModel.shared
     @State private var fetchTask: Task<Void, Never>?
     @Binding var isDataLoaded: Bool
     @State private var minimumTimeElapsed = false
@@ -14,8 +14,8 @@ struct SplashView: View {
             Image("icon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 140, height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 17))
+                .frame(width: 134, height: 134)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
             
             VStack {
                 Spacer()

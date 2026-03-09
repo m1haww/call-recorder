@@ -1,12 +1,31 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject private var appManager = AppViewModel.shared
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var appManager = AppViewModel.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @StateObject private var viewModel = ContentViewModel()
+    @StateObject private var subscriptionService = SubscriptionService.shared
     
     @State private var showToast = false
     
+    private func navigationTitleForTab(_ tabIndex: Int) -> String {
+        switch tabIndex {
+        case 0: return localizationManager.localizedString("recordings")
+        case 1: return localizationManager.localizedString("record_call")
+        case 2: return localizationManager.localizedString("transcripts")
+        case 3: return localizationManager.localizedString("settings")
+        default: return localizationManager.localizedString("recordings")
+        }
+    }
+
+    private func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(Color.darkBackground)
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     private func makePhoneCall(to number: String) {
         let phoneNumber = "tel://\(number)"
         if let url = URL(string: phoneNumber), UIApplication.shared.canOpenURL(url) {
@@ -47,12 +66,7 @@ struct ContentView: View {
                 .tint(.primaryGreen)
                 .preferredColorScheme(.dark)
                 .onAppear {
-                    let appearance = UITabBarAppearance()
-                    appearance.configureWithOpaqueBackground()
-                    appearance.backgroundColor = UIColor(Color.darkBackground)
-                    
-                    UITabBar.appearance().standardAppearance = appearance
-                    UITabBar.appearance().scrollEdgeAppearance = appearance
+                    configureTabBarAppearance()
                 }
                 
                 VStack {
@@ -63,10 +77,10 @@ struct ContentView: View {
                             HapticManager.shared.impact(.medium)
                             if appManager.recordingServiceNumber.isEmpty {
                                 appManager.showToast("Loading service number...")
-                            } else if appManager.isProUser {
+                            } else if subscriptionService.isProUser {
                                 makePhoneCall(to: appManager.recordingServiceNumber)
                             } else {
-                                AppViewModel.shared.showPaywall = true
+                                subscriptionService.showPaywall = true
                             }
                         }) {
                             ZStack {
@@ -113,6 +127,10 @@ struct ContentView: View {
                     }
                 }
             }
+            .navigationTitle(navigationTitleForTab(viewModel.selectedTab))
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Color.darkBackground, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toast(message: appManager.alertMessage, isShowing: $showToast)
             .onChange(of: appManager.showAlert) { newValue in
                 if newValue {

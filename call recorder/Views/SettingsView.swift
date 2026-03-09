@@ -1,75 +1,64 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject private var viewModel = AppViewModel.shared
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var viewModel = AppViewModel.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "pushNotificationsEnabled")
     @State private var selectedPlan = "monthly"
     @State private var showSignOutAlert = false
     @State private var showDeleteAccountAlert = false
-    @State private var userEmail = ""
-    @State private var userName = ""
-    @State private var userPhoneNumber = ""
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    ProfileSection(userPhoneNumber: userPhoneNumber, userName: userName)
-                    
-                    NotificationsSection(notificationsEnabled: $notificationsEnabled)
-                    
-                    LanguageSection()
-                    
-                    PrivacySection()
-                    
-                    LegalSection()
-                    
-                    AccountSection(
-                        showSignOutAlert: $showSignOutAlert,
-                        showDeleteAccountAlert: $showDeleteAccountAlert
-                    )
-                }
-                .padding(.vertical)
+        ScrollView {
+            VStack(spacing: 20) {
+                ProfileSection(userPhoneNumber: viewModel.userPhoneNumber, userName: viewModel.userName)
+                
+                NotificationsSection(notificationsEnabled: $notificationsEnabled)
+                
+                LanguageSection()
+                
+                PrivacySection()
+                
+                LegalSection()
+                
+                AccountSection(
+                    showSignOutAlert: $showSignOutAlert,
+                    showDeleteAccountAlert: $showDeleteAccountAlert
+                )
             }
-            .navigationTitle(localized("settings"))
-            .navigationBarTitleDisplayMode(.large)
-            .preferredColorScheme(.dark)
-            .background(Color.darkBackground)
-            .onAppear {
-                loadUserData()
-            }
+            .padding(.vertical)
+            .padding(.bottom, 80)
         }
-        .alert("Delete Data", isPresented: $showDeleteAccountAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .preferredColorScheme(.dark)
+        .background(Color.darkBackground)
+        .onAppear {
+            viewModel.loadUserData()
+        }
+        .alert(localizationManager.localizedString("delete_data"), isPresented: $showDeleteAccountAlert) {
+            Button(localizationManager.localizedString("cancel"), role: .cancel) {}
+            Button(localizationManager.localizedString("delete"), role: .destructive) {
                 deleteUserData()
             }
         } message: {
-            Text("This action will delete all your recorded calls and data. Are you sure you want to continue?")
+            Text(localizationManager.localizedString("delete_data_message"))
         }
-    }
-    
-    private func loadUserData() {
-        userEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
-        userName = UserDefaults.standard.string(forKey: "userName") ?? "User"
-        userPhoneNumber = viewModel.userPhoneNumber
     }
     
     private func deleteUserData() {
         viewModel.recordings.removeAll()
-        viewModel.showToast("All data deleted successfully")
+        viewModel.showToast(localizationManager.localizedString("delete_data_success"))
     }
 }
 
 struct ProfileSection: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     let userPhoneNumber: String
     let userName: String
     @State private var showEditSheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Profile", icon: "person.circle")
+            SectionHeader(title: localizationManager.localizedString("profile"), icon: "person.circle")
             
             VStack(spacing: 0) {
                 HStack {
@@ -77,25 +66,25 @@ struct ProfileSection: View {
                         .fill(Color.primaryGreen.opacity(0.2))
                         .frame(width: 50, height: 50)
                         .overlay(
-                            Text(userName.prefix(1).uppercased())
+                            Text((userName.isEmpty ? localizationManager.localizedString("user") : userName).prefix(1).uppercased())
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primaryGreen)
                         )
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(userName.isEmpty ? "User" : userName)
+                        Text(userName.isEmpty ? localizationManager.localizedString("user") : userName)
                             .font(.headline)
                             .foregroundColor(.primaryText)
                         
-                        Text(userPhoneNumber.isEmpty ? "No phone number" : userPhoneNumber)
+                        Text(userPhoneNumber.isEmpty ? localizationManager.localizedString("no_phone_number") : userPhoneNumber)
                             .font(.subheadline)
                             .foregroundColor(.secondaryText)
                     }
                     
                     Spacer()
                     
-                    Button("Edit") {
+                    Button(localizationManager.localizedString("edit")) {
                         showEditSheet = true
                     }
                     .font(.subheadline)
@@ -114,14 +103,16 @@ struct ProfileSection: View {
 }
 
 struct NotificationsSection: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var notificationsEnabled: Bool
     @State private var isUpdating = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @StateObject private var viewModel = AppViewModel.shared
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Notifications", icon: "bell")
+            SectionHeader(title: localizationManager.localizedString("notifications"), icon: "bell")
             
             HStack {
                 Toggle(isOn: Binding(
@@ -133,7 +124,7 @@ struct NotificationsSection: View {
                     HStack {
                         Image(systemName: "bell.badge")
                             .foregroundColor(.primaryGreen)
-                        Text("Push Notifications")
+                        Text(localizationManager.localizedString("push_notifications"))
                             .font(.subheadline)
                             .foregroundColor(.primaryText)
                     }
@@ -152,8 +143,8 @@ struct NotificationsSection: View {
             .cornerRadius(12)
         }
         .padding(.horizontal)
-        .alert("Notification Error", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
+        .alert(localizationManager.localizedString("notification_error"), isPresented: $showError) {
+            Button(localizationManager.localizedString("ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
@@ -164,7 +155,7 @@ struct NotificationsSection: View {
         let previousValue = notificationsEnabled
         notificationsEnabled = enabled
         
-        UserService.shared.updateNotificationSettings(enabled: enabled) { result in
+        UserService.shared.updateNotificationSettings(userId: viewModel.userId, enabled: enabled) { result in
             isUpdating = false
             
             switch result {
@@ -180,12 +171,12 @@ struct NotificationsSection: View {
 }
 
 struct LanguageSection: View {
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @State private var showLanguagePicker = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: localized("language"), icon: "globe")
+            SectionHeader(title: localizationManager.localizedString("language"), icon: "globe")
             
             Button(action: {
                 showLanguagePicker = true
@@ -214,15 +205,17 @@ struct LanguageSection: View {
 }
 
 struct PrivacySection: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Privacy & Security", icon: "lock")
+            SectionHeader(title: localizationManager.localizedString("privacy_security"), icon: "lock")
             
             VStack(spacing: 0) {
                 SettingsRow(
                     icon: "lock.shield",
-                    title: "Data Encryption",
-                    subtitle: "End-to-end encrypted"
+                    title: localizationManager.localizedString("data_encryption"),
+                    subtitle: localizationManager.localizedString("end_to_end_encrypted")
                 )
                 
                 Divider()
@@ -236,7 +229,7 @@ struct PrivacySection: View {
                 }) {
                     SettingsRow(
                         icon: "hand.raised",
-                        title: "Privacy Policy",
+                        title: localizationManager.localizedString("privacy_policy"),
                         showChevron: true
                     )
                 }
@@ -253,7 +246,7 @@ struct PrivacySection: View {
                 }) {
                     SettingsRow(
                         icon: "doc.text",
-                        title: "Data Usage",
+                        title: localizationManager.localizedString("data_usage"),
                         showChevron: true
                     )
                 }
@@ -267,9 +260,11 @@ struct PrivacySection: View {
 }
 
 struct LegalSection: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Legal", icon: "doc.text.magnifyingglass")
+            SectionHeader(title: localizationManager.localizedString("legal"), icon: "doc.text.magnifyingglass")
             
             VStack(spacing: 0) {
                 Button(action: {
@@ -279,7 +274,7 @@ struct LegalSection: View {
                 }) {
                     SettingsRow(
                         icon: "doc.text",
-                        title: "Terms of Service",
+                        title: localizationManager.localizedString("terms_service"),
                         showChevron: true
                     )
                 }
@@ -296,7 +291,7 @@ struct LegalSection: View {
                 }) {
                     SettingsRow(
                         icon: "questionmark.circle",
-                        title: "Help & Support",
+                        title: localizationManager.localizedString("help_support"),
                         showChevron: true
                     )
                 }
@@ -310,6 +305,7 @@ struct LegalSection: View {
 }
 
 struct AccountSection: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var showSignOutAlert: Bool
     @Binding var showDeleteAccountAlert: Bool
     
@@ -320,7 +316,7 @@ struct AccountSection: View {
             }) {
                 HStack {
                     Image(systemName: "trash")
-                    Text("Delete Data")
+                    Text(localizationManager.localizedString("delete_data"))
                         .fontWeight(.medium)
                 }
                 .frame(maxWidth: .infinity)
@@ -425,6 +421,8 @@ struct PlanButton: View {
 
 struct SubscriptionDetailsView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var subscriptionService = SubscriptionService.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     
     var body: some View {
         NavigationView {
@@ -434,12 +432,12 @@ struct SubscriptionDetailsView: View {
                         .font(.system(size: 60))
                         .foregroundColor(.primaryGreen)
                     
-                    Text("Unlock Premium Features")
+                    Text(localizationManager.localizedString("unlock_premium_features"))
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primaryText)
                     
-                    Text("Get unlimited recordings and transcripts")
+                    Text(localizationManager.localizedString("unlock_premium_subtitle"))
                         .font(.subheadline)
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
@@ -447,10 +445,10 @@ struct SubscriptionDetailsView: View {
                 .padding(.top, 40)
                 
                 VStack(spacing: 16) {
-                    FeatureRow(icon: "infinity", text: "Unlimited recordings")
-                    FeatureRow(icon: "text.bubble", text: "Full transcripts")
-                    FeatureRow(icon: "icloud", text: "Cloud backup")
-                    FeatureRow(icon: "bolt", text: "Priority support")
+                    FeatureRow(icon: "infinity", text: localizationManager.localizedString("unlimited_recordings"))
+                    FeatureRow(icon: "text.bubble", text: localizationManager.localizedString("full_transcripts"))
+                    FeatureRow(icon: "icloud", text: localizationManager.localizedString("cloud_backup"))
+                    FeatureRow(icon: "bolt", text: localizationManager.localizedString("priority_support"))
                 }
                 .padding(.horizontal, 40)
                 
@@ -458,9 +456,9 @@ struct SubscriptionDetailsView: View {
                 
                 VStack(spacing: 12) {
                     Button(action: {
-                        AppViewModel.shared.showPaywall = true
+                        subscriptionService.showPaywall = true
                     }) {
-                        Text("Try 3 Days Free")
+                        Text(localizationManager.localizedString("try_3_days_free"))
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -469,7 +467,7 @@ struct SubscriptionDetailsView: View {
                             .cornerRadius(12)
                     }
                     
-                    Text("Then \(priceForPlan("weekly"))")
+                    Text(localizationManager.localizedString("subscription_then").replacingOccurrences(of: "%@", with: priceForPlan("weekly")))
                         .font(.caption)
                         .foregroundColor(.secondaryText)
                 }
@@ -477,12 +475,12 @@ struct SubscriptionDetailsView: View {
                 .padding(.bottom, 40)
             }
             .background(Color.cardBackground)
-            .navigationTitle("Premium")
+            .navigationTitle(localizationManager.localizedString("premium"))
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(localizationManager.localizedString("done")) {
                         dismiss()
                     }
                     .foregroundColor(.primaryGreen)
@@ -521,7 +519,7 @@ struct FeatureRow: View {
 }
 
 struct LanguagePickerView: View {
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -566,16 +564,19 @@ struct LanguagePickerView: View {
                 Spacer()
             }
             .background(Color.darkBackground)
-            .navigationTitle(localized("settings"))
+            .navigationTitle(localizationManager.localizedString("language"))
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(localizationManager.localizedString("done")) {
                         dismiss()
                     }
                     .foregroundColor(.primaryGreen)
                 }
+            }
+            .onAppear {
+                print("\(AppViewModel.shared.userId)")
             }
         }
     }

@@ -72,7 +72,6 @@ struct AvatarImagePicker: View {
                         )
                 }
                 
-                // Edit overlay
                 Circle()
                     .fill(Color.black.opacity(0.5))
                     .frame(width: 50, height: 50)

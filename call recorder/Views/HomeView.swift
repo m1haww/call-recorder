@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @ObservedObject var viewModel = AppViewModel.shared
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject var viewModel = AppViewModel.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var navigationPath: NavigationPath
     
     @State private var searchText = ""
@@ -25,73 +25,62 @@ struct HomeView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                SearchBar(text: $searchText)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                
-                FilterBar(selectedFilter: $selectedFilter, filters: filters)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                
-                if filteredRecordings.isEmpty {
-                    EmptyStateView()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(filteredRecordings) { recording in
-                                RecordingCard(
-                                    recording: recording,
-                                    onPlay: {
-                                        HapticManager.shared.impact(.light)
-                                        viewModel.navigateTo(.callDetails(recording))
-                                    },
-                                    onShare: {
-                                        HapticManager.shared.impact(.light)
-                                        viewModel.recordingToShare = recording
-                                        showShareSheet = true
-                                    },
-                                    onDelete: {
-                                        HapticManager.shared.impact(.medium)
-                                        recordingToDelete = recording
-                                        showDeleteAlert = true
-                                    }
-                                )
-                                .padding(.horizontal)
-                                .onTapGesture {
+        VStack(spacing: 0) {
+            SearchBar(text: $searchText)
+                .padding(.horizontal)
+                .padding(.top, 8)
+            
+            FilterBar(selectedFilter: $selectedFilter, filters: filters)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+            
+            if filteredRecordings.isEmpty {
+                EmptyStateView()
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(filteredRecordings) { recording in
+                            RecordingCard(
+                                recording: recording,
+                                onPlay: {
                                     HapticManager.shared.impact(.light)
                                     viewModel.navigateTo(.callDetails(recording))
+                                },
+                                onShare: {
+                                    HapticManager.shared.impact(.light)
+                                    viewModel.recordingToShare = recording
+                                    showShareSheet = true
+                                },
+                                onDelete: {
+                                    HapticManager.shared.impact(.medium)
+                                    recordingToDelete = recording
+                                    showDeleteAlert = true
                                 }
+                            )
+                            .padding(.horizontal)
+                            .onTapGesture {
+                                HapticManager.shared.impact(.light)
+                                viewModel.navigateTo(.callDetails(recording))
                             }
                         }
-                        .padding(.top, 8)
                     }
-                    .refreshable {
-                        await viewModel.refreshRecordings()
-                    }
+                    .padding(.top, 8)
                 }
-            }
-            .navigationTitle(localized("recordings"))
-            .navigationBarTitleDisplayMode(.large)
-            .preferredColorScheme(.dark)
-            .background(Color.darkBackground)
-            .onAppear {
-                Task {
-                    if viewModel.recordings.isEmpty {
-                        await viewModel.fetchCallsFromServerAsync()
-                    }
+                .refreshable {
+                    await viewModel.refreshRecordings()
                 }
             }
         }
+        .preferredColorScheme(.dark)
+        .background(Color.darkBackground)
         .sheet(isPresented: $showShareSheet) {
             if let recording = viewModel.recordingToShare {
                 ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.youtube.com")!])
             }
         }
-        .alert("Delete Recording", isPresented: $showDeleteAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
+            Button(localizationManager.localizedString("cancel"), role: .cancel) {}
+            Button(localizationManager.localizedString("delete"), role: .destructive) {
                 if let recording = recordingToDelete,
                    let index = viewModel.recordings.firstIndex(where: { $0.id == recording.id }) {
                     HapticManager.shared.notification(.warning)
@@ -102,13 +91,14 @@ struct HomeView: View {
                 }
             }
         } message: {
-            Text("Are you sure you want to delete this recording? This action cannot be undone.")
+            Text(localizationManager.localizedString("delete_recording_message"))
         }
     }
 }
 
 
 struct SearchBar: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var text: String
     
     var body: some View {
@@ -116,7 +106,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondaryText)
             
-            TextField(localized("search_recordings"), text: $text)
+            TextField(localizationManager.localizedString("search_recordings"), text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .foregroundColor(.primaryText)
         }
@@ -176,6 +166,7 @@ struct FilterButton: View {
 }
 
 struct RecordingCard: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     let recording: Recording
     var onPlay: () -> Void = {}
     var onShare: () -> Void = {}
@@ -211,13 +202,13 @@ struct RecordingCard: View {
             
             Menu {
                 Button(action: onPlay) {
-                    Label(localized("play"), systemImage: "play.fill")
+                    Label(localizationManager.localizedString("play"), systemImage: "play.fill")
                 }
                 Button(action: onShare) {
-                    Label(localized("share"), systemImage: "square.and.arrow.up")
+                    Label(localizationManager.localizedString("share"), systemImage: "square.and.arrow.up")
                 }
                 Button(role: .destructive, action: onDelete) {
-                    Label(localized("delete"), systemImage: "trash")
+                    Label(localizationManager.localizedString("delete"), systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")

@@ -1,7 +1,6 @@
 import SwiftUI
 import StoreKit
 
-// MARK: - Variant B step content (4 intro screens from reference + phone)
 private let variantBIntroSteps: [(title: String, subtitle: String)] = [
     ("Record calls hassle free", "Seamless call recording of all your incoming and outgoing phone calls"),
     ("Automatically record outgoing calls", "Make an outgoing call with 2 simple steps and we'll take care of the recording"),
@@ -9,21 +8,14 @@ private let variantBIntroSteps: [(title: String, subtitle: String)] = [
     ("Organize your recordings", "Create lists and have full control of your recorded calls and transcriptions")
 ]
 
-/// Onboarding variant B — premium design: phone mockups, soft glow, luxury feel to drive subscription intent.
 struct OnboardingVariantB: View {
-    @ObservedObject private var viewModel = AppViewModel.shared
+    @StateObject private var viewModel = AppViewModel.shared
+    @StateObject private var subscriptionService = SubscriptionService.shared
 
-    @State private var phoneNumber = ""
-    @State private var selectedCountry = Country.defaultCountry
-    @State private var showCountryPicker = false
     @State private var currentStep = 0
-    @State private var showError = false
-    @State private var errorMessage = ""
-    @State private var isLoading = false
-    @FocusState private var isTextFieldFocused: Bool
+    @Environment(\.requestReview) var requestReview
 
     private static let introCount = 4
-    private static let phoneStepIndex = 4
 
     var body: some View {
         ZStack {
@@ -54,25 +46,16 @@ struct OnboardingVariantB: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                if currentStep < OnboardingVariantB.phoneStepIndex {
-                    introContent
-                } else {
-                    phoneStepContent
-                }
+                introContent
 
                 Spacer(minLength: 24)
 
                 continueButton
+                    .padding(.bottom, 12)
+                
                 pageIndicators
-                    .padding(.bottom, 44)
+                    .padding(.bottom, 22)
             }
-        }
-        .onTapGesture { isTextFieldFocused = false }
-        .alert("Error", isPresented: $showError) {
-            Button("OK") { HapticManager.shared.notification(.warning) }
-        } message: { Text(errorMessage) }
-        .sheet(isPresented: $showCountryPicker) {
-            CountryPickerView(selectedCountry: $selectedCountry)
         }
         .preferredColorScheme(.dark)
     }
@@ -81,8 +64,8 @@ struct OnboardingVariantB: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 36) {
                 stepIllustration
-                    .frame(height: 300)
-                    .padding(.top, 20)
+                    .frame(height: 400)
+                    .padding(.top, 5)
                     .shadow(color: .black.opacity(0.35), radius: 24, x: 0, y: 12)
 
                 VStack(spacing: 14) {
@@ -133,49 +116,30 @@ struct OnboardingVariantB: View {
             HapticManager.shared.impact(.light)
             nextStep()
         }) {
-            Group {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                        .scaleEffect(0.8)
-                } else {
-                    Text("Continue")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                }
-            }
+            Text("Continue")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
             .background(
-                Group {
-                    if canProceed {
-                        LinearGradient(
-                            colors: [Color.primaryGreen, Color.accentGreen],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    } else {
-                        LinearGradient(
-                            colors: [Color.surfaceBackground, Color.surfaceBackground],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    }
-                }
+                LinearGradient(
+                    colors: [Color.primaryGreen, Color.accentGreen],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
             )
             .foregroundColor(.black)
             .cornerRadius(30)
-            .shadow(color: canProceed ? Color.primaryGreen.opacity(0.45) : Color.clear, radius: 16, x: 0, y: 6)
+            .shadow(color: Color.primaryGreen.opacity(0.45), radius: 16, x: 0, y: 6)
             .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
-        .disabled(!canProceed || isLoading)
         .padding(.horizontal, 24)
     }
 
     private var pageIndicators: some View {
         HStack(spacing: 10) {
-            ForEach(0..<(OnboardingVariantB.introCount + 1), id: \.self) { index in
-                if index == min(currentStep, OnboardingVariantB.introCount) {
+            ForEach(0..<OnboardingVariantB.introCount, id: \.self) { index in
+                if index == currentStep {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color.primaryGreen)
                         .frame(width: 24, height: 6)
@@ -190,150 +154,24 @@ struct OnboardingVariantB: View {
         .padding(.top, 20)
     }
 
-    private var phoneStepContent: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 28) {
-                ZStack {
-                    Circle()
-                        .fill(Color.primaryGreen.opacity(0.2))
-                        .frame(width: 88, height: 88)
-                        .blur(radius: 20)
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 56))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color.primaryGreen, Color.accentGreen],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
-
-                VStack(spacing: 10) {
-                    Text("You're almost there")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.primaryGreen)
-                    Text("Enter Your Phone Number")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                        .multilineTextAlignment(.center)
-                    Text("Select your country and enter your phone number to get started")
-                        .font(.system(size: 15))
-                        .foregroundColor(.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                }
-
-                VStack(spacing: 18) {
-                    Button(action: {
-                        HapticManager.shared.selection()
-                        showCountryPicker = true
-                    }) {
-                        HStack {
-                            Text("\(selectedCountry.flag) \(selectedCountry.name)")
-                                .font(.system(size: 17, weight: .medium))
-                                .foregroundColor(.primaryText)
-                            Spacer()
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.secondaryText)
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 16)
-                        .background(Color.cardBackground)
-                        .cornerRadius(14)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.surfaceBackground, lineWidth: 1)
-                        )
-                    }
-
-                    HStack(spacing: 0) {
-                        Text(selectedCountry.dialCode)
-                            .font(.system(size: 17))
-                            .foregroundColor(.secondaryText)
-                            .padding(.leading, 18)
-                        TextField("Phone number", text: $phoneNumber)
-                            .font(.system(size: 17))
-                            .foregroundColor(.primaryText)
-                            .keyboardType(.phonePad)
-                            .textContentType(.telephoneNumber)
-                            .padding()
-                            .focused($isTextFieldFocused)
-                    }
-                    .background(Color.cardBackground)
-                    .cornerRadius(14)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(showError ? Color.red : Color.surfaceBackground, lineWidth: 1)
-                    )
-
-                    Text("Enter your phone number without the country code")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondaryText.opacity(0.9))
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
-            }
-            .padding(.top, 36)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var canProceed: Bool {
-        if currentStep < OnboardingVariantB.phoneStepIndex { return true }
-        return isValidPhoneNumber(phoneNumber)
-    }
-
     private func nextStep() {
-        isTextFieldFocused = false
-        if currentStep < OnboardingVariantB.phoneStepIndex {
+        if currentStep < OnboardingVariantB.introCount - 1 {
             withAnimation(.easeInOut(duration: 0.25)) { currentStep += 1 }
         } else {
-            if isValidPhoneNumber(phoneNumber) {
-                registerUser()
-            } else {
-                HapticManager.shared.notification(.error)
-                showError = true
-                errorMessage = "Please enter a valid phone number for \(selectedCountry.name)"
-            }
-        }
-    }
-
-    private func registerUser() {
-        let fullPhoneNumber = selectedCountry.dialCode + phoneNumber
-        isLoading = true
-        UserService.shared.registerUser(phoneNumber: fullPhoneNumber, countryCode: selectedCountry.code) { result in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                switch result {
-                case .success(let userId):
-                    self.viewModel.saveUserId(userId)
-                    completeOnboarding()
-                    viewModel.showPaywall = true
-                case .failure(let error):
-                    HapticManager.shared.notification(.error)
-                    self.showError = true
-                    self.errorMessage = "Registration failed: \(error.localizedDescription)"
-                }
-            }
+            completeOnboarding()
         }
     }
 
     private func completeOnboarding() {
-        viewModel.completeOnboarding()
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: windowScene)
+        subscriptionService.showPaywall = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            requestReview()
+            viewModel.completeOnboarding()
         }
-    }
-
-    private func isValidPhoneNumber(_ number: String) -> Bool {
-        let cleaned = number.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        return cleaned.count >= 7 && cleaned.count <= 15 && !cleaned.isEmpty
     }
 }
 
-// MARK: - Phone frame (shared) — premium depth and border
 private struct VariantB_PhoneFrame<Content: View>: View {
     let content: Content
     var size: CGFloat = 140
@@ -382,48 +220,47 @@ private struct VariantB_PhoneFrame<Content: View>: View {
     }
 }
 
-// MARK: - Screen 0: Record calls hassle free — two phones, call logs + action buttons
 private struct VariantB_RecordCallsIllustration: View {
     var body: some View {
         ZStack {
-            VariantB_PhoneFrame(size: 200) {
-                VStack(alignment: .leading, spacing: 10) {
+            VariantB_PhoneFrame(size: 240) {
+                VStack(alignment: .leading, spacing: 12) {
                     ForEach(0..<3, id: \.self) { _ in
-                        HStack(spacing: 8) {
+                        HStack(spacing: 10) {
                             Image(systemName: "phone.fill")
-                                .font(.system(size: 12))
+                                .font(.system(size: 14))
                                 .foregroundColor(.primaryText)
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 5) {
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(Color.surfaceBackground)
-                                    .frame(height: 8)
+                                    .frame(height: 9)
                                     .frame(maxWidth: .infinity)
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(Color.primaryGreen)
-                                    .frame(width: 44, height: 4)
+                                    .frame(width: 52, height: 5)
                                     .shadow(color: Color.primaryGreen.opacity(0.4), radius: 2)
                             }
                             Spacer()
                             Text("0")
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundColor(.secondaryText)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
                                 .background(Capsule().fill(Color.surfaceBackground))
                         }
                     }
                     Spacer(minLength: 0)
                 }
             }
-            .offset(x: -28, y: -20)
-            .scaleEffect(0.9)
+            .offset(x: -34, y: -24)
+            .scaleEffect(1.0)
 
-            VariantB_PhoneFrame(size: 200) {
-                HStack(spacing: 28) {
+            VariantB_PhoneFrame(size: 240) {
+                HStack(spacing: 32) {
                     ZStack {
                         Circle()
                             .fill(Color.primaryGreen.opacity(0.35))
-                            .frame(width: 56, height: 56)
+                            .frame(width: 64, height: 64)
                             .blur(radius: 8)
                         Circle()
                             .fill(
@@ -433,10 +270,10 @@ private struct VariantB_RecordCallsIllustration: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 48, height: 48)
+                            .frame(width: 56, height: 56)
                             .overlay(
                                 Image(systemName: "phone.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(.black)
                             )
                             .shadow(color: Color.primaryGreen.opacity(0.5), radius: 6)
@@ -444,7 +281,7 @@ private struct VariantB_RecordCallsIllustration: View {
                     ZStack {
                         Circle()
                             .fill(Color.primaryGreen.opacity(0.3))
-                            .frame(width: 56, height: 56)
+                            .frame(width: 64, height: 64)
                             .blur(radius: 8)
                         Circle()
                             .fill(
@@ -454,10 +291,10 @@ private struct VariantB_RecordCallsIllustration: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 48, height: 48)
+                            .frame(width: 56, height: 56)
                             .overlay(
                                 Image(systemName: "mic.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(.black)
                             )
                             .shadow(color: Color.primaryGreen.opacity(0.4), radius: 6)
@@ -465,55 +302,54 @@ private struct VariantB_RecordCallsIllustration: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .offset(x: 32, y: 16)
+            .offset(x: 38, y: 20)
         }
         .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - Screen 1: Automatically record outgoing calls — dial pad + recording UI
 private struct VariantB_OutgoingCallsIllustration: View {
     var body: some View {
         ZStack {
-            VariantB_PhoneFrame(size: 200) {
-                VStack(spacing: 6) {
+            VariantB_PhoneFrame(size: 240) {
+                VStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { row in
-                        HStack(spacing: 6) {
+                        HStack(spacing: 8) {
                             ForEach(0..<3, id: \.self) { col in
                                 Circle()
                                     .fill(Color.surfaceBackground)
-                                    .frame(width: 22, height: 22)
+                                    .frame(width: 26, height: 26)
                             }
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .offset(x: -32, y: -16)
-            .scaleEffect(0.88)
+            .offset(x: -38, y: -20)
+            .scaleEffect(1.0)
 
-            VariantB_PhoneFrame(size: 200) {
-                VStack(spacing: 12) {
+            VariantB_PhoneFrame(size: 240) {
+                VStack(spacing: 14) {
                     Text("00:23")
-                        .font(.system(size: 20, weight: .medium, design: .monospaced))
+                        .font(.system(size: 24, weight: .medium, design: .monospaced))
                         .foregroundColor(.primaryText)
-                    HStack(spacing: 3) {
+                    HStack(spacing: 4) {
                         ForEach(0..<20, id: \.self) { i in
                             RoundedRectangle(cornerRadius: 1.5)
                                 .fill(Color.primaryGreen)
-                                .frame(width: 3, height: CGFloat([8, 14, 10, 18, 12, 16, 8, 20, 14, 10, 16, 12, 18, 8, 14, 10, 16, 12, 18, 14][i]))
+                                .frame(width: 4, height: CGFloat([8, 14, 10, 18, 12, 16, 8, 20, 14, 10, 16, 12, 18, 8, 14, 10, 16, 12, 18, 14][i]) * 1.2)
                         }
                     }
-                    .frame(height: 24)
+                    .frame(height: 28)
                     .shadow(color: Color.primaryGreen.opacity(0.4), radius: 4)
                     ZStack {
                         Circle()
                             .fill(Color.primaryGreen.opacity(0.25))
-                            .frame(width: 56, height: 56)
+                            .frame(width: 64, height: 64)
                             .blur(radius: 6)
                         Circle()
                             .stroke(Color.primaryText.opacity(0.4), lineWidth: 2.5)
-                            .frame(width: 50, height: 50)
+                            .frame(width: 58, height: 58)
                         Circle()
                             .fill(
                                 LinearGradient(
@@ -522,19 +358,19 @@ private struct VariantB_OutgoingCallsIllustration: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 42, height: 42)
+                            .frame(width: 50, height: 50)
                             .shadow(color: Color.primaryGreen.opacity(0.5), radius: 6)
                         Image(systemName: "stop.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 18))
                             .foregroundColor(.black)
                     }
                     HStack {
                         Circle()
                             .fill(Color.surfaceBackground)
-                            .frame(width: 28, height: 28)
+                            .frame(width: 34, height: 34)
                             .overlay(
                                 Image(systemName: "person.fill")
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .foregroundColor(.secondaryText)
                             )
                         Spacer()
@@ -542,31 +378,30 @@ private struct VariantB_OutgoingCallsIllustration: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .offset(x: 28, y: 12)
+            .offset(x: 34, y: 16)
         }
         .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - Screen 2: Transcribe — chat bubbles
 private struct VariantB_TranscribeIllustration: View {
     var body: some View {
-        VariantB_PhoneFrame(size: 220) {
-            VStack(alignment: .leading, spacing: 10) {
+        VariantB_PhoneFrame(size: 268) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Spacer()
-                    bubble(lines: [60, 40], isUser: false)
+                    bubble(lines: [72, 48], isUser: false)
                 }
                 HStack {
-                    bubble(lines: [80, 50, 30], isUser: true)
+                    bubble(lines: [96, 60, 36], isUser: true)
                     Spacer()
                 }
                 HStack {
                     Spacer()
-                    bubble(lines: [70, 45], isUser: false)
+                    bubble(lines: [84, 54], isUser: false)
                 }
                 HStack {
-                    bubble(lines: [50, 90], isUser: true)
+                    bubble(lines: [60, 108], isUser: true)
                     Spacer()
                 }
                 Spacer(minLength: 0)
@@ -576,15 +411,15 @@ private struct VariantB_TranscribeIllustration: View {
     }
 
     private func bubble(lines: [CGFloat], isUser: Bool) -> some View {
-        VStack(alignment: isUser ? .leading : .trailing, spacing: 4) {
+        VStack(alignment: isUser ? .leading : .trailing, spacing: 5) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, w in
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: 2.5)
                     .fill(isUser ? Color.black.opacity(0.75) : Color.secondaryText)
-                    .frame(width: w, height: 5)
+                    .frame(width: w, height: 6)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(isUser ? Color.primaryGreen : Color.cardBackground)
@@ -597,11 +432,10 @@ private struct VariantB_TranscribeIllustration: View {
     }
 }
 
-// MARK: - Screen 3: Organize — lists with green borders
 private struct VariantB_OrganizeIllustration: View {
     var body: some View {
-        VariantB_PhoneFrame(size: 220) {
-            VStack(spacing: 12) {
+        VariantB_PhoneFrame(size: 268) {
+            VStack(spacing: 14) {
                 listSection(count: 3)
                 listSection(count: 2)
             }
@@ -611,33 +445,33 @@ private struct VariantB_OrganizeIllustration: View {
     }
 
     private func listSection(count: Int) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             ForEach(0..<count, id: \.self) { _ in
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     Image(systemName: "phone.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: 12))
                         .foregroundColor(.primaryText)
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 4) {
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.surfaceBackground)
-                            .frame(height: 6)
+                            .frame(height: 7)
                             .frame(maxWidth: .infinity)
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.primaryGreen.opacity(0.8))
-                            .frame(width: 32, height: 3)
+                            .frame(width: 40, height: 4)
                     }
                     Spacer()
                     Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 14))
+                        .font(.system(size: 16))
                         .foregroundColor(.primaryText.opacity(0.8))
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
                 .background(Color.surfaceBackground.opacity(0.6))
-                .cornerRadius(8)
+                .cornerRadius(10)
             }
         }
-        .padding(12)
+        .padding(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(

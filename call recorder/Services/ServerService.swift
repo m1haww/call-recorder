@@ -1,9 +1,9 @@
 import Foundation
 
-final class ServerManager: ObservableObject {
-    static let shared = ServerManager()
+final class ServerService: ObservableObject {
+    static let shared = ServerService()
     
-    private let baseURL = "https://call-recorder-api-164860087792.us-central1.run.app"
+    private let baseURL = "https://call-recorder-api-production-bc8d.up.railway.app"
     
     private init() {}
     
@@ -23,7 +23,8 @@ final class ServerManager: ObservableObject {
         let title = dictionary["title"] as? String
         let transcriptionStatus = dictionary["transcription_status"] as? String ?? ""
         let transcriptionText = dictionary["transcription_text"] as? String
-        
+        let transcriptionSegments = parseTranscriptionSegments(dictionary["transcription_segments"])
+
         return Recording(
             id: id,
             callDate: callDate,
@@ -35,8 +36,20 @@ final class ServerManager: ObservableObject {
             summary: summary,
             title: title,
             transcriptionStatus: transcriptionStatus,
-            transcriptionText: transcriptionText
+            transcriptionText: transcriptionText,
+            transcriptionSegments: transcriptionSegments
         )
+    }
+
+    private func parseTranscriptionSegments(_ value: Any?) -> [TranscriptionSegment]? {
+        guard let array = value as? [[String: Any]], !array.isEmpty else { return nil }
+        let segments: [TranscriptionSegment] = array.compactMap { dict in
+            guard let start = dict["start"] as? Double ?? (dict["start"] as? Int).map(Double.init),
+                  let end = dict["end"] as? Double ?? (dict["end"] as? Int).map(Double.init),
+                  let text = dict["text"] as? String else { return nil }
+            return TranscriptionSegment(start: start, end: end, text: text)
+        }
+        return segments.isEmpty ? nil : segments
     }
     
     func fetchCallsForUser(userId: String) async throws -> [Recording] {
@@ -124,7 +137,9 @@ final class ServerManager: ObservableObject {
     }
     
     func fetchPhoneServiceNumber() async throws -> PhoneServiceInfo {
-        let url = URL(string: "\(baseURL)/api/service/phone")!
+        let countryCode = Locale.current.region?.identifier ?? "US"
+        let url = URL(string: "\(baseURL)/api/service/phone/\(countryCode)")!
+        print("User country code: \(countryCode)")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 30.0
@@ -142,6 +157,7 @@ final class ServerManager: ObservableObject {
             
             let decoder = JSONDecoder()
             let phoneServiceInfo = try decoder.decode(PhoneServiceInfo.self, from: data)
+            print("Fetched phone number: \(phoneServiceInfo.phoneNumber)")
             return phoneServiceInfo
         } catch {
             print("Error fetching phone service number: \(error)")

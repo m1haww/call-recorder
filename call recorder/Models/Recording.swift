@@ -1,5 +1,13 @@
 import Foundation
 
+struct TranscriptionSegment: Codable, Identifiable {
+    let start: Double
+    let end: Double
+    let text: String
+
+    var id: String { "\(start)-\(end)" }
+}
+
 struct Recording: Identifiable, Codable {
     let id: String
     let callDate: String
@@ -12,7 +20,8 @@ struct Recording: Identifiable, Codable {
     let title: String?
     let transcriptionStatus: String
     let transcriptionText: String?
-    
+    let transcriptionSegments: [TranscriptionSegment]?
+
     init(id: String = UUID().uuidString,
          callDate: String,
          fromPhone: String,
@@ -23,7 +32,8 @@ struct Recording: Identifiable, Codable {
          summary: String? = nil,
          title: String? = nil,
          transcriptionStatus: String,
-         transcriptionText: String? = nil) {
+         transcriptionText: String? = nil,
+         transcriptionSegments: [TranscriptionSegment]? = nil) {
         self.id = id
         self.callDate = callDate
         self.fromPhone = fromPhone
@@ -35,6 +45,7 @@ struct Recording: Identifiable, Codable {
         self.title = title
         self.transcriptionStatus = transcriptionStatus
         self.transcriptionText = transcriptionText
+        self.transcriptionSegments = transcriptionSegments
     }
     
     var contactName: String {

@@ -10,34 +10,11 @@ struct UserData {
 final class UserService {
     static let shared = UserService()
     
-    private let baseURL = "https://call-recorder-api-164860087792.us-central1.run.app"
+    private let baseURL = "https://call-recorder-api-production-bc8d.up.railway.app"
     
     private init() {}
     
-    private let fcmTokenKey = "user_fcm_token"
-    private let userIdKey = "user_id"
-    
-    func saveFCMToken(_ token: String) {
-        UserDefaults.standard.set(token, forKey: fcmTokenKey)
-        UserDefaults.standard.synchronize()
-    }
-    
-    func getFCMToken() -> String {
-        return UserDefaults.standard.string(forKey: fcmTokenKey) ?? "No fcm token was provided"
-    }
-    
-    func saveUserId(_ userId: String) {
-        UserDefaults.standard.set(userId, forKey: userIdKey)
-        UserDefaults.standard.synchronize()
-    }
-    
-    func getUserId() -> String? {
-        return UserDefaults.standard.string(forKey: userIdKey)
-    }
-    
-    func registerUser(phoneNumber: String, countryCode: String) async throws -> String {
-        let fcmToken = getFCMToken()
-        
+    func registerUser(fcmToken: String?, phoneNumber: String, countryCode: String) async throws {
         guard let url = URL(string: "\(baseURL)/api/users/register") else {
             throw UserServiceError.invalidURL
         }
@@ -47,11 +24,15 @@ final class UserService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30.0
         
-        let requestBody: [String: Any] = [
+        var requestBody: [String: Any] = [
+            "id": AppViewModel.shared.userId,
             "countryCode": countryCode,
             "phoneNumber": phoneNumber,
-            "fcmToken": fcmToken
         ]
+        
+        if let token = fcmToken {
+            requestBody["fcmToken"] = token
+        }
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
@@ -80,41 +61,15 @@ final class UserService {
             throw UserServiceError.serverError(statusCode: httpResponse.statusCode)
         }
         
-        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let userId = json["userId"] as? String {
-            
-            saveUserId(userId)
-            
-            print("✅ Registration successful - User ID: \(userId)")
-            return userId
+        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            print("✅ Registration successful - User ID: \(json["message"] ?? "No message")")
         } else {
             print("❌ Invalid response format")
             throw UserServiceError.invalidResponse
         }
     }
     
-    func registerUser(phoneNumber: String, countryCode: String, completion: @escaping (Result<String, Error>) -> Void) {
-        Task {
-            do {
-                let userId = try await registerUser(phoneNumber: phoneNumber, countryCode: countryCode)
-                DispatchQueue.main.async {
-                    completion(.success(userId))
-                }
-            } catch {
-                print("❌ Registration error: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
-            }
-        }
-    }
-    
-    func updateNotificationSettings(enabled: Bool, completion: @escaping (Result<Bool, Error>) -> Void) {
-        guard let userId = getUserId() else {
-            completion(.failure(UserServiceError.missingUserId))
-            return
-        }
-        
+    func updateNotificationSettings(userId: String, enabled: Bool, completion: @escaping (Result<Bool, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/api/users/notifications") else {
             completion(.failure(UserServiceError.invalidURL))
             return
@@ -163,11 +118,7 @@ final class UserService {
         }.resume()
     }
     
-    func updateUserPhoneNumber(newPhoneNumber: String, countryCode: String) async throws -> Bool {
-        guard let userId = getUserId() else {
-            throw UserServiceError.missingUserId
-        }
-        
+    func updateUserPhoneNumber(userId: String, newPhoneNumber: String, countryCode: String) async throws -> Bool {
         guard let url = URL(string: "\(baseURL)/api/users/update-phone") else {
             throw UserServiceError.invalidURL
         }
@@ -197,11 +148,7 @@ final class UserService {
         }
     }
     
-    func updateNotificationSettings(enabled: Bool) async throws -> Bool {
-        guard let userId = getUserId() else {
-            throw UserServiceError.missingUserId
-        }
-        
+    func updateNotificationSettings(userId: String, enabled: Bool) async throws -> Bool {
         guard let url = URL(string: "\(baseURL)/api/users/notifications") else {
             throw UserServiceError.invalidURL
         }
@@ -230,11 +177,7 @@ final class UserService {
         }
     }
     
-    func loadUserData() async throws -> UserData {
-        guard let userId = getUserId() else {
-            throw UserServiceError.missingUserId
-        }
-        
+    func loadUserData(userId: String) async throws -> UserData {
         guard let url = URL(string: "\(baseURL)/api/users/\(userId)") else {
             throw UserServiceError.invalidURL
         }
@@ -281,28 +224,6 @@ final class UserService {
             countryCode: countryCode,
             notificationsEnabled: notificationsEnabled
         )
-    }
-    
-    func loadUserData(completion: @escaping (Result<UserData, Error>) -> Void) {
-        Task {
-            do {
-                let userData = try await loadUserData()
-                DispatchQueue.main.async {
-                    completion(.success(userData))
-                }
-            } catch {
-                print("❌ Load user data error: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
-            }
-        }
-    }
-    
-    func clearUserData() {
-        UserDefaults.standard.removeObject(forKey: fcmTokenKey)
-        UserDefaults.standard.removeObject(forKey: userIdKey)
-        UserDefaults.standard.synchronize()
     }
 }
 

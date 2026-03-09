@@ -45,7 +45,7 @@ struct RecordingPlayerView: View {
         .padding()
         .background(Color.lightGrey)
         .sheet(isPresented: $showShareSheet) {
-//            ShareSheet(recording: recording)
+            ShareSheet(items: [recording])
         }
     }
     

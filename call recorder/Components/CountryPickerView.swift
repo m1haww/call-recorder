@@ -20,7 +20,6 @@ struct CountryPickerView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondaryText)
@@ -35,7 +34,6 @@ struct CountryPickerView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 
-                // Countries List
                 List {
                     ForEach(filteredCountries) { country in
                         CountryRow(

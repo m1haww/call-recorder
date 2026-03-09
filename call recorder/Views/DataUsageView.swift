@@ -22,7 +22,6 @@ struct DataUsageView: View {
                             .foregroundColor(.secondaryText)
                     }
                     
-                    // Storage Overview
                     VStack(alignment: .leading, spacing: 16) {
                         SectionHeader(title: "Storage Overview", icon: "internaldrive")
                         
@@ -50,7 +49,6 @@ struct DataUsageView: View {
                         }
                     }
                     
-                    // Network Usage
                     VStack(alignment: .leading, spacing: 16) {
                         SectionHeader(title: "Network Usage", icon: "wifi")
                         
@@ -78,7 +76,6 @@ struct DataUsageView: View {
                         }
                     }
                     
-                    // Data Management
                     VStack(alignment: .leading, spacing: 16) {
                         SectionHeader(title: "Data Management", icon: "gearshape")
                         

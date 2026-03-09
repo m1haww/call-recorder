@@ -15,15 +15,12 @@ struct TranscriptDetailView: View {
             Color.darkBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom Navigation Bar
                 ZStack {
-                    // Center title
                     Text("Transcript")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primaryText)
                         .frame(maxWidth: .infinity)
                     
-                    // Left and right buttons
                     HStack {
                         Button(action: { dismiss() }) {
                             HStack(spacing: 4) {
@@ -48,7 +45,6 @@ struct TranscriptDetailView: View {
                 .padding(.vertical, 12)
                 .background(Color.darkBackground)
                 
-                // Recording Info Card
                 VStack(spacing: 16) {
                     HStack(spacing: 16) {
                         ZStack {
@@ -84,7 +80,6 @@ struct TranscriptDetailView: View {
                         Spacer()
                     }
                     
-                    // Quick Stats
                     HStack(spacing: 12) {
                         TranscriptStatCard(
                             icon: "text.word.spacing",
@@ -114,7 +109,6 @@ struct TranscriptDetailView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 
-                // Search Bar (shown when searching)
                 if isSearching {
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -138,7 +132,6 @@ struct TranscriptDetailView: View {
                     .padding(.vertical, 8)
                 }
                 
-                // View Mode Picker
                 Picker("View Mode", selection: $selectedSegment) {
                     Text("Full Text").tag(0)
                     Text("Summary").tag(1)
@@ -147,12 +140,28 @@ struct TranscriptDetailView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 
-                // Transcript Content
                 ScrollView {
                     VStack(spacing: 0) {
                         if selectedSegment == 0 {
-                            // Full Text View
-                            if let transcript = recording.transcript, !transcript.isEmpty {
+                            if let segments = recording.transcriptionSegments, !segments.isEmpty {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text("Transcript")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.primaryText)
+                                        .padding(.bottom, 12)
+                                    
+                                    ForEach(segments) { segment in
+                                        TranscriptSegmentRow(
+                                            startTime: segment.start,
+                                            endTime: segment.end,
+                                            text: segment.text,
+                                            formatTimestamp: formatTimestamp
+                                        )
+                                    }
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            } else if let transcript = recording.transcript, !transcript.isEmpty {
                                 VStack(alignment: .leading, spacing: 16) {
                                     Text("Transcript")
                                         .font(.system(size: 18, weight: .semibold))
@@ -171,7 +180,6 @@ struct TranscriptDetailView: View {
                                     .padding(.top, 80)
                             }
                         } else {
-                            // Summary View
                             if let summary = recording.summary, !summary.isEmpty {
                                 VStack(alignment: .leading, spacing: 16) {
                                     Text("Summary")
@@ -209,7 +217,6 @@ struct TranscriptDetailView: View {
                 }
                 .background(Color.darkBackground)
                 
-                // Action Bar
                 HStack(spacing: 0) {
                     TranscriptActionButton(
                         icon: "square.and.arrow.up",
@@ -297,6 +304,30 @@ struct TranscriptDetailView: View {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
+struct TranscriptSegmentRow: View {
+    let startTime: Double
+    let endTime: Double
+    let text: String
+    let formatTimestamp: (Double) -> String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(formatTimestamp(startTime))
+                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                .foregroundColor(.secondaryText)
+                .frame(width: 44, alignment: .leading)
+            
+            Text(text)
+                .font(.system(size: 15))
+                .foregroundColor(.primaryText)
+                .lineSpacing(5)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 8)
     }
 }
 

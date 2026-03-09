@@ -5,13 +5,13 @@ import AVKit
 struct CallDetailsView: View {
     let recording: Recording
     @Binding var navigationPath: NavigationPath
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @StateObject private var audioPlayer = AudioPlayerManager()
     @State private var showDeleteAlert = false
     @State private var showShareSheet = false
     @State private var isLoadingRecording = false
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var appViewModel: AppViewModel = AppViewModel.shared
+    @StateObject var appViewModel: AppViewModel = AppViewModel.shared
     
     var body: some View {
         ZStack {
@@ -298,8 +298,6 @@ struct CallDetailsView: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 }
-
-// MARK: - Components
 
 struct StatCard: View {
     let icon: String

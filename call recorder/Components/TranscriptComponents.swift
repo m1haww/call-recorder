@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct TranscriptEmptyState: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     let isProUser: Bool
+    @StateObject private var subscriptionService = SubscriptionService.shared
     
     var body: some View {
         VStack(spacing: 0) {
@@ -25,11 +27,11 @@ struct TranscriptEmptyState: View {
                 }
                 
                 VStack(spacing: 6) {
-                    Text("No Transcripts Yet")
+                    Text(localizationManager.localizedString("no_transcripts"))
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.primaryText)
                     
-                    Text(isProUser ? "Unlock the power of AI transcription" : "Your transcripts will appear here")
+                    Text(isProUser ? localizationManager.localizedString("transcripts_unlock_ai") : localizationManager.localizedString("transcripts_will_appear_here"))
                         .font(.system(size: 14))
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
@@ -41,20 +43,20 @@ struct TranscriptEmptyState: View {
                 VStack(spacing: 14) {
                     TranscriptFeatureRow(
                         icon: "waveform.badge.mic",
-                        title: "AI-Powered Transcriptions",
-                        subtitle: "Convert calls to searchable text instantly"
+                        title: localizationManager.localizedString("transcripts_feature_ai_title"),
+                        subtitle: localizationManager.localizedString("transcripts_feature_ai_subtitle")
                     )
                     
                     TranscriptFeatureRow(
                         icon: "magnifyingglass.circle.fill",
-                        title: "Smart Search",
-                        subtitle: "Find any conversation in seconds"
+                        title: localizationManager.localizedString("transcripts_feature_search_title"),
+                        subtitle: localizationManager.localizedString("transcripts_feature_search_subtitle")
                     )
                     
                     TranscriptFeatureRow(
                         icon: "square.and.arrow.up.fill",
-                        title: "Export & Share",
-                        subtitle: "Save transcripts as text files"
+                        title: localizationManager.localizedString("transcripts_feature_export_title"),
+                        subtitle: localizationManager.localizedString("transcripts_feature_export_subtitle")
                     )
                 }
                 .padding(.horizontal, 28)
@@ -65,12 +67,12 @@ struct TranscriptEmptyState: View {
                 
                 VStack(spacing: 10) {
                     Button(action: {
-                        AppViewModel.shared.showPaywall = true
+                        subscriptionService.showPaywall = true
                     }) {
                         HStack(spacing: 8) {
                             Image(systemName: "crown.fill")
                                 .font(.system(size: 16))
-                            Text("Upgrade to Premium")
+                            Text(localizationManager.localizedString("upgrade_premium"))
                                 .font(.system(size: 17, weight: .semibold))
                         }
                         .foregroundColor(.white)
@@ -91,7 +93,7 @@ struct TranscriptEmptyState: View {
                     }
                     .padding(.horizontal, 28)
                     
-                    Text("Start your 3-day free trial")
+                    Text(localizationManager.localizedString("start_free_trial"))
                         .font(.system(size: 12))
                         .foregroundColor(.tertiaryText)
                 }
@@ -110,11 +112,11 @@ struct TranscriptEmptyState: View {
                                     .fill(Color.primaryGreen.opacity(0.1))
                             )
                         
-                        Text("Record your first call")
+                        Text(localizationManager.localizedString("record_first_call"))
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.primaryText)
                         
-                        Text("Transcripts will be generated automatically\nafter each recording")
+                        Text(localizationManager.localizedString("transcripts_auto_generated"))
                             .font(.system(size: 13))
                             .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.center)
@@ -122,8 +124,8 @@ struct TranscriptEmptyState: View {
                     }
                     
                     HStack(spacing: 16) {
-                        ProFeatureBadge(icon: "checkmark.seal.fill", text: "Premium Active")
-                        ProFeatureBadge(icon: "infinity", text: "Unlimited Transcripts")
+                        ProFeatureBadge(icon: "checkmark.seal.fill", text: localizationManager.localizedString("premium_active"))
+                        ProFeatureBadge(icon: "infinity", text: localizationManager.localizedString("unlimited_transcripts"))
                     }
                 }
             }
@@ -137,6 +139,7 @@ struct TranscriptEmptyState: View {
 }
 
 struct TranscriptLoadingView: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     @State private var dots = ""
     
     var body: some View {
@@ -145,7 +148,7 @@ struct TranscriptLoadingView: View {
                 .scaleEffect(1.2)
                 .tint(.primaryGreen)
             
-            Text("Generating transcript\(dots)")
+            Text(localizationManager.localizedString("generating_transcript") + dots)
                 .font(.subheadline)
                 .foregroundColor(.primaryText)
         }

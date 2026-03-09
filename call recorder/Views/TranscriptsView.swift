@@ -2,8 +2,9 @@ import SwiftUI
 import UIKit
 
 struct TranscriptsView: View {
-    @ObservedObject var viewModel = AppViewModel.shared
-    @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject var viewModel = AppViewModel.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var subscriptionService = SubscriptionService.shared
     @Binding var navigationPath: NavigationPath
     
     var recordingsWithTranscripts: [Recording] {
@@ -11,38 +12,35 @@ struct TranscriptsView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                if recordingsWithTranscripts.isEmpty {
-                    TranscriptEmptyState(isProUser: viewModel.isProUser)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(recordingsWithTranscripts) { recording in
-                                TranscriptCard(recording: recording, isProUser: viewModel.isProUser)
-                                    .onTapGesture {
-                                        HapticManager.shared.impact(.light)
-                                        if recording.transcript != nil && !recording.transcript!.isEmpty {
-                                            viewModel.navigateTo(.transcriptDetail(recording))
-                                        } else if !viewModel.isProUser {
-                                            AppViewModel.shared.showPaywall = true
-                                        }
+        VStack(spacing: 0) {
+            if recordingsWithTranscripts.isEmpty {
+                TranscriptEmptyState(isProUser: subscriptionService.isProUser)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(recordingsWithTranscripts) { recording in
+                            TranscriptCard(recording: recording, isProUser: subscriptionService.isProUser)
+                                .onTapGesture {
+                                    HapticManager.shared.impact(.light)
+                                    if recording.transcript != nil && !recording.transcript!.isEmpty {
+                                        viewModel.navigateTo(.transcriptDetail(recording))
+                                    } else if !subscriptionService.isProUser {
+                                        subscriptionService.showPaywall = true
                                     }
-                                    .padding(.horizontal)
-                            }
+                                }
+                                .padding(.horizontal)
                         }
-                        .padding(.top, 8)
                     }
-                }}
-            .navigationTitle(localized("transcripts"))
-            .navigationBarTitleDisplayMode(.large)
-            .background(Color.darkBackground)
-        }
+                    .padding(.top, 8)
+                }
+            }}
+        .background(Color.darkBackground)
         .preferredColorScheme(.dark)
     }
 }
 
 struct LanguagePicker: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var selectedLanguage: String
     let languages: [String]
     
@@ -51,7 +49,7 @@ struct LanguagePicker: View {
             Image(systemName: "globe")
                 .foregroundColor(.skyBlue)
             
-            Picker("Language", selection: $selectedLanguage) {
+            Picker(localizationManager.localizedString("language"), selection: $selectedLanguage) {
                 ForEach(languages, id: \.self) { language in
                     Text(language).tag(language)
                 }
@@ -73,6 +71,7 @@ struct LanguagePicker: View {
 
 
 struct TranscriptCard: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
     let recording: Recording
     let isProUser: Bool
     
@@ -107,14 +106,14 @@ struct TranscriptCard: View {
                     Image(systemName: "lock.fill")
                         .foregroundColor(.orange)
                         .font(.system(size: 12))
-                    Text("Transcript available with Premium")
+                    Text(localizationManager.localizedString("transcript_available_premium"))
                         .font(.system(size: 12))
                         .foregroundColor(.orange)
                         .italic()
                 }
                 .padding(.top, 2)
             } else {
-                Text("Transcript not available")
+                Text(localizationManager.localizedString("transcript_not_available"))
                     .font(.system(size: 12))
                     .foregroundColor(.tertiaryText)
                     .italic()
@@ -129,7 +128,7 @@ struct TranscriptCard: View {
                 Spacer()
                 
                 if recording.isUploaded {
-                    Label("Synced", systemImage: "checkmark.icloud.fill")
+                    Label(localizationManager.localizedString("synced"), systemImage: "checkmark.icloud.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.primaryGreen)
                 }

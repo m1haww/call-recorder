@@ -8,7 +8,6 @@ enum NavigationDestination: Hashable {
     case recordCall
     case player(Recording)
     
-    // Make it Hashable
     func hash(into hasher: inout Hasher) {
         switch self {
         case .callDetails(let recording):

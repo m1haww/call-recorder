@@ -11,23 +11,42 @@ final class AppViewModel: ObservableObject {
     @Published var showAlert = false
     @Published var alertMessage = ""
     
-    @Published var isProUser: Bool = false
-    
     @Published var selectedLanguage = "English"
     @Published var notificationsEnabled = true
     @Published var showPermissionAlert = false
-    @Published var showPaywall = false
     
     @Published var isOnboardingComplete = false
-    @Published var userId: String = ""
     @Published var userPhoneNumber: String = ""
     @Published var userCountryCode: String = ""
     
+    @Published var isRegistered: Bool = false
+    @Published var showPhoneSelection: Bool = false
     @Published var recordingToShare: Recording?
-    
     @Published var recordingServiceNumber: String = ""
-    
     @Published var navigationPath = NavigationPath()
+    @Published var userName: String = ""
+    @Published var userEmail: String = ""
+    
+    private let fcmTokenKey = "user_fcm_token"
+    private let userIdKey = "user_id"
+    
+    var userId: String {
+        if let id = UserDefaults.standard.string(forKey: userIdKey) {
+            return id
+        } else {
+            let newId = UUID().uuidString
+            UserDefaults.standard.set(newId, forKey: userIdKey)
+            return newId
+        }
+    }
+    
+    var fcmToken: String? {
+        return UserDefaults.standard.string(forKey: fcmTokenKey)
+    }
+    
+    func saveFCMToken(_ token: String) {
+        UserDefaults.standard.set(token, forKey: fcmTokenKey)
+    }
     
     enum UserType {
         case free, premium
@@ -66,7 +85,7 @@ final class AppViewModel: ObservableObject {
         }
         
         do {
-            try await ServerManager.shared.deleteRecording(recordingId: recording.id, userId: userId)
+            try await ServerService.shared.deleteRecording(recordingId: recording.id, userId: userId)
             await MainActor.run {
                 showToast("Recording deleted")
             }
@@ -93,7 +112,7 @@ final class AppViewModel: ObservableObject {
         isLoading = true
         
         do {
-            try await ServerManager.shared.deleteAllRecordings(userId: userId)
+            try await ServerService.shared.deleteAllRecordings(userId: userId)
             
             recordings.removeAll()
             showToast("All recordings deleted")
@@ -132,7 +151,7 @@ final class AppViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let success = try await UserService.shared.updateUserPhoneNumber(newPhoneNumber: newPhoneNumber, countryCode: countryCode)
+            let success = try await UserService.shared.updateUserPhoneNumber(userId: self.userId, newPhoneNumber: newPhoneNumber, countryCode: countryCode)
             if success {
                 userPhoneNumber = newPhoneNumber
                 userCountryCode = countryCode
@@ -155,7 +174,7 @@ final class AppViewModel: ObservableObject {
         }
         
         do {
-            let userData = try await UserService.shared.loadUserData()
+            let userData = try await UserService.shared.loadUserData(userId: self.userId)
             
             userPhoneNumber = userData.phoneNumber
             userCountryCode = userData.countryCode
@@ -194,21 +213,20 @@ final class AppViewModel: ObservableObject {
         return filtered
     }
     
-    func loadUserData() {
-        isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
-        
-        if let savedUserId = UserService.shared.getUserId() {
-            userId = savedUserId
-        }
+    func toggleRegisterStatus() {
+        self.isRegistered = true
+        UserDefaults.standard.set(true, forKey: "isRegistered")
     }
     
-    func saveUserId(_ id: String) {
-        userId = id
-        UserService.shared.saveUserId(id)
+    func loadUserData() {
+        self.isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
+        self.isRegistered = UserDefaults.standard.bool(forKey: "isRegistered")
+        self.userName = UserDefaults.standard.string(forKey: "userName") ?? ""
+        self.userEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
     }
     
     func completeOnboarding() {
-        isOnboardingComplete = true
+        self.isOnboardingComplete = true
         UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
     }
     
@@ -224,7 +242,7 @@ final class AppViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let recordings = try await ServerManager.shared.fetchCallsForUser(userId: userId)
+            let recordings = try await ServerService.shared.fetchCallsForUser(userId: userId)
             
             if Task.isCancelled {
                 isLoading = false
@@ -250,7 +268,7 @@ final class AppViewModel: ObservableObject {
         guard !userId.isEmpty else { return }
         
         do {
-            let recordings = try await ServerManager.shared.fetchCallsForUser(userId: userId)
+            let recordings = try await ServerService.shared.fetchCallsForUser(userId: userId)
         
             if !Task.isCancelled {
                 self.recordings = recordings
@@ -283,12 +301,10 @@ final class AppViewModel: ObservableObject {
     @MainActor
     func fetchPhoneServiceNumber() async {
         do {
-            let phoneService = try await ServerManager.shared.fetchPhoneServiceNumber()
-
+            let phoneService = try await ServerService.shared.fetchPhoneServiceNumber()
             self.recordingServiceNumber = phoneService.phoneNumber
         } catch {
             print("Failed to fetch phone service number: \(error.localizedDescription)")
-            self.recordingServiceNumber = "+19865294217"
         }
     }
 }
