@@ -63,7 +63,7 @@ final class ServerService: ObservableObject {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         do {
-            let (data, req) = try await URLSession.shared.data(for: request)
+            let (data, req) = try await safeSession().data(for: request)
             
             if let httpResponse = req as? HTTPURLResponse {
                 print("Status code: \(httpResponse.statusCode)")
@@ -96,7 +96,7 @@ final class ServerService: ObservableObject {
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServerError.invalidResponse
@@ -120,7 +120,7 @@ final class ServerService: ObservableObject {
         let body = ["user_id": userId]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServerError.invalidResponse
@@ -145,7 +145,7 @@ final class ServerService: ObservableObject {
         request.timeoutInterval = 30.0
         
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await safeSession().data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw ServerError.invalidResponse

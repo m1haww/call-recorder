@@ -4,6 +4,7 @@ import FirebaseAnalytics
 let revenueCatApiKey = "appl_RzxHifEwmEeTIsvRBmevdDVzrVW"
 
 final class AnalyticsManager {
+    
     static let shared = AnalyticsManager()
     
     private init() {}

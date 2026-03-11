@@ -6,8 +6,6 @@ import RevenueCatUI
 import AdSupport
 import AppTrackingTransparency
 
-private let firstAppOpenTimestampKey = "firstAppOpenTimestamp"
-
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
@@ -16,10 +14,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: revenueCatApiKey, appUserID: AppViewModel.shared.userId)
         
-        setFirstAppOpenTimestampIfNeeded()
-        
         if ATTrackingManager.trackingAuthorizationStatus != .notDetermined {
-            Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
+            Task {
+                await setAppleSearchAdsAttribution()
+            }
         }
         
         UNUserNotificationCenter.current().delegate = self
@@ -68,20 +66,38 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         @unknown default:
             print("Unknown ATT status")
         }
-        
-        Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
+
+        await setAppleSearchAdsAttribution()
     }
-    
-    private func setFirstAppOpenTimestampIfNeeded() {
-        let defaults = UserDefaults.standard
-        guard defaults.string(forKey: firstAppOpenTimestampKey) == nil else { return }
+
+    private static let hasSetAppleSearchAdsAttributionKey = "hasSetAppleSearchAdsAttributionToRevenueCat"
+
+    @MainActor
+    private func setAppleSearchAdsAttribution() async {
+        guard #available(iOS 14.3, *) else { return }
+        guard !UserDefaults.standard.bool(forKey: Self.hasSetAppleSearchAdsAttributionKey) else { return }
+        UserDefaults.standard.set(true, forKey: Self.hasSetAppleSearchAdsAttributionKey)
+
+        guard let data = await AppleAttributionManager.shared.fetchAttributionData() else { return }
+        guard data.attribution else { return }
+        setRevenuecatAttributes(data: data)
+    }
+
+    private func setRevenuecatAttributes(data: AppleAttributionData) {
+        Purchases.shared.attribution.setKeyword(data.keywordId.map { String($0) })
+        Purchases.shared.attribution.setAdGroup(data.adGroupId.map { String($0) })
+        Purchases.shared.attribution.setCampaign(data.campaignId.map { String($0) })
+        Purchases.shared.attribution.setAttributes(["installDate": data.clickDate ?? Self.getCurrentDate()])
+        Purchases.shared.attribution.setMediaSource("Apple Search Ads")
+        Purchases.shared.attribution.setAd(data.adId.map { String($0) })
+    }
+
+    private static func getCurrentDate() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm'Z'"
         formatter.timeZone = TimeZone(identifier: "UTC")
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        let timestamp = formatter.string(from: Date())
-        defaults.set(timestamp, forKey: firstAppOpenTimestampKey)
-        Purchases.shared.attribution.setAttributes(["firstAppOpenTimestamp": timestamp])
+        return formatter.string(from: Date())
     }
 }
 

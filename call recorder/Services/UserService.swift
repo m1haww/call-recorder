@@ -41,7 +41,7 @@ final class UserService {
         print("   Method: POST")
         print("   Body: \(requestBody)")
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await safeSession().data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse {
             print("📥 Register User Response:")
@@ -91,7 +91,7 @@ final class UserService {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        safeSession().dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
                     completion(.failure(error))
@@ -135,7 +135,7 @@ final class UserService {
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw UserServiceError.invalidResponse
@@ -164,7 +164,7 @@ final class UserService {
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw UserServiceError.invalidResponse
@@ -191,7 +191,7 @@ final class UserService {
         print("   URL: \(url)")
         print("   Method: GET")
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await safeSession().data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse {
             print("📥 Load User Data Response:")

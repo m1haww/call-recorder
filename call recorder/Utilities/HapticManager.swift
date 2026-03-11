@@ -2,6 +2,7 @@ import UIKit
 import SwiftUI
 
 final class HapticManager {
+    
     static let shared = HapticManager()
     
     private init() {}
