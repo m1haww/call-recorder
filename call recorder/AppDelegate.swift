@@ -6,13 +6,17 @@ import RevenueCatUI
 import AdSupport
 import AppTrackingTransparency
 
+private let firstAppOpenTimestampKey = "firstAppOpenTimestamp"
+
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
         OnboardingRemoteConfigManager.shared.fetchAndActivate()
-
+        
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: revenueCatApiKey, appUserID: AppViewModel.shared.userId)
+        
+        setFirstAppOpenTimestampIfNeeded()
         
         if ATTrackingManager.trackingAuthorizationStatus != .notDetermined {
             Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
@@ -66,6 +70,18 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         }
         
         Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
+    }
+    
+    private func setFirstAppOpenTimestampIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard defaults.string(forKey: firstAppOpenTimestampKey) == nil else { return }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm'Z'"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        let timestamp = formatter.string(from: Date())
+        defaults.set(timestamp, forKey: firstAppOpenTimestampKey)
+        Purchases.shared.attribution.setAttributes(["firstAppOpenTimestamp": timestamp])
     }
 }
 
