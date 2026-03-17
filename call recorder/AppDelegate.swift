@@ -5,6 +5,7 @@ import RevenueCat
 import RevenueCatUI
 import AdSupport
 import AppTrackingTransparency
+import FirebaseAnalytics
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -23,6 +24,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         
         SubscriptionService.shared.checkSubscriptionStatus()
+        
+        let instanceID = Analytics.appInstanceID()
+        if let unwrapped = instanceID {
+            Purchases.shared.attribution.setFirebaseAppInstanceID(unwrapped)
+        }
         
         Task {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
