@@ -25,19 +25,20 @@ struct HomeView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            SearchBar(text: $searchText)
-                .padding(.horizontal)
-                .padding(.top, 8)
-            
-            FilterBar(selectedFilter: $selectedFilter, filters: filters)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-            
-            if filteredRecordings.isEmpty {
-                EmptyStateView()
-            } else {
-                ScrollView {
+        ScrollView(.vertical) {
+            VStack(spacing: 0) {
+                SearchBar(text: $searchText)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                
+                FilterBar(selectedFilter: $selectedFilter, filters: filters)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                
+                if filteredRecordings.isEmpty {
+                    EmptyStateView()
+                        .padding(.top, 65)
+                } else {
                     LazyVStack(spacing: 12) {
                         ForEach(filteredRecordings) { recording in
                             RecordingCard(
@@ -66,32 +67,32 @@ struct HomeView: View {
                     }
                     .padding(.top, 8)
                 }
-                .refreshable {
-                    await viewModel.refreshRecordings()
+            }
+            .sheet(isPresented: $showShareSheet) {
+                if let recording = viewModel.recordingToShare {
+                    ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.youtube.com")!])
                 }
+            }
+            .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
+                Button(localizationManager.localizedString("cancel"), role: .cancel) {}
+                Button(localizationManager.localizedString("delete"), role: .destructive) {
+                    if let recording = recordingToDelete,
+                       let index = viewModel.recordings.firstIndex(where: { $0.id == recording.id }) {
+                        HapticManager.shared.notification(.warning)
+                        
+                        Task {
+                            await viewModel.deleteRecording(at: index)
+                        }
+                    }
+                }
+            } message: {
+                Text(localizationManager.localizedString("delete_recording_message"))
             }
         }
         .preferredColorScheme(.dark)
         .background(Color.darkBackground)
-        .sheet(isPresented: $showShareSheet) {
-            if let recording = viewModel.recordingToShare {
-                ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.youtube.com")!])
-            }
-        }
-        .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
-            Button(localizationManager.localizedString("cancel"), role: .cancel) {}
-            Button(localizationManager.localizedString("delete"), role: .destructive) {
-                if let recording = recordingToDelete,
-                   let index = viewModel.recordings.firstIndex(where: { $0.id == recording.id }) {
-                    HapticManager.shared.notification(.warning)
-                    
-                    Task {
-                        await viewModel.deleteRecording(at: index)
-                    }
-                }
-            }
-        } message: {
-            Text(localizationManager.localizedString("delete_recording_message"))
+        .refreshable {
+            await viewModel.refreshRecordings()
         }
     }
 }

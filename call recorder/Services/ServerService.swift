@@ -21,9 +21,7 @@ final class ServerService: ObservableObject {
         let recordingUrl = dictionary["recording_url"] as? String
         let summary = dictionary["summary"] as? String
         let title = dictionary["title"] as? String
-        let transcriptionStatus = dictionary["transcription_status"] as? String ?? ""
-        let transcriptionText = dictionary["transcription_text"] as? String
-        let transcriptionSegments = parseTranscriptionSegments(dictionary["transcription_segments"])
+        let transcript = (dictionary["transcript"] as? [String: Any]).flatMap { parseTranscript(from: $0, fallbackCallId: id) }
 
         return Recording(
             id: id,
@@ -35,10 +33,42 @@ final class ServerService: ObservableObject {
             recordingUrl: recordingUrl,
             summary: summary,
             title: title,
-            transcriptionStatus: transcriptionStatus,
-            transcriptionText: transcriptionText,
-            transcriptionSegments: transcriptionSegments
+            transcript: transcript
         )
+    }
+
+    private func parseTranscript(from dict: [String: Any], fallbackCallId: String) -> RecordingTranscript? {
+        let idString: String = {
+            if let n = dict["id"] as? Int { return String(n) }
+            if let s = dict["id"] as? String { return s }
+            return "\(fallbackCallId)-transcript"
+        }()
+        let callId = dict["call_id"] as? String ?? fallbackCallId
+        let status = dict["status"] as? String
+        let text = dict["text"] as? String
+        let segments = parseTranscriptionSegments(dict["segments"])
+        let durationSeconds = dict["duration_seconds"] as? Double ?? (dict["duration_seconds"] as? Int).map(Double.init)
+        let createdAt = parseISO8601Date(dict["created_at"] as? String)
+        let updatedAt = parseISO8601Date(dict["updated_at"] as? String)
+        return RecordingTranscript(
+            id: idString,
+            callId: callId,
+            status: status,
+            text: text,
+            segments: segments,
+            durationSeconds: durationSeconds,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+
+    private func parseISO8601Date(_ value: String?) -> Date? {
+        guard let value = value else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: value) { return date }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: value)
     }
 
     private func parseTranscriptionSegments(_ value: Any?) -> [TranscriptionSegment]? {
@@ -68,6 +98,9 @@ final class ServerService: ObservableObject {
             if let httpResponse = req as? HTTPURLResponse {
                 print("Status code: \(httpResponse.statusCode)")
             }
+            
+            print("Recording data:")
+            print(String(decoding: data, as: UTF8.self))
             
             if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
                 let recordings = jsonArray.compactMap { self.createRecording(from: $0, userPhone: "") }

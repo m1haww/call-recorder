@@ -15,18 +15,18 @@ struct call_recorderApp: App {
         WindowGroup {
             ZStack {
                 Group {
-                    if viewModel.isOnboardingComplete {
-                        ContentView()
-                    } else if viewModel.showPhoneSelection {
+                    if !viewModel.isOnboardingComplete {
+                        OnboardingEntryView()
+                    } else if viewModel.showPhoneSelection || !viewModel.isRegistered {
                         PhoneSelectionView()
                     } else {
-                        OnboardingEntryView()
+                        ContentView()
                     }
                 }
                 .opacity(showSplash ? 0 : 1)
                 .animation(.easeIn(duration: 0.5), value: showSplash)
                 .fullScreenCover(isPresented: $subscriptionService.showPaywall) {
-                    PaywallView(displayCloseButton: false)
+                    PaywallView()
                         .onPurchaseCompleted { customerInfo in
                             subscriptionService.checkSubscriptionStatus()
                             subscriptionService.showPaywall = false

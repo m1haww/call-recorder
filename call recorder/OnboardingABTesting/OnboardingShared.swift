@@ -110,6 +110,12 @@ struct PhoneSelectionView: View {
                             .symbolRenderingMode(.hierarchical)
                     }
                     .padding(.bottom, 32)
+                    
+                    Text("Enter your phone number without the country code")
+                        .font(.body)
+                        .foregroundColor(.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 14)
 
                     VStack(spacing: 20) {
                         Button(action: {
@@ -144,17 +150,26 @@ struct PhoneSelectionView: View {
                                     .font(.title3)
                                     .foregroundColor(.secondaryText)
                                     .padding(.leading, 18)
-                                    .padding(.vertical, 16)
 
-                                TextField("Phone number", text: $phoneNumber)
-                                    .font(.title3)
-                                    .foregroundColor(.primaryText)
-                                    .padding(.trailing, 18)
-                                    .padding(.vertical, 16)
-                                    .keyboardType(.phonePad)
-                                    .textContentType(.telephoneNumber)
-                                    .padding(.leading, 8)
-                                    .focused($isTextFieldFocused)
+                                ZStack(alignment: .leading) {
+                                    TextField("", text: $phoneNumber)
+                                        .font(.title3)
+                                        .foregroundColor(.primaryText)
+                                        .padding(.trailing, 18)
+                                        .keyboardType(.phonePad)
+                                        .textContentType(.telephoneNumber)
+                                        .padding(.leading, 8)
+                                        .focused($isTextFieldFocused)
+                                    
+                                    if phoneNumber.isEmpty {
+                                        Text("Phone number")
+                                            .font(.title3)
+                                            .foregroundColor(.white)
+                                            .padding(.leading, 8)
+                                            .allowsHitTesting(false)
+                                    }
+                                }
+                                .padding(.vertical, 16)
                             }
                             .background(Color.cardBackground)
                             .cornerRadius(14)
@@ -163,16 +178,8 @@ struct PhoneSelectionView: View {
                                     .stroke(showError ? Color.red.opacity(0.8) : Color.surfaceBackground.opacity(0.8), lineWidth: 1)
                             )
                         }
-
-                        Text("Enter your phone number without the country code")
-                            .font(.subheadline)
-                            .foregroundColor(.secondaryText)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 4)
                     }
                     .padding(.horizontal, 28)
-
-                    Spacer(minLength: 22)
 
                     VStack(spacing: 16) {
                         Button(action: {

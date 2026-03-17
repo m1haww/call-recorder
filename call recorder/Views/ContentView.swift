@@ -7,7 +7,8 @@ struct ContentView: View {
     @StateObject private var subscriptionService = SubscriptionService.shared
     
     @State private var showToast = false
-    
+    @State private var showRecordCallTutorial = false
+
     private func navigationTitleForTab(_ tabIndex: Int) -> String {
         switch tabIndex {
         case 0: return localizationManager.localizedString("recordings")
@@ -68,36 +69,6 @@ struct ContentView: View {
                 .onAppear {
                     configureTabBarAppearance()
                 }
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            HapticManager.shared.impact(.medium)
-                            if appManager.recordingServiceNumber.isEmpty {
-                                appManager.showToast("Loading service number...")
-                            } else if subscriptionService.isProUser {
-                                makePhoneCall(to: appManager.recordingServiceNumber)
-                            } else {
-                                subscriptionService.showPaywall = true
-                            }
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.primaryGreen)
-                                    .frame(width: 60, height: 60)
-                                
-                                Image(systemName: "phone.fill")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .shadow(color: Color.primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 70)
-                    }
-                }
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
                     case .callDetails(let recording):
@@ -126,11 +97,58 @@ struct ContentView: View {
                             .toolbar(.hidden, for: .tabBar)
                     }
                 }
+                
+                if viewModel.selectedTab != 1 && viewModel.selectedTab != 3 {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                HapticManager.shared.impact(.medium)
+                                if appManager.recordingServiceNumber.isEmpty {
+                                    appManager.showToast("Loading service number...")
+                                } else if subscriptionService.isProUser {
+                                    makePhoneCall(to: appManager.recordingServiceNumber)
+                                } else {
+                                    subscriptionService.showPaywall = true
+                                }
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.primaryGreen)
+                                        .frame(width: 60, height: 60)
+                                    
+                                    Image(systemName: "phone.fill")
+                                        .font(.system(size: 24, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .shadow(color: Color.primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 70)
+                        }
+                    }
+                }
             }
             .navigationTitle(navigationTitleForTab(viewModel.selectedTab))
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(Color.darkBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        HapticManager.shared.selection()
+                        showRecordCallTutorial = true
+                    }) {
+                        Image(systemName: "questionmark.circle")
+                            .font(.title3)
+                            .foregroundColor(.primaryText)
+                    }
+                }
+            }
+            .sheet(isPresented: $showRecordCallTutorial) {
+                RecordCallTutorialView()
+            }
             .toast(message: appManager.alertMessage, isShowing: $showToast)
             .onChange(of: appManager.showAlert) { newValue in
                 if newValue {

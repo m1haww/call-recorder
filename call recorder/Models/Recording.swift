@@ -1,13 +1,5 @@
 import Foundation
 
-struct TranscriptionSegment: Codable, Identifiable {
-    let start: Double
-    let end: Double
-    let text: String
-
-    var id: String { "\(start)-\(end)" }
-}
-
 struct Recording: Identifiable, Codable {
     let id: String
     let callDate: String
@@ -18,9 +10,7 @@ struct Recording: Identifiable, Codable {
     let recordingUrl: String?
     let summary: String?
     let title: String?
-    let transcriptionStatus: String
-    let transcriptionText: String?
-    let transcriptionSegments: [TranscriptionSegment]?
+    let transcript: RecordingTranscript?
 
     init(id: String = UUID().uuidString,
          callDate: String,
@@ -31,9 +21,7 @@ struct Recording: Identifiable, Codable {
          recordingUrl: String? = nil,
          summary: String? = nil,
          title: String? = nil,
-         transcriptionStatus: String,
-         transcriptionText: String? = nil,
-         transcriptionSegments: [TranscriptionSegment]? = nil) {
+         transcript: RecordingTranscript? = nil) {
         self.id = id
         self.callDate = callDate
         self.fromPhone = fromPhone
@@ -43,10 +31,11 @@ struct Recording: Identifiable, Codable {
         self.recordingUrl = recordingUrl
         self.summary = summary
         self.title = title
-        self.transcriptionStatus = transcriptionStatus
-        self.transcriptionText = transcriptionText
-        self.transcriptionSegments = transcriptionSegments
+        self.transcript = transcript
     }
+
+    /// Convenience: transcript text for display (nil if no transcript or no text).
+    var transcriptText: String? { transcript?.text }
     
     var contactName: String {
         if let title = title, !title.isEmpty {
@@ -90,10 +79,6 @@ struct Recording: Identifiable, Codable {
     
     var duration: TimeInterval {
         return TimeInterval(recordingDuration)
-    }
-    
-    var transcript: String? {
-        return transcriptionText ?? summary
     }
     
     var isUploaded: Bool {

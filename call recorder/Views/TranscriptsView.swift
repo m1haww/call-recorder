@@ -8,7 +8,7 @@ struct TranscriptsView: View {
     @Binding var navigationPath: NavigationPath
     
     var recordingsWithTranscripts: [Recording] {
-        return viewModel.recordings.filter { $0.transcript != nil && !$0.transcript!.isEmpty }
+        return viewModel.recordings.filter { $0.transcript != nil }
     }
     
     var body: some View {
@@ -22,7 +22,7 @@ struct TranscriptsView: View {
                             TranscriptCard(recording: recording, isProUser: subscriptionService.isProUser)
                                 .onTapGesture {
                                     HapticManager.shared.impact(.light)
-                                    if recording.transcript != nil && !recording.transcript!.isEmpty {
+                                    if recording.transcript != nil && !(recording.transcriptText?.isEmpty ?? true) {
                                         viewModel.navigateTo(.transcriptDetail(recording))
                                     } else if !subscriptionService.isProUser {
                                         subscriptionService.showPaywall = true
@@ -34,6 +34,9 @@ struct TranscriptsView: View {
                     .padding(.top, 8)
                 }
             }}
+        .onAppear {
+            print(recordingsWithTranscripts.count)
+        }
         .background(Color.darkBackground)
         .preferredColorScheme(.dark)
     }
@@ -95,8 +98,8 @@ struct TranscriptCard: View {
                     .font(.system(size: 14))
             }
             
-            if let transcript = recording.transcript {
-                Text(transcript)
+            if let transcriptText = recording.transcriptText, !transcriptText.isEmpty {
+                Text(transcriptText)
                     .font(.system(size: 14))
                     .foregroundColor(.secondaryText)
                     .lineLimit(2)

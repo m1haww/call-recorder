@@ -37,16 +37,11 @@ final class UserService {
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
         print("📤 Register User Request:")
-        print("   URL: \(url)")
-        print("   Method: POST")
-        print("   Body: \(requestBody)")
         
         let (data, response) = try await safeSession().data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse {
             print("📥 Register User Response:")
-            print("   Status Code: \(httpResponse.statusCode)")
-            print("   Headers: \(httpResponse.allHeaderFields)")
         }
         
         if let responseString = String(data: data, encoding: .utf8) {
@@ -186,10 +181,6 @@ final class UserService {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30.0
-        
-        print("📤 Load User Data Request:")
-        print("   URL: \(url)")
-        print("   Method: GET")
         
         let (data, response) = try await safeSession().data(for: request)
         

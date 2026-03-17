@@ -16,16 +16,11 @@ struct EmptyStateView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primaryText)
                 
-                Text(localizationManager.localizedString("your_recordings_appear"))
+                Text(localizationManager.localizedString("tap_record"))
                     .font(.subheadline)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
-                
-                Text(localizationManager.localizedString("tap_record"))
-                    .font(.caption)
-                    .foregroundColor(.secondaryText.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 4)
+                    .padding(.top, 2)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

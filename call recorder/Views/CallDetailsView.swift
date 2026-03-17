@@ -32,7 +32,7 @@ struct CallDetailsView: View {
                                 )
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Call Recording")
+                                Text(localizationManager.localizedString("call_recording"))
                                     .font(.system(size: 20, weight: .medium))
                                     .foregroundColor(.primaryText)
                                 
@@ -53,21 +53,21 @@ struct CallDetailsView: View {
                     HStack(spacing: 12) {
                         StatCard(
                             icon: "calendar",
-                            title: "Date",
+                            title: localizationManager.localizedString("date"),
                             value: formatShortDate(recording.date),
                             color: .primaryGreen
                         )
                         
                         StatCard(
                             icon: "clock",
-                            title: "Time",
+                            title: localizationManager.localizedString("time"),
                             value: formatTime(recording.date),
                             color: .primaryGreen
                         )
                         
                         StatCard(
                             icon: "timer",
-                            title: "Duration",
+                            title: localizationManager.localizedString("duration"),
                             value: formatShortDuration(recording.duration),
                             color: .primaryGreen
                         )
@@ -86,6 +86,10 @@ struct CallDetailsView: View {
                         
                         VStack(spacing: 8) {
                             GeometryReader { geometry in
+                                let totalDuration = audioPlayer.duration > 0 ? audioPlayer.duration : recording.duration
+                                let progressRatio = totalDuration > 0
+                                    ? min(1, max(0, audioPlayer.currentTime / totalDuration))
+                                    : 0
                                 ZStack(alignment: .leading) {
                                     RoundedRectangle(cornerRadius: 3)
                                         .fill(Color.surfaceBackground)
@@ -93,7 +97,7 @@ struct CallDetailsView: View {
                                     
                                     RoundedRectangle(cornerRadius: 3)
                                         .fill(Color.primaryGreen)
-                                        .frame(width: geometry.size.width * audioPlayer.progress, height: 6)
+                                        .frame(width: geometry.size.width * progressRatio, height: 6)
                                 }
                             }
                             .frame(height: 6)
@@ -169,14 +173,14 @@ struct CallDetailsView: View {
                     HStack(spacing: 12) {
                         DetailActionButton(
                             icon: "square.and.arrow.up",
-                            title: "Share",
+                            title: localizationManager.localizedString("share"),
                             color: .primaryGreen,
                             action: { showShareSheet = true }
                         )
                         
                         DetailActionButton(
                             icon: "trash",
-                            title: "Delete",
+                            title: localizationManager.localizedString("delete"),
                             color: .red,
                             action: { showDeleteAlert = true }
                         )
@@ -184,14 +188,14 @@ struct CallDetailsView: View {
                     .padding(.horizontal, 20)
                     
                     VStack(spacing: 12) {
-                        if let transcript = recording.transcript, !transcript.isEmpty {
+                        if let transcriptText = recording.transcriptText, !transcriptText.isEmpty {
                             Button(action: {
                                 appViewModel.navigateTo(.transcriptDetail(recording))
                             }) {
                                 InfoCard(
                                     icon: "doc.text.fill",
-                                    title: "Transcript",
-                                    value: "Available",
+                                    title: localizationManager.localizedString("transcript"),
+                                    value: localizationManager.localizedString("available"),
                                     color: .primaryGreen,
                                     isClickable: true
                                 )
@@ -202,15 +206,15 @@ struct CallDetailsView: View {
                         if recording.isUploaded {
                             InfoCard(
                                 icon: "checkmark.icloud.fill",
-                                title: "Cloud Sync",
-                                value: "Uploaded",
+                                title: localizationManager.localizedString("cloud_sync"),
+                                value: localizationManager.localizedString("uploaded"),
                                 color: .primaryGreen
                             )
                         }
                         
                         InfoCard(
                             icon: "info.circle.fill",
-                            title: localized("recording_id"),
+                            title: localizationManager.localizedString("recording_id"),
                             value: String(recording.id.prefix(8)) + "...",
                             color: .secondaryText
                         )
@@ -220,7 +224,7 @@ struct CallDetailsView: View {
                 .padding(.vertical)
             }
         }
-        .navigationTitle("Recording")
+        .navigationTitle(localizationManager.localizedString("recording"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -231,23 +235,23 @@ struct CallDetailsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .medium))
-                        Text(localized("back"))
+                        Text(localizationManager.localizedString("back"))
                             .font(.system(size: 17))
                     }
                     .foregroundColor(.primaryGreen)
                 }
             }
         }
-        .alert("Delete Recording", isPresented: $showDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+        .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
+            Button(localizationManager.localizedString("cancel"), role: .cancel) { }
+            Button(localizationManager.localizedString("delete"), role: .destructive) {
                 Task {
                     await appViewModel.deleteRecording(recording)
                     dismiss()
                 }
             }
         } message: {
-            Text("Are you sure you want to delete this recording?")
+            Text(localizationManager.localizedString("delete_recording_message"))
         }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.google.com")!])
@@ -526,10 +530,23 @@ final class AudioPlayerManager: NSObject, ObservableObject {
     
     func skip(by seconds: Double) {
         guard let player = player else { return }
-        let currentTime = CMTimeGetSeconds(player.currentTime())
-        let newTime = currentTime + seconds
-        let clampedTime = max(0, min(newTime, duration))
-        player.seek(to: CMTime(seconds: clampedTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        let now = CMTimeGetSeconds(player.currentTime())
+        var effectiveDuration = duration
+        if effectiveDuration <= 0, let item = player.currentItem, item.duration.isValid, !item.duration.isIndefinite {
+            effectiveDuration = CMTimeGetSeconds(item.duration)
+        }
+        let newTime = now + seconds
+        let targetSeconds = effectiveDuration > 0
+            ? max(0, min(newTime, effectiveDuration))
+            : max(0, newTime)
+        player.seek(to: CMTime(seconds: targetSeconds, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) { [weak self] _ in
+            Task { @MainActor in
+                guard let self = self else { return }
+                self.currentTime = targetSeconds
+                if self.duration <= 0, effectiveDuration > 0 { self.duration = effectiveDuration }
+                if self.duration > 0 { self.progress = targetSeconds / self.duration }
+            }
+        }
     }
     
     func stop() {

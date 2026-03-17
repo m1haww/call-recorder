@@ -27,7 +27,7 @@ struct SettingsView: View {
                 )
             }
             .padding(.vertical)
-            .padding(.bottom, 80)
+            .padding(.bottom, 40)
         }
         .preferredColorScheme(.dark)
         .background(Color.darkBackground)

@@ -8,7 +8,7 @@ struct TranscriptEmptyState: View {
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-                .frame(minHeight: 40, maxHeight: 60)
+                .frame(minHeight: 120, maxHeight: 160)
             
             VStack(spacing: 16) {
                 ZStack {
@@ -31,103 +31,15 @@ struct TranscriptEmptyState: View {
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.primaryText)
                     
-                    Text(isProUser ? localizationManager.localizedString("transcripts_unlock_ai") : localizationManager.localizedString("transcripts_will_appear_here"))
+                    Text(localizationManager.localizedString("transcripts_first_recording_hint"))
                         .font(.system(size: 14))
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                }
-            }
-            
-            if !isProUser {
-                VStack(spacing: 14) {
-                    TranscriptFeatureRow(
-                        icon: "waveform.badge.mic",
-                        title: localizationManager.localizedString("transcripts_feature_ai_title"),
-                        subtitle: localizationManager.localizedString("transcripts_feature_ai_subtitle")
-                    )
-                    
-                    TranscriptFeatureRow(
-                        icon: "magnifyingglass.circle.fill",
-                        title: localizationManager.localizedString("transcripts_feature_search_title"),
-                        subtitle: localizationManager.localizedString("transcripts_feature_search_subtitle")
-                    )
-                    
-                    TranscriptFeatureRow(
-                        icon: "square.and.arrow.up.fill",
-                        title: localizationManager.localizedString("transcripts_feature_export_title"),
-                        subtitle: localizationManager.localizedString("transcripts_feature_export_subtitle")
-                    )
-                }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 24)
-                
-                Spacer()
-                    .frame(minHeight: 20, maxHeight: 40)
-                
-                VStack(spacing: 10) {
-                    Button(action: {
-                        subscriptionService.showPaywall = true
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 16))
-                            Text(localizationManager.localizedString("upgrade_premium"))
-                                .font(.system(size: 17, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
+                        .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.primaryGreen,
-                                    Color.primaryGreen.opacity(0.85)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .cornerRadius(14)
-                        .shadow(color: Color.primaryGreen.opacity(0.25), radius: 10, x: 0, y: 4)
-                    }
-                    .padding(.horizontal, 28)
-                    
-                    Text(localizationManager.localizedString("start_free_trial"))
-                        .font(.system(size: 12))
-                        .foregroundColor(.tertiaryText)
+                        .padding(.horizontal, 24)
                 }
-            } else {
-                Spacer()
-                    .frame(minHeight: 30, maxHeight: 50)
-                
-                VStack(spacing: 20) {
-                    VStack(spacing: 10) {
-                        Image(systemName: "phone.arrow.up.right")
-                            .font(.system(size: 26))
-                            .foregroundColor(.primaryGreen)
-                            .padding(14)
-                            .background(
-                                Circle()
-                                    .fill(Color.primaryGreen.opacity(0.1))
-                            )
-                        
-                        Text(localizationManager.localizedString("record_first_call"))
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.primaryText)
-                        
-                        Text(localizationManager.localizedString("transcripts_auto_generated"))
-                            .font(.system(size: 13))
-                            .foregroundColor(.secondaryText)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(3)
-                    }
-                    
-                    HStack(spacing: 16) {
-                        ProFeatureBadge(icon: "checkmark.seal.fill", text: localizationManager.localizedString("premium_active"))
-                        ProFeatureBadge(icon: "infinity", text: localizationManager.localizedString("unlimited_transcripts"))
-                    }
-                }
+                .frame(maxWidth: .infinity)
             }
             
             Spacer()

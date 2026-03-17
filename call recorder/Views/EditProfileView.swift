@@ -5,6 +5,7 @@ struct EditProfileView: View {
     let phoneNumber: String
     @Environment(\.dismiss) private var dismiss
     @StateObject var viewModel = AppViewModel.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     
     @State private var editedName: String = ""
     @State private var editedPhoneNumber: String = ""
@@ -29,7 +30,7 @@ struct EditProfileView: View {
                                 .foregroundColor(.primaryGreen)
                         )
                     
-                    Text("Edit your profile name")
+                    Text(localizationManager.localizedString("edit_profile_subtitle"))
                         .font(.caption)
                         .foregroundColor(.secondaryText)
                 }
@@ -37,7 +38,7 @@ struct EditProfileView: View {
                 
                 VStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Full Name")
+                        Text(localizationManager.localizedString("full_name"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.primaryText)
@@ -46,7 +47,7 @@ struct EditProfileView: View {
                             Image(systemName: "person")
                                 .foregroundColor(.secondaryText)
                             
-                            TextField("Enter your full name", text: $editedName)
+                            TextField(localizationManager.localizedString("enter_full_name"), text: $editedName)
                                 .foregroundColor(.primaryText)
                         }
                         .padding()
@@ -59,7 +60,7 @@ struct EditProfileView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Phone Number")
+                        Text(localizationManager.localizedString("phone_number"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.primaryText)
@@ -94,7 +95,7 @@ struct EditProfileView: View {
                                     .padding(.leading, 16)
                                     .padding(.vertical, 16)
                                 
-                                TextField("Phone number", text: $editedPhoneNumber)
+                                TextField(localizationManager.localizedString("phone_number_placeholder"), text: $editedPhoneNumber)
                                     .font(.body)
                                     .foregroundColor(.primaryText)
                                     .padding(.trailing, 16)
@@ -125,7 +126,7 @@ struct EditProfileView: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(0.8)
                         } else {
-                            Text("Save Changes")
+                            Text(localizationManager.localizedString("save_changes"))
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.black)
@@ -148,12 +149,12 @@ struct EditProfileView: View {
                 .opacity((editedName.isEmpty || isValidPhoneNumber(editedPhoneNumber) == false || isLoading) ? 0.6 : 1.0)
             }
             .background(Color.darkBackground)
-            .navigationTitle("Edit Profile")
+            .navigationTitle(localizationManager.localizedString("edit_profile"))
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(localizationManager.localizedString("cancel")) {
                         dismiss()
                     }
                     .foregroundColor(.primaryGreen)
@@ -166,18 +167,18 @@ struct EditProfileView: View {
             .sheet(isPresented: $showCountryPicker) {
                 CountryPickerView(selectedCountry: $selectedCountry)
             }
-            .alert("Error", isPresented: $showError) {
-                Button("OK") {}
+            .alert(localizationManager.localizedString("error"), isPresented: $showError) {
+                Button(localizationManager.localizedString("ok")) {}
             } message: {
                 Text(errorMessage)
             }
         }
-        .alert("Profile Updated", isPresented: $showSaveAlert) {
-            Button("OK") {
+        .alert(localizationManager.localizedString("profile_updated"), isPresented: $showSaveAlert) {
+            Button(localizationManager.localizedString("ok")) {
                 dismiss()
             }
         } message: {
-            Text("Your profile has been updated successfully.")
+            Text(localizationManager.localizedString("profile_updated_message"))
         }
     }
     
@@ -231,12 +232,12 @@ struct EditProfileView: View {
             } else {
                 isLoading = false
                 showError = true
-                errorMessage = "Failed to update phone number"
+                errorMessage = localizationManager.localizedString("failed_update_phone")
             }
         } catch {
             isLoading = false
             showError = true
-            errorMessage = "Error updating phone number: \(error.localizedDescription)"
+            errorMessage = String(format: localizationManager.localizedString("error_updating_phone"), error.localizedDescription)
         }
     }
 }
