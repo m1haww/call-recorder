@@ -115,7 +115,8 @@ struct PhoneSelectionView: View {
                         .font(.body)
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 20)
+                        .padding(.horizontal, 16)
 
                     VStack(spacing: 20) {
                         Button(action: {
@@ -164,7 +165,7 @@ struct PhoneSelectionView: View {
                                     if phoneNumber.isEmpty {
                                         Text("Phone number")
                                             .font(.title3)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.white.opacity(0.6))
                                             .padding(.leading, 8)
                                             .allowsHitTesting(false)
                                     }
@@ -224,7 +225,7 @@ struct PhoneSelectionView: View {
                         .animation(.easeInOut(duration: 0.2), value: canProceed)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.top, 36)
+                    .padding(.top, 26)
                     .padding(.bottom, 40)
                 }
                 .frame(maxWidth: .infinity)

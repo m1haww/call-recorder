@@ -2,6 +2,7 @@ import Foundation
 import FirebaseRemoteConfig
 import SwiftUI
 import Combine
+import RevenueCat
 
 final class OnboardingRemoteConfigManager: ObservableObject {
     static let shared = OnboardingRemoteConfigManager()
@@ -9,29 +10,27 @@ final class OnboardingRemoteConfigManager: ObservableObject {
     
     @Published var onboardingVariant = OnboardingABVariant.a
     
-    func fetchAndActivate() {
-        let remoteConfig = RemoteConfig.remoteConfig()
-        let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0
-        remoteConfig.configSettings = settings
-        
-        remoteConfig.fetchAndActivate { status, _ in
-            switch status {
-            case .successFetchedFromRemote, .successUsingPreFetchedData:
-                print("Successfully fetched remote config")
-                self.loadOnboardingVariant()
-                break
-            default:
-                print("Failed to fetch or activate remote config")
-                break
+    func fetchAndActivateConfig() async {
+        do {
+            let remoteConfig = RemoteConfig.remoteConfig()
+            let settings = RemoteConfigSettings()
+            settings.minimumFetchInterval = 0
+            remoteConfig.configSettings = settings
+            
+            _ = try await remoteConfig.fetch()
+            _ = try await remoteConfig.activate()
+
+            let value = remoteConfig.configValue(forKey: parameterKey).stringValue.lowercased()
+            guard let variant = OnboardingABVariant(rawValue: value) else { return }
+
+            await MainActor.run {
+                self.onboardingVariant = variant
             }
+
+            Purchases.shared.attribution.setAttributes(["onboardingVariant": variant.rawValue])
+            print("Fetched onboarding variant: \(variant.rawValue)")
+        } catch {
+            print("Failed to fetch/activate remote config: \(error.localizedDescription)")
         }
-    }
-    
-    func loadOnboardingVariant() {
-        let remoteConfig = RemoteConfig.remoteConfig()
-        let value = remoteConfig.configValue(forKey: parameterKey).stringValue.lowercased()
-        guard let variant = OnboardingABVariant(rawValue: value) else { return }
-        self.onboardingVariant = variant
     }
 }

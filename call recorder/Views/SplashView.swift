@@ -2,10 +2,7 @@ import SwiftUI
 
 struct SplashView: View {
     @StateObject var viewModel = AppViewModel.shared
-    @State private var fetchTask: Task<Void, Never>?
     @Binding var isDataLoaded: Bool
-    @State private var minimumTimeElapsed = false
-    @State private var dataLoadingComplete = false
     
     var body: some View {
         ZStack {
@@ -14,7 +11,7 @@ struct SplashView: View {
             Image("icon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 134, height: 134)
+                .frame(width: 135, height: 135)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
             
             VStack {
@@ -27,43 +24,18 @@ struct SplashView: View {
             }
         }
         .ignoresSafeArea()
-        .onAppear {
+        .task {
             AnalyticsManager.shared.logEvent(name: "App Launched")
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                minimumTimeElapsed = true
-                checkIfReadyToNavigate()
-            }
+            await OnboardingRemoteConfigManager.shared.fetchAndActivateConfig()
             
-            fetchTask = Task {
-                await withTaskGroup(of: Void.self) { group in
-                    group.addTask {
-                        await viewModel.loadUserDataFromServer()
-                    }
-                    
-                    group.addTask {
-                        await viewModel.fetchCallsFromServerAsync()
-                    }
-                    
-                    group.addTask {
-                        await viewModel.fetchPhoneServiceNumber()
-                    }
-                }
-                
-                await MainActor.run {
-                    dataLoadingComplete = true
-                    checkIfReadyToNavigate()
-                }
-            }
-        }
-        .onDisappear {
-            fetchTask?.cancel()
-        }
-    }
-    
-    private func checkIfReadyToNavigate() {
-        if minimumTimeElapsed && dataLoadingComplete {
-            isDataLoaded = true
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            
+            await viewModel.loadUserDataFromServer()
+            await viewModel.fetchCallsFromServerAsync()
+            await viewModel.fetchPhoneServiceNumber()
+            
+            self.isDataLoaded = true
         }
     }
 }

@@ -10,7 +10,6 @@ import FirebaseAnalytics
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
-        OnboardingRemoteConfigManager.shared.fetchAndActivate()
         
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: revenueCatApiKey, appUserID: AppViewModel.shared.userId)
