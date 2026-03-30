@@ -1,8 +1,6 @@
 import SwiftUI
 import ContactsUI
 
-/// Presents the system contact picker; selected contact's first phone number is written to `selectedNumber`.
-/// Add "Privacy - Contacts Usage Description" (NSContactsUsageDescription) to the app's Info if not already set.
 struct ContactPickerView: UIViewControllerRepresentable {
     @Binding var selectedNumber: String
     @Environment(\.dismiss) private var dismiss

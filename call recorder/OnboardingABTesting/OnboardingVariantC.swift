@@ -19,6 +19,8 @@ struct OnboardingVariantC: View {
     @State private var widgetOpacity: Double = 0
     @State private var textOpacity: Double = 0
     @State private var buttonScale: CGFloat = 1
+    
+    @Environment(\.requestReview) var requestReview
 
     private static let introCount = 3
 
@@ -233,11 +235,11 @@ struct OnboardingVariantC: View {
     private func completeOnboarding() {
         subscriptionService.showPaywall = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                SKStoreReviewController.requestReview(in: windowScene)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
+            requestReview()
+            withAnimation {
+                viewModel.completeOnboarding()
             }
-            viewModel.completeOnboarding()
         }
     }
 }

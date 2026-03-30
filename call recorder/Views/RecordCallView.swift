@@ -5,7 +5,7 @@ struct RecordCallView: View {
     @StateObject private var subscriptionService = SubscriptionService.shared
     @StateObject private var localizationManager = LocalizationManager.shared
 
-    @State private var selectedTab = 0 // 0 = Incoming, 1 = Outgoing
+    @State private var selectedTab = 0
     @State private var phoneNumber: String = "1"
     @State private var showContactPicker = false
 
@@ -92,7 +92,6 @@ struct RecordCallView: View {
     }
 }
 
-// MARK: - Incoming call section (answer → open app & tap phone button → merge)
 private struct IncomingCallSection: View {
     @StateObject private var localizationManager = LocalizationManager.shared
     let isServiceNumberLoading: Bool
@@ -140,7 +139,6 @@ private struct IncomingCallSection: View {
     }
 }
 
-// MARK: - Outgoing call section (single vertical stack: Step 1 → Step 2 → Step 3)
 private struct OutgoingCallSection: View {
     @Binding var phoneNumber: String
     @Binding var showContactPicker: Bool
@@ -153,20 +151,17 @@ private struct OutgoingCallSection: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 12) {
-                // Step 1
                 OutgoingStep1Content(
                     isServiceNumberLoading: isServiceNumberLoading,
                     onCallService: onCallService
                 )
 
-                // Step 2
                 OutgoingStep2Content(
                     phoneNumber: $phoneNumber,
                     showContactPicker: $showContactPicker,
                     onCallNumber: onCallNumber
                 )
 
-                // Step 3
                 OutgoingStep3Content()
                 
             }
@@ -260,7 +255,6 @@ private struct OutgoingStep3Content: View {
     }
 }
 
-// MARK: - iOS-style dial pad (keypad + number display + green call button)
 struct DialPadView: View {
     @Binding var phoneNumber: String
     let onCall: () -> Void
@@ -291,7 +285,6 @@ struct DialPadView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Contact button (optional) + number display + delete
             HStack(spacing: 16) {
                 if let onPickContact = onPickContact {
                     Button(action: {
@@ -344,7 +337,6 @@ struct DialPadView: View {
             .padding(.horizontal, 32)
             .padding(.top, 8)
 
-            // Green call button
             Button(action: onCall) {
                 ZStack {
                     Circle()
@@ -388,7 +380,6 @@ private struct KeypadButton: View {
     }
 }
 
-// MARK: - Horizontal paging tutorial
 struct RecordCallTutorialView: View {
     @StateObject private var localizationManager = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
@@ -423,7 +414,6 @@ struct RecordCallTutorialView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
-                // Page indicator
                 HStack(spacing: 8) {
                     ForEach(0..<pageCount, id: \.self) { index in
                         Circle()

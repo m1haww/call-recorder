@@ -165,9 +165,11 @@ struct OnboardingVariantB: View {
     private func completeOnboarding() {
         subscriptionService.showPaywall = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
             requestReview()
-            viewModel.completeOnboarding()
+            withAnimation {
+                viewModel.completeOnboarding()
+            }
         }
     }
 }

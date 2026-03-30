@@ -34,7 +34,6 @@ struct Recording: Identifiable, Codable {
         self.transcript = transcript
     }
 
-    /// Convenience: transcript text for display (nil if no transcript or no text).
     var transcriptText: String? { transcript?.text }
     
     var contactName: String {

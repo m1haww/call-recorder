@@ -11,7 +11,7 @@ struct SplashView: View {
             Image("icon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 135, height: 135)
+                .frame(width: 137.5, height: 137.5)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
             
             VStack {
