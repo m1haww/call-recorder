@@ -3,7 +3,6 @@ import SwiftUI
 struct RecordCallView: View {
     @StateObject private var viewModel = AppViewModel.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
-    @StateObject private var localizationManager = LocalizationManager.shared
 
     @State private var selectedTab = 0
     @State private var phoneNumber: String = "1"
@@ -12,8 +11,8 @@ struct RecordCallView: View {
     var body: some View {
         VStack(spacing: 0) {
             Picker("", selection: $selectedTab) {
-                Text(localizationManager.localizedString("incoming_call")).tag(0)
-                Text(localizationManager.localizedString("outgoing_call")).tag(1)
+                Text(String(localized: "Incoming Call")).tag(0)
+                Text(String(localized: "Outgoing Call")).tag(1)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 24)
@@ -57,7 +56,7 @@ struct RecordCallView: View {
     private func onCallServiceTapped() {
         HapticManager.shared.impact(.medium)
         if viewModel.recordingServiceNumber.isEmpty {
-            viewModel.showToast(localizationManager.localizedString("loading_service_number"))
+            viewModel.showToast(String(localized: "Loading service number..."))
             return
         }
         if subscriptionService.isProUser {
@@ -79,28 +78,27 @@ struct RecordCallView: View {
 
     private func makePhoneCall(to number: String) {
         guard !number.isEmpty else {
-            viewModel.showToast(localizationManager.localizedString("no_phone_number"))
+            viewModel.showToast(String(localized: "No phone number"))
             return
         }
         if let phoneURL = URL(string: "tel://\(number)") {
             if UIApplication.shared.canOpenURL(phoneURL) {
                 UIApplication.shared.open(phoneURL)
             } else {
-                viewModel.showToast(localizationManager.localizedString("unable_make_call"))
+                viewModel.showToast(String(localized: "Unable to make phone call on this device"))
             }
         }
     }
 }
 
 private struct IncomingCallSection: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let isServiceNumberLoading: Bool
     let onCallService: () -> Void
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                Text(localizationManager.localizedString("incoming_steps_intro"))
+                Text(String(localized: "When you receive a call, follow these steps:"))
                     .font(.subheadline)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
@@ -108,16 +106,16 @@ private struct IncomingCallSection: View {
                     .padding(.top, 8)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    InstructionStep(number: "1", text: localizationManager.localizedString("incoming_step_1"))
-                    InstructionStep(number: "2", text: localizationManager.localizedString("incoming_step_2_app"))
-                    InstructionStep(number: "3", text: localizationManager.localizedString("incoming_step_4"))
+                    InstructionStep(number: "1", text: String(localized: "Answer the incoming call"))
+                    InstructionStep(number: "2", text: String(localized: "Open the app and tap the green phone button to call our service"))
+                    InstructionStep(number: "3", text: String(localized: "Merge the calls - recording starts automatically"))
                 }
                 .padding(.horizontal, 24)
 
                 Button(action: onCallService) {
                     HStack(spacing: 10) {
                         Image(systemName: "phone.fill")
-                        Text(localizationManager.localizedString("call_our_service"))
+                        Text(String(localized: "Call Our Service"))
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
@@ -146,8 +144,6 @@ private struct OutgoingCallSection: View {
     let onCallService: () -> Void
     let onCallNumber: () -> Void
 
-    @StateObject private var localizationManager = LocalizationManager.shared
-
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 12) {
@@ -172,13 +168,12 @@ private struct OutgoingCallSection: View {
 }
 
 private struct OutgoingStep1Content: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let isServiceNumberLoading: Bool
     let onCallService: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Text(localizationManager.localizedString("record_step1_call_service"))
+            Text(String(localized: "Step 1: Call our recording service first"))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(.secondaryText)
@@ -188,7 +183,7 @@ private struct OutgoingStep1Content: View {
             Button(action: onCallService) {
                 HStack(spacing: 10) {
                     Image(systemName: "phone.fill")
-                    Text(localizationManager.localizedString("call_our_service"))
+                    Text(String(localized: "Call Our Service"))
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -209,11 +204,9 @@ private struct OutgoingStep2Content: View {
     @Binding var showContactPicker: Bool
     let onCallNumber: () -> Void
 
-    @StateObject private var localizationManager = LocalizationManager.shared
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(localizationManager.localizedString("record_then_return"))
+            Text(String(localized: "Step 2: Then return to the app and call the person you need, or pick a contact."))
                 .font(.subheadline)
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.leading)
@@ -230,11 +223,10 @@ private struct OutgoingStep2Content: View {
 }
 
 private struct OutgoingStep3Content: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(localizationManager.localizedString("record_step3_merge"))
+            Text(String(localized: "Step 3: Merge the calls\n\nMerge the two calls together. Recording starts automatically—no extra steps needed."))
                 .font(.subheadline)
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.leading)
@@ -381,7 +373,6 @@ private struct KeypadButton: View {
 }
 
 struct RecordCallTutorialView: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var currentPage = 0
 
@@ -392,22 +383,22 @@ struct RecordCallTutorialView: View {
             VStack(spacing: 0) {
                 TabView(selection: $currentPage) {
                     TutorialPageView(
-                        title: localizationManager.localizedString("tutorial_page1_title"),
-                        bodyText: localizationManager.localizedString("tutorial_page1_body"),
+                        title: String(localized: "Call our recording service first"),
+                        bodyText: String(localized: "Tap \"Call our service\" to dial the recording line. Stay on the call, then return to the app."),
                         assetImageName: "iphone-app"
                     )
                     .tag(0)
 
                     TutorialPageView(
-                        title: localizationManager.localizedString("tutorial_page2_title"),
-                        bodyText: localizationManager.localizedString("tutorial_page2_body"),
+                        title: String(localized: "Then call the number or pick a contact"),
+                        bodyText: String(localized: "Back in the app, enter the phone number on the keypad or tap \"Pick contact\" to choose from your contacts. Then tap the green call button."),
                         assetImageName: "iphone-service"
                     )
                     .tag(1)
 
                     TutorialPageView(
-                        title: localizationManager.localizedString("tutorial_page3_title"),
-                        bodyText: localizationManager.localizedString("tutorial_page3_body"),
+                        title: String(localized: "Merge the calls"),
+                        bodyText: String(localized: "Merge the two calls together. Recording starts automatically—no extra steps needed."),
                         assetImageName: "iphone-merge"
                     )
                     .tag(2)
@@ -424,12 +415,12 @@ struct RecordCallTutorialView: View {
                 .padding(.bottom, 24)
             }
             .background(Color.darkBackground)
-            .navigationTitle(localizationManager.localizedString("how_to_record"))
+            .navigationTitle(String(localized: "How to record"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.darkBackground, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(localizationManager.localizedString("done")) {
+                    Button(String(localized: "Done")) {
                         HapticManager.shared.selection()
                         dismiss()
                     }
@@ -494,7 +485,6 @@ struct InstructionStep: View {
 }
 
 struct WarningBanner: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -502,7 +492,7 @@ struct WarningBanner: View {
                 .foregroundColor(.orange)
                 .font(.title3)
 
-            Text(localizationManager.localizedString("recording_merge_warning"))
+            Text(String(localized: "Recording starts automatically when calls are merged"))
                 .font(.footnote)
                 .fontWeight(.medium)
                 .foregroundColor(.orange)

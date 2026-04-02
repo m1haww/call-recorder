@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var appManager = AppViewModel.shared
-    @StateObject private var localizationManager = LocalizationManager.shared
     @StateObject private var viewModel = ContentViewModel()
     @StateObject private var subscriptionService = SubscriptionService.shared
     
@@ -11,11 +10,11 @@ struct ContentView: View {
 
     private func navigationTitleForTab(_ tabIndex: Int) -> String {
         switch tabIndex {
-        case 0: return localizationManager.localizedString("recordings")
-        case 1: return localizationManager.localizedString("record_call")
-        case 2: return localizationManager.localizedString("transcripts")
-        case 3: return localizationManager.localizedString("settings")
-        default: return localizationManager.localizedString("recordings")
+        case 0: return String(localized: "Recordings")
+        case 1: return String(localized: "Record Call")
+        case 2: return String(localized: "Transcripts")
+        case 3: return String(localized: "Settings")
+        default: return String(localized: "Recordings")
         }
     }
 
@@ -32,7 +31,7 @@ struct ContentView: View {
         if let url = URL(string: phoneNumber), UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         } else {
-            appManager.showToast("Unable to make phone call")
+            appManager.showToast(String(localized: "Unable to make phone call on this device"))
         }
     }
     
@@ -42,25 +41,25 @@ struct ContentView: View {
                 TabView(selection: $viewModel.selectedTab) {
                     HomeView(navigationPath: $appManager.navigationPath)
                         .tabItem {
-                            Label(localized("recordings"), systemImage: viewModel.selectedTab == 0 ? "house.fill" : "house")
+                            Label(String(localized: "Recordings"), systemImage: viewModel.selectedTab == 0 ? "house.fill" : "house")
                         }
                         .tag(0)
                     
                     RecordCallView()
                         .tabItem {
-                            Label(localized("record_call"), systemImage: viewModel.selectedTab == 1 ? "phone.circle.fill" : "phone.circle")
+                            Label(String(localized: "Record Call"), systemImage: viewModel.selectedTab == 1 ? "phone.circle.fill" : "phone.circle")
                         }
                         .tag(1)
                     
                     TranscriptsView(navigationPath: $appManager.navigationPath)
                         .tabItem {
-                            Label(localized("transcripts"), systemImage: viewModel.selectedTab == 2 ? "doc.text.fill" : "doc.text")
+                            Label(String(localized: "Transcripts"), systemImage: viewModel.selectedTab == 2 ? "doc.text.fill" : "doc.text")
                         }
                         .tag(2)
                     
                     SettingsView()
                         .tabItem {
-                            Label(localized("settings"), systemImage: viewModel.selectedTab == 3 ? "gearshape.fill" : "gearshape")
+                            Label(String(localized: "Settings"), systemImage: viewModel.selectedTab == 3 ? "gearshape.fill" : "gearshape")
                         }
                         .tag(3)
                 }
@@ -106,7 +105,7 @@ struct ContentView: View {
                             Button(action: {
                                 HapticManager.shared.impact(.medium)
                                 if appManager.recordingServiceNumber.isEmpty {
-                                    appManager.showToast("Loading service number...")
+                                    appManager.showToast(String(localized: "Loading service number..."))
                                 } else if subscriptionService.isProUser {
                                     makePhoneCall(to: appManager.recordingServiceNumber)
                                 } else {

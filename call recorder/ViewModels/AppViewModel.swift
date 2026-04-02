@@ -11,7 +11,6 @@ final class AppViewModel: ObservableObject {
     @Published var showAlert = false
     @Published var alertMessage = ""
     
-    @Published var selectedLanguage = "English"
     @Published var notificationsEnabled = true
     @Published var showPermissionAlert = false
     
@@ -250,8 +249,6 @@ final class AppViewModel: ObservableObject {
             }
             
             self.recordings = recordings
-            
-            showToast("\(recordings.count) recordings loaded")
         } catch {
             if error._code == NSURLErrorCancelled {
                 print("Request was cancelled")

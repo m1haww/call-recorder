@@ -5,7 +5,6 @@ import AVKit
 struct CallDetailsView: View {
     let recording: Recording
     @Binding var navigationPath: NavigationPath
-    @StateObject private var localizationManager = LocalizationManager.shared
     @StateObject private var audioPlayer = AudioPlayerManager()
     @State private var showDeleteAlert = false
     @State private var showShareSheet = false
@@ -32,7 +31,7 @@ struct CallDetailsView: View {
                                 )
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(localizationManager.localizedString("call_recording"))
+                                Text(String(localized: "Call Recording"))
                                     .font(.system(size: 20, weight: .medium))
                                     .foregroundColor(.primaryText)
                                 
@@ -53,21 +52,21 @@ struct CallDetailsView: View {
                     HStack(spacing: 12) {
                         StatCard(
                             icon: "calendar",
-                            title: localizationManager.localizedString("date"),
+                            title: String(localized: "Date"),
                             value: formatShortDate(recording.date),
                             color: .primaryGreen
                         )
                         
                         StatCard(
                             icon: "clock",
-                            title: localizationManager.localizedString("time"),
+                            title: String(localized: "Time"),
                             value: formatTime(recording.date),
                             color: .primaryGreen
                         )
                         
                         StatCard(
                             icon: "timer",
-                            title: localizationManager.localizedString("duration"),
+                            title: String(localized: "Duration"),
                             value: formatShortDuration(recording.duration),
                             color: .primaryGreen
                         )
@@ -139,17 +138,17 @@ struct CallDetailsView: View {
                             }) {
                                 ZStack {
                                     Circle()
-                                        .fill(Color.primaryGreen)
+                                        .fill(Color.primaryGreen.opacity(0.15))
                                         .frame(width: 64, height: 64)
                                     
                                     if isLoadingRecording || audioPlayer.isLoading {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            .progressViewStyle(CircularProgressViewStyle(tint: Color.primaryGreen))
                                             .scaleEffect(0.8)
                                     } else {
                                         Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
                                             .font(.system(size: 28))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(Color.primaryGreen)
                                             .offset(x: audioPlayer.isPlaying ? 0 : 2)
                                     }
                                 }
@@ -173,14 +172,14 @@ struct CallDetailsView: View {
                     HStack(spacing: 12) {
                         DetailActionButton(
                             icon: "square.and.arrow.up",
-                            title: localizationManager.localizedString("share"),
+                            title: String(localized: "Share"),
                             color: .primaryGreen,
                             action: { showShareSheet = true }
                         )
                         
                         DetailActionButton(
                             icon: "trash",
-                            title: localizationManager.localizedString("delete"),
+                            title: String(localized: "Delete"),
                             color: .red,
                             action: { showDeleteAlert = true }
                         )
@@ -194,8 +193,8 @@ struct CallDetailsView: View {
                             }) {
                                 InfoCard(
                                     icon: "doc.text.fill",
-                                    title: localizationManager.localizedString("transcript"),
-                                    value: localizationManager.localizedString("available"),
+                                    title: String(localized: "Transcript"),
+                                    value: String(localized: "Available"),
                                     color: .primaryGreen,
                                     isClickable: true
                                 )
@@ -206,15 +205,15 @@ struct CallDetailsView: View {
                         if recording.isUploaded {
                             InfoCard(
                                 icon: "checkmark.icloud.fill",
-                                title: localizationManager.localizedString("cloud_sync"),
-                                value: localizationManager.localizedString("uploaded"),
+                                title: String(localized: "Cloud Sync"),
+                                value: String(localized: "Uploaded"),
                                 color: .primaryGreen
                             )
                         }
                         
                         InfoCard(
                             icon: "info.circle.fill",
-                            title: localizationManager.localizedString("recording_id"),
+                            title: String(localized: "Recording ID"),
                             value: String(recording.id.prefix(8)) + "...",
                             color: .secondaryText
                         )
@@ -224,7 +223,7 @@ struct CallDetailsView: View {
                 .padding(.vertical)
             }
         }
-        .navigationTitle(localizationManager.localizedString("recording"))
+        .navigationTitle(String(localized: "Recording"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -235,23 +234,23 @@ struct CallDetailsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .medium))
-                        Text(localizationManager.localizedString("back"))
+                        Text(String(localized: "Back"))
                             .font(.system(size: 17))
                     }
                     .foregroundColor(.primaryGreen)
                 }
             }
         }
-        .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
-            Button(localizationManager.localizedString("cancel"), role: .cancel) { }
-            Button(localizationManager.localizedString("delete"), role: .destructive) {
+        .alert(String(localized: "Delete Recording"), isPresented: $showDeleteAlert) {
+            Button(String(localized: "Cancel"), role: .cancel) { }
+            Button(String(localized: "Delete"), role: .destructive) {
                 Task {
                     await appViewModel.deleteRecording(recording)
                     dismiss()
                 }
             }
         } message: {
-            Text(localizationManager.localizedString("delete_recording_message"))
+            Text(String(localized: "Are you sure you want to delete this recording? This action cannot be undone."))
         }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.google.com")!])
@@ -452,7 +451,7 @@ final class AudioPlayerManager: NSObject, ObservableObject {
                 }
             }
         } catch {
-            print("Error preloading recording: \\(error)")
+            print("Error preloading recording: \(error)")
         }
         
         isLoading = false

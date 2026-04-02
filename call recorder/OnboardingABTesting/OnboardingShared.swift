@@ -32,7 +32,7 @@ struct PhoneSelectionView: View {
         } else {
             HapticManager.shared.notification(.error)
             showError = true
-            errorMessage = "Please enter a valid phone number for \(selectedCountry.name)"
+            errorMessage = String(format: String(localized: "Please enter a valid phone number for %@"), selectedCountry.name)
         }
     }
     
@@ -54,7 +54,7 @@ struct PhoneSelectionView: View {
                 let notificationFeedback = UINotificationFeedbackGenerator()
                 notificationFeedback.notificationOccurred(.error)
                 self.showError = true
-                self.errorMessage = "Registration failed: \(error.localizedDescription)"
+                self.errorMessage = String(format: String(localized: "Registration failed: %@"), error.localizedDescription)
             }
         }
     }
@@ -111,7 +111,7 @@ struct PhoneSelectionView: View {
                     }
                     .padding(.bottom, 32)
                     
-                    Text("Enter your phone number without the country code")
+                    Text(String(localized: "Enter your phone number without the country code"))
                         .font(.body)
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
@@ -163,7 +163,7 @@ struct PhoneSelectionView: View {
                                         .focused($isTextFieldFocused)
                                     
                                     if phoneNumber.isEmpty {
-                                        Text("Phone number")
+                                        Text(String(localized: "Phone number"))
                                             .font(.title3)
                                             .foregroundColor(.white.opacity(0.6))
                                             .padding(.leading, 8)
@@ -193,7 +193,7 @@ struct PhoneSelectionView: View {
                                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                         .scaleEffect(0.9)
                                 } else {
-                                    Text("Continue")
+                                    Text(String(localized: "Continue"))
                                         .font(.headline)
                                         .fontWeight(.semibold)
                                 }
@@ -236,8 +236,8 @@ struct PhoneSelectionView: View {
                 removal: .move(edge: .leading).combined(with: .opacity)
             ))
         }
-        .alert("Error", isPresented: $showError) {
-            Button("OK") {
+        .alert(String(localized: "Error"), isPresented: $showError) {
+            Button(String(localized: "OK")) {
                 let notificationFeedback = UINotificationFeedbackGenerator()
                 notificationFeedback.notificationOccurred(.warning)
             }

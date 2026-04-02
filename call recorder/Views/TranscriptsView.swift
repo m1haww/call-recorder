@@ -3,7 +3,6 @@ import UIKit
 
 struct TranscriptsView: View {
     @StateObject var viewModel = AppViewModel.shared
-    @StateObject private var localizationManager = LocalizationManager.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
     @Binding var navigationPath: NavigationPath
     
@@ -42,39 +41,7 @@ struct TranscriptsView: View {
     }
 }
 
-struct LanguagePicker: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
-    @Binding var selectedLanguage: String
-    let languages: [String]
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "globe")
-                .foregroundColor(.skyBlue)
-            
-            Picker(localizationManager.localizedString("language"), selection: $selectedLanguage) {
-                ForEach(languages, id: \.self) { language in
-                    Text(language).tag(language)
-                }
-            }
-            .pickerStyle(MenuPickerStyle())
-            .tint(.navyBlue)
-            .onChange(of: selectedLanguage) { _ in
-                HapticManager.shared.selection()
-            }
-            
-            Spacer()
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
-    }
-}
-
-
 struct TranscriptCard: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let recording: Recording
     let isProUser: Bool
     
@@ -109,14 +76,14 @@ struct TranscriptCard: View {
                     Image(systemName: "lock.fill")
                         .foregroundColor(.orange)
                         .font(.system(size: 12))
-                    Text(localizationManager.localizedString("transcript_available_premium"))
+                    Text(String(localized: "Transcript available with Premium"))
                         .font(.system(size: 12))
                         .foregroundColor(.orange)
                         .italic()
                 }
                 .padding(.top, 2)
             } else {
-                Text(localizationManager.localizedString("transcript_not_available"))
+                Text(String(localized: "Transcript not available"))
                     .font(.system(size: 12))
                     .foregroundColor(.tertiaryText)
                     .italic()
@@ -131,7 +98,7 @@ struct TranscriptCard: View {
                 Spacer()
                 
                 if recording.isUploaded {
-                    Label(localizationManager.localizedString("synced"), systemImage: "checkmark.icloud.fill")
+                    Label(String(localized: "Synced"), systemImage: "checkmark.icloud.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.primaryGreen)
                 }
@@ -159,4 +126,3 @@ struct TranscriptCard: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 }
-

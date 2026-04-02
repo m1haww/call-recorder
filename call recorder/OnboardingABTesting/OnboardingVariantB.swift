@@ -1,12 +1,35 @@
 import SwiftUI
 import StoreKit
 
-private let variantBIntroSteps: [(title: String, subtitle: String)] = [
-    ("Record calls hassle free", "Seamless call recording of all your incoming and outgoing phone calls"),
-    ("Automatically record outgoing calls", "Make an outgoing call with 2 simple steps and we'll take care of the recording"),
-    ("Transcribe your recorded calls", "Transcribe your calls straight after finishing a call and store them on your phone or share."),
-    ("Organize your recordings", "Create lists and have full control of your recorded calls and transcriptions")
-]
+private func variantBIntroStep(for index: Int) -> (title: String, subtitle: String) {
+    switch index {
+    case 0:
+        return (
+            String(localized: "Record calls hassle free"),
+            String(localized: "Seamless call recording of all your incoming and outgoing phone calls")
+        )
+    case 1:
+        return (
+            String(localized: "Automatically record outgoing calls"),
+            String(localized: "Make an outgoing call with 2 simple steps and we'll take care of the recording")
+        )
+    case 2:
+        return (
+            String(localized: "Transcribe your recorded calls"),
+            String(localized: "Transcribe your calls straight after finishing a call and store them on your phone or share.")
+        )
+    case 3:
+        return (
+            String(localized: "Organize your recordings"),
+            String(localized: "Create lists and have full control of your recorded calls and transcriptions")
+        )
+    default:
+        return (
+            String(localized: "Record calls hassle free"),
+            String(localized: "Seamless call recording of all your incoming and outgoing phone calls")
+        )
+    }
+}
 
 struct OnboardingVariantB: View {
     @StateObject private var viewModel = AppViewModel.shared
@@ -69,13 +92,13 @@ struct OnboardingVariantB: View {
                     .shadow(color: .black.opacity(0.35), radius: 24, x: 0, y: 12)
 
                 VStack(spacing: 14) {
-                    Text(variantBIntroSteps[currentStep].title)
+                    Text(variantBIntroStep(for: currentStep).title)
                         .font(.system(size: 26, weight: .bold, design: .rounded))
                         .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(2)
 
-                    Text(variantBIntroSteps[currentStep].subtitle)
+                    Text(variantBIntroStep(for: currentStep).subtitle)
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.secondaryText.opacity(0.95))
                         .multilineTextAlignment(.center)
@@ -83,7 +106,7 @@ struct OnboardingVariantB: View {
                         .padding(.horizontal, 32)
 
                     if currentStep == 3 {
-                        Text("Everything you need in one place.")
+                        Text(String(localized: "Everything you need in one place."))
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.primaryGreen.opacity(0.95))
                             .padding(.top, 4)
@@ -116,7 +139,7 @@ struct OnboardingVariantB: View {
             HapticManager.shared.impact(.light)
             nextStep()
         }) {
-            Text("Continue")
+            Text(String(localized: "Continue"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)

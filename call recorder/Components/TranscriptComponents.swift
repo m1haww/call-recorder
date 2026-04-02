@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct TranscriptEmptyState: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let isProUser: Bool
     @StateObject private var subscriptionService = SubscriptionService.shared
     
@@ -27,11 +26,11 @@ struct TranscriptEmptyState: View {
                 }
                 
                 VStack(spacing: 6) {
-                    Text(localizationManager.localizedString("no_transcripts"))
+                    Text(String(localized: "No Transcripts Yet"))
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.primaryText)
                     
-                    Text(localizationManager.localizedString("transcripts_first_recording_hint"))
+                    Text(String(localized: "Make your first recording to see your transcripts here."))
                         .font(.system(size: 14))
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
@@ -51,7 +50,6 @@ struct TranscriptEmptyState: View {
 }
 
 struct TranscriptLoadingView: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     @State private var dots = ""
     
     var body: some View {
@@ -60,7 +58,7 @@ struct TranscriptLoadingView: View {
                 .scaleEffect(1.2)
                 .tint(.primaryGreen)
             
-            Text(localizationManager.localizedString("generating_transcript") + dots)
+            Text(String(localized: "Generating transcript") + dots)
                 .font(.subheadline)
                 .foregroundColor(.primaryText)
         }
@@ -136,4 +134,3 @@ struct ProFeatureBadge: View {
         )
     }
 }
-

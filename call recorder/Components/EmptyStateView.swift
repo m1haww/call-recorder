@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct EmptyStateView: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let screenHeight = UIScreen.main.bounds.height
     
     var body: some View {
@@ -11,12 +10,12 @@ struct EmptyStateView: View {
                 .foregroundColor(.secondaryText)
             
             VStack(spacing: 8) {
-                Text(localizationManager.localizedString("no_recordings"))
+                Text(String(localized: "No Recordings Yet"))
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.primaryText)
                 
-                Text(localizationManager.localizedString("tap_record"))
+                Text(String(localized: "Tap the Record Call tab to get started"))
                     .font(.subheadline)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)

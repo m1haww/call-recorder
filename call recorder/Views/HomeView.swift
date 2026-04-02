@@ -2,7 +2,6 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject var viewModel = AppViewModel.shared
-    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var navigationPath: NavigationPath
     
     @State private var searchText = ""
@@ -14,9 +13,11 @@ struct HomeView: View {
     @State private var showShareSheet = false
     
     var filters: [String] {
-        [localizationManager.localizedString("all"),
-         localizationManager.localizedString("today"),
-         localizationManager.localizedString("week")]
+        [
+            String(localized: "All"),
+            String(localized: "Today"),
+            String(localized: "Week")
+        ]
     }
     
     var filteredRecordings: [Recording] {
@@ -73,9 +74,9 @@ struct HomeView: View {
                     ShareSheet(items: [recording.recordingUrl ?? URL(string: "https://www.youtube.com")!])
                 }
             }
-            .alert(localizationManager.localizedString("delete_recording"), isPresented: $showDeleteAlert) {
-                Button(localizationManager.localizedString("cancel"), role: .cancel) {}
-                Button(localizationManager.localizedString("delete"), role: .destructive) {
+            .alert(String(localized: "Delete Recording"), isPresented: $showDeleteAlert) {
+                Button(String(localized: "Cancel"), role: .cancel) {}
+                Button(String(localized: "Delete"), role: .destructive) {
                     if let recording = recordingToDelete,
                        let index = viewModel.recordings.firstIndex(where: { $0.id == recording.id }) {
                         HapticManager.shared.notification(.warning)
@@ -86,7 +87,7 @@ struct HomeView: View {
                     }
                 }
             } message: {
-                Text(localizationManager.localizedString("delete_recording_message"))
+                Text(String(localized: "Are you sure you want to delete this recording? This action cannot be undone."))
             }
         }
         .preferredColorScheme(.dark)
@@ -99,7 +100,6 @@ struct HomeView: View {
 
 
 struct SearchBar: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     @Binding var text: String
     
     var body: some View {
@@ -107,7 +107,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondaryText)
             
-            TextField(localizationManager.localizedString("search_recordings"), text: $text)
+            TextField(String(localized: "Search recordings..."), text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .foregroundColor(.primaryText)
         }
@@ -167,7 +167,6 @@ struct FilterButton: View {
 }
 
 struct RecordingCard: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
     let recording: Recording
     var onPlay: () -> Void = {}
     var onShare: () -> Void = {}
@@ -203,13 +202,13 @@ struct RecordingCard: View {
             
             Menu {
                 Button(action: onPlay) {
-                    Label(localizationManager.localizedString("play"), systemImage: "play.fill")
+                    Label(String(localized: "Play"), systemImage: "play.fill")
                 }
                 Button(action: onShare) {
-                    Label(localizationManager.localizedString("share"), systemImage: "square.and.arrow.up")
+                    Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
                 }
                 Button(role: .destructive, action: onDelete) {
-                    Label(localizationManager.localizedString("delete"), systemImage: "trash")
+                    Label(String(localized: "Delete"), systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")

@@ -8,45 +8,45 @@ struct TermsOfServiceView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Terms of Service")
+                        Text(String(localized: "Terms of Service"))
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.primaryText)
                         
-                        Text("Last updated: \(Date().formatted(date: .abbreviated, time: .omitted))")
+                        Text("\(String(localized: "Last updated:")) \(Date().formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
                         TermsSection(
-                            title: "Acceptance of Terms",
-                            content: "By accessing and using Call Recorder, you accept and agree to be bound by the terms and provision of this agreement."
+                            title: String(localized: "Acceptance of Terms"),
+                            content: String(localized: "By accessing and using Call Recorder, you accept and agree to be bound by the terms and provision of this agreement.")
                         )
                         
                         TermsSection(
-                            title: "Legal Compliance",
-                            content: "You are responsible for ensuring that your use of this app complies with all applicable laws and regulations regarding call recording in your jurisdiction. Some areas require consent from all parties before recording."
+                            title: String(localized: "Legal Compliance"),
+                            content: String(localized: "You are responsible for ensuring that your use of this app complies with all applicable laws and regulations regarding call recording in your jurisdiction. Some areas require consent from all parties before recording.")
                         )
                         
                         TermsSection(
-                            title: "Prohibited Uses",
-                            content: "You may not use this app for any unlawful purpose or to solicit others to perform unlawful acts. You are prohibited from recording calls without proper consent where required by law."
+                            title: String(localized: "Prohibited Uses"),
+                            content: String(localized: "You may not use this app for any unlawful purpose or to solicit others to perform unlawful acts. You are prohibited from recording calls without proper consent where required by law.")
                         )
                         
                         TermsSection(
-                            title: "Service Availability",
-                            content: "We strive to keep the app available at all times, but we cannot guarantee uninterrupted service. We reserve the right to modify or discontinue the service with reasonable notice."
+                            title: String(localized: "Service Availability"),
+                            content: String(localized: "We strive to keep the app available at all times, but we cannot guarantee uninterrupted service. We reserve the right to modify or discontinue the service with reasonable notice.")
                         )
                         
                         TermsSection(
-                            title: "Limitation of Liability",
-                            content: "In no event shall Call Recorder be liable for any indirect, incidental, special, consequential, or punitive damages arising out of your use of the service."
+                            title: String(localized: "Limitation of Liability"),
+                            content: String(localized: "In no event shall Call Recorder be liable for any indirect, incidental, special, consequential, or punitive damages arising out of your use of the service.")
                         )
                         
                         TermsSection(
-                            title: "Changes to Terms",
-                            content: "We reserve the right to modify these terms at any time. Users will be notified of significant changes via email or app notification."
+                            title: String(localized: "Changes to Terms"),
+                            content: String(localized: "We reserve the right to modify these terms at any time. Users will be notified of significant changes via email or app notification.")
                         )
                     }
                 }
@@ -57,7 +57,7 @@ struct TermsOfServiceView: View {
             .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(String(localized: "Done")) {
                         dismiss()
                     }
                     .foregroundColor(.primaryGreen)

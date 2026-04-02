@@ -8,45 +8,45 @@ struct PrivacyPolicyView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Privacy Policy")
+                        Text(String(localized: "Privacy Policy"))
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.primaryText)
                         
-                        Text("Last updated: \(Date().formatted(date: .abbreviated, time: .omitted))")
+                        Text("\(String(localized: "Last updated:")) \(Date().formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
                         PolicySection(
-                            title: "Information We Collect",
-                            content: "We collect information you provide directly to us, such as when you create an account, record calls, or contact us for support. This may include your name, email address, phone number, and call recordings."
+                            title: String(localized: "Information We Collect"),
+                            content: String(localized: "We collect information you provide directly to us, such as when you create an account, record calls, or contact us for support. This may include your name, email address, phone number, and call recordings.")
                         )
                         
                         PolicySection(
-                            title: "How We Use Your Information",
-                            content: "We use the information we collect to provide, maintain, and improve our services, process transactions, send you technical notices and support messages, and respond to your comments and questions."
+                            title: String(localized: "How We Use Your Information"),
+                            content: String(localized: "We use the information we collect to provide, maintain, and improve our services, process transactions, send you technical notices and support messages, and respond to your comments and questions.")
                         )
                         
                         PolicySection(
-                            title: "Information Sharing",
-                            content: "We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy or as required by law."
+                            title: String(localized: "Information Sharing"),
+                            content: String(localized: "We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy or as required by law.")
                         )
                         
                         PolicySection(
-                            title: "Data Security",
-                            content: "We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. All call recordings are encrypted end-to-end."
+                            title: String(localized: "Data Security"),
+                            content: String(localized: "We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. All call recordings are encrypted end-to-end.")
                         )
                         
                         PolicySection(
-                            title: "Your Rights",
-                            content: "You have the right to access, update, or delete your personal information. You can also request that we stop processing your data or transfer your data to another service."
+                            title: String(localized: "Your Rights"),
+                            content: String(localized: "You have the right to access, update, or delete your personal information. You can also request that we stop processing your data or transfer your data to another service.")
                         )
                         
                         PolicySection(
-                            title: "Contact Us",
-                            content: "If you have any questions about this Privacy Policy, please contact us at privacy@callrecorder.com"
+                            title: String(localized: "Contact Us"),
+                            content: String(localized: "If you have any questions about this Privacy Policy, please contact us at privacy@callrecorder.com")
                         )
                     }
                 }
@@ -57,7 +57,7 @@ struct PrivacyPolicyView: View {
             .preferredColorScheme(.dark)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(String(localized: "Done")) {
                         dismiss()
                     }
                     .foregroundColor(.primaryGreen)

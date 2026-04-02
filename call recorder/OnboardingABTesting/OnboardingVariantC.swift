@@ -5,10 +5,6 @@ private extension Color {
     static let variantCGreenDark = Color.primaryGreen.opacity(0.25)
 }
 
-private let variantCStep1Title = "What do you need today?"
-private let variantCStep2Title = "Record calls in one tap"
-private let variantCStep3Title = "Auto-save, transcripts & summaries"
-
 struct OnboardingVariantC: View {
     @StateObject private var viewModel = AppViewModel.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
@@ -96,7 +92,7 @@ struct OnboardingVariantC: View {
 
     private var step1Content: some View {
         VStack(spacing: 38) {
-            Text(variantCStep1Title)
+            Text(String(localized: "What do you need today?"))
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
                 .multilineTextAlignment(.center)
@@ -106,7 +102,7 @@ struct OnboardingVariantC: View {
             VStack(spacing: 16) {
                 optionCard(
                     icon: "phone.arrow.up.right",
-                    title: "Record calls & keep evidence",
+                    title: String(localized: "Record calls & keep evidence"),
                     isSelected: selectedOptionIndex == 0
                 ) {
                     HapticManager.shared.selection()
@@ -114,7 +110,7 @@ struct OnboardingVariantC: View {
                 }
                 optionCard(
                     icon: "checkmark.shield.fill",
-                    title: "Stay private on public Wi-Fi (VPN)",
+                    title: String(localized: "Stay private on public Wi-Fi (VPN)"),
                     isSelected: selectedOptionIndex == 1
                 ) {
                     HapticManager.shared.selection()
@@ -157,7 +153,7 @@ struct OnboardingVariantC: View {
     }
 
     private var stepTitleOnly: some View {
-        Text(currentStep == 1 ? variantCStep2Title : variantCStep3Title)
+        Text(currentStep == 1 ? String(localized: "Record calls in one tap") : String(localized: "Auto-save, transcripts & summaries"))
             .font(.system(size: 26, weight: .bold, design: .rounded))
             .foregroundColor(.primaryText)
             .multilineTextAlignment(.center)
@@ -186,7 +182,7 @@ struct OnboardingVariantC: View {
                 nextStep()
             }
         }) {
-            Text(currentStep == 0 ? "Continue" : "Next")
+            Text(currentStep == 0 ? String(localized: "Continue") : String(localized: "Next"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -194,7 +190,6 @@ struct OnboardingVariantC: View {
                 .foregroundColor(buttonForeground)
                 .cornerRadius(28)
                 .scaleEffect(buttonScale)
-                .shadow(color: currentStep == 0 ? Color.clear : Color.primaryGreen.opacity(0.4), radius: 14, x: 0, y: 6)
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 28)

@@ -7,7 +7,6 @@ struct TranscriptDetailView: View {
     @State private var copiedToClipboard = false
     @State private var selectedSegment = 0
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var localizationManager = LocalizationManager.shared
     
     var body: some View {
         ZStack {
@@ -15,7 +14,7 @@ struct TranscriptDetailView: View {
             
             VStack(spacing: 0) {
                 ZStack {
-                    Text(localizationManager.localizedString("transcript"))
+                    Text(String(localized: "Transcript"))
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primaryText)
                         .frame(maxWidth: .infinity)
@@ -25,7 +24,7 @@ struct TranscriptDetailView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 17, weight: .medium))
-                                Text(localizationManager.localizedString("back"))
+                                Text(String(localized: "Back"))
                                     .font(.system(size: 17))
                             }
                             .foregroundColor(.skyBlue)
@@ -51,7 +50,7 @@ struct TranscriptDetailView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(localizationManager.localizedString("call_recording"))
+                            Text(String(localized: "Call Recording"))
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.secondaryText)
                             
@@ -77,21 +76,21 @@ struct TranscriptDetailView: View {
                         TranscriptStatCard(
                             icon: "text.word.spacing",
                             value: "\(wordCount)",
-                            label: localizationManager.localizedString("words"),
+                            label: String(localized: "Words"),
                             color: .skyBlue
                         )
                         
                         TranscriptStatCard(
                             icon: "doc.text",
-                            value: recording.summary != nil ? localizationManager.localizedString("yes") : localizationManager.localizedString("no"),
-                            label: localizationManager.localizedString("summary"),
+                            value: recording.summary != nil ? String(localized: "Yes") : String(localized: "No"),
+                            label: String(localized: "Summary"),
                             color: .purple
                         )
                         
                         TranscriptStatCard(
                             icon: "waveform",
-                            value: (recording.transcript?.status ?? "") == "completed" ? localizationManager.localizedString("clear_quality") : localizationManager.localizedString("processing"),
-                            label: localizationManager.localizedString("quality"),
+                            value: (recording.transcript?.status ?? "") == "completed" ? String(localized: "Clear") : String(localized: "Processing"),
+                            label: String(localized: "Quality"),
                             color: .orange
                         )
                     }
@@ -103,8 +102,8 @@ struct TranscriptDetailView: View {
                 .padding(.top, 8)
                 
                 Picker("View Mode", selection: $selectedSegment) {
-                    Text(localizationManager.localizedString("full_text")).tag(0)
-                    Text(localizationManager.localizedString("summary")).tag(1)
+                    Text(String(localized: "Full Text")).tag(0)
+                    Text(String(localized: "Summary")).tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
@@ -115,7 +114,7 @@ struct TranscriptDetailView: View {
                         if selectedSegment == 0 {
                             if let segments = recording.transcript?.segments, !segments.isEmpty {
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text(localizationManager.localizedString("transcript"))
+                                    Text(String(localized: "Transcript"))
                                         .font(.system(size: 18, weight: .semibold))
                                         .foregroundColor(.primaryText)
                                         .padding(.bottom, 12)
@@ -133,7 +132,7 @@ struct TranscriptDetailView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             } else if let transcriptText = recording.transcriptText, !transcriptText.isEmpty {
                                 VStack(alignment: .leading, spacing: 16) {
-                                    Text(localizationManager.localizedString("transcript"))
+                                    Text(String(localized: "Transcript"))
                                         .font(.system(size: 18, weight: .semibold))
                                         .foregroundColor(.primaryText)
                                     
@@ -147,15 +146,15 @@ struct TranscriptDetailView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             } else {
                                 EmptyTranscriptView(
-                                    title: localizationManager.localizedString("transcript_not_available"),
-                                    subtitle: localizationManager.localizedString("transcript_processing_unavailable")
+                                    title: String(localized: "Transcript not available"),
+                                    subtitle: String(localized: "The transcript for this recording is being processed or unavailable")
                                 )
                                     .padding(.top, 80)
                             }
                         } else {
                             if let summary = recording.summary, !summary.isEmpty {
                                 VStack(alignment: .leading, spacing: 16) {
-                                    Text(localizationManager.localizedString("summary"))
+                                    Text(String(localized: "Summary"))
                                         .font(.system(size: 18, weight: .semibold))
                                         .foregroundColor(.primaryText)
                                     
@@ -173,11 +172,11 @@ struct TranscriptDetailView: View {
                                         .font(.system(size: 60))
                                         .foregroundColor(.tertiaryText.opacity(0.5))
                                     
-                                    Text(localizationManager.localizedString("no_summary_available"))
+                                    Text(String(localized: "No summary available"))
                                         .font(.system(size: 18, weight: .medium))
                                         .foregroundColor(.tertiaryText)
                                     
-                                    Text(localizationManager.localizedString("no_summary_message"))
+                                    Text(String(localized: "A summary has not been generated for this recording"))
                                         .font(.system(size: 14))
                                         .foregroundColor(.tertiaryText.opacity(0.7))
                                         .multilineTextAlignment(.center)
@@ -193,7 +192,7 @@ struct TranscriptDetailView: View {
                 HStack(spacing: 0) {
                     TranscriptActionButton(
                         icon: "square.and.arrow.up",
-                        title: localizationManager.localizedString("share"),
+                        title: String(localized: "Share"),
                         action: { showShareSheet = true }
                     )
                     
@@ -203,7 +202,7 @@ struct TranscriptDetailView: View {
                     
                     TranscriptActionButton(
                         icon: copiedToClipboard ? "checkmark" : "doc.on.doc",
-                        title: copiedToClipboard ? localizationManager.localizedString("copied") : localizationManager.localizedString("copy"),
+                        title: copiedToClipboard ? String(localized: "Copied!") : String(localized: "Copy"),
                         action: {
                             if let transcriptText = recording.transcriptText {
                                 UIPasteboard.general.string = transcriptText
@@ -244,20 +243,20 @@ struct TranscriptDetailView: View {
     }
     
     private func formatTranscriptForSharing() -> String {
-        var output = localizationManager.localizedString("share_transcript_header") + "\n"
+        var output = String(localized: "Call Recording Transcript") + "\n"
         output += "========================\n\n"
-        output += localizationManager.localizedString("title_label") + ": \(recording.title ?? recording.contactName)\n"
-        output += localizationManager.localizedString("contact_label") + ": \(recording.contactName)\n"
-        output += localizationManager.localizedString("date") + ": \(formatDate(recording.date))\n"
-        output += localizationManager.localizedString("duration") + ": \(formatDuration(recording.duration))\n\n"
+        output += String(localized: "Title") + ": \(recording.title ?? recording.contactName)\n"
+        output += String(localized: "Contact") + ": \(recording.contactName)\n"
+        output += String(localized: "Date") + ": \(formatDate(recording.date))\n"
+        output += String(localized: "Duration") + ": \(formatDuration(recording.duration))\n\n"
         
         if let summary = recording.summary, !summary.isEmpty {
-            output += localizationManager.localizedString("summary") + ":\n"
+            output += String(localized: "Summary") + ":\n"
             output += summary + "\n\n"
         }
         
-        output += localizationManager.localizedString("full_transcript_label") + ":\n\n"
-        output += recording.transcriptText ?? localizationManager.localizedString("transcript_not_available")
+        output += String(localized: "Full Transcript") + ":\n\n"
+        output += recording.transcriptText ?? String(localized: "Transcript not available")
         return output
     }
     

@@ -12,8 +12,6 @@ struct OnboardingVariantA: View {
     
     @Environment(\.requestReview) var requestReview
 
-    private let steps = OnboardingStep.defaultSteps
-
     var body: some View {
         geometryContent
             .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0), value: currentStep)
@@ -77,7 +75,7 @@ struct OnboardingVariantA: View {
         .overlay(
             VStack(spacing: 38) {
                 VStack(spacing: 8) {
-                    Text(steps[currentStep].title)
+                    Text(variantATitle(for: currentStep))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
@@ -95,7 +93,7 @@ struct OnboardingVariantA: View {
                 }
 
                 Button(action: nextButtonTapped) {
-                    Text("Next")
+                    Text(String(localized: "Next"))
                         .font(.system(size: 20, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
@@ -141,12 +139,21 @@ struct OnboardingVariantA: View {
         }
     }
 
+    private func variantATitle(for step: Int) -> String {
+        switch step {
+        case 0: return String(localized: "Welcome to Call Recorder")
+        case 1: return String(localized: "Smart Call Recording")
+        case 2: return String(localized: "Instant Summary & Insights")
+        default: return String(localized: "Welcome to Call Recorder")
+        }
+    }
+
     private func variantASubtitle(for step: Int) -> String {
         switch step {
-        case 0: return "Record and transcribe your important\ncalls with ease"
-        case 1: return "Never miss important details again.\nOur AI captures every word with precision"
-        case 2: return "Save hours with automated meeting notes.\nFocus on the conversation, not note-taking"
-        default: return steps[step].subtitle
+        case 0: return String(localized: "Record and transcribe your important\ncalls with ease")
+        case 1: return String(localized: "Never miss important details again.\nOur AI captures every word with precision")
+        case 2: return String(localized: "Save hours with automated meeting notes.\nFocus on the conversation, not note-taking")
+        default: return String(localized: "Record and transcribe your important\ncalls with ease")
         }
     }
 }
