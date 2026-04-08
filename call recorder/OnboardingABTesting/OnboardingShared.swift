@@ -5,6 +5,7 @@ enum OnboardingABVariant: String, CaseIterable {
     case a
     case b
     case c
+    case d
 }
 
 struct OnboardingStep: Identifiable {
