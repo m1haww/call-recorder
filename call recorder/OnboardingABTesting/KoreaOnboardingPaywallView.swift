@@ -1,5 +1,6 @@
 import RevenueCat
 import SwiftUI
+import StoreKit
 
 struct KoreaOnboardingPaywallView: View {
     var onPurchaseSuccess: () -> Void
@@ -12,6 +13,8 @@ struct KoreaOnboardingPaywallView: View {
     @State private var isPurchasing = false
     @State private var showPurchaseError = false
     @State private var purchaseErrorMessage = ""
+    
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         ZStack {
@@ -61,6 +64,7 @@ struct KoreaOnboardingPaywallView: View {
         .preferredColorScheme(.dark)
         .task {
             await loadOffering()
+            requestReview()
         }
         .alert("오류", isPresented: $showPurchaseError) {
             Button("확인", role: .cancel) {}

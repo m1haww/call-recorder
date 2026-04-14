@@ -11,8 +11,6 @@ struct OnboardingKoreaVariant: View {
     @StateObject private var viewModel = AppViewModel.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
 
-    @Environment(\.requestReview) private var requestReview
-
     private static let steps: [(title: String, subtitle: String)] = [
         (
             "통화 내용을 즉시 녹음하세요",
@@ -194,7 +192,6 @@ struct OnboardingKoreaVariant: View {
     private func finalizeKoreaOnboarding() {
         subscriptionService.checkSubscriptionStatus()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
-            requestReview()
             withAnimation {
                 viewModel.completeOnboarding()
             }
