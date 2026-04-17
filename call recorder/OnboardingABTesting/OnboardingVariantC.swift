@@ -11,8 +11,6 @@ struct OnboardingVariantC: View {
 
     @State private var currentStep = 0
     @State private var selectedOptionIndex: Int = 0
-    @State private var widgetScale: CGFloat = 0.88
-    @State private var widgetOpacity: Double = 0
     @State private var textOpacity: Double = 0
     @State private var buttonScale: CGFloat = 1
     
@@ -45,13 +43,8 @@ struct OnboardingVariantC: View {
     }
 
     private func runStepAnimations() {
-        widgetScale = 0.88
-        widgetOpacity = 0
         textOpacity = 0
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
-            widgetScale = 1
-            widgetOpacity = 1
-        }
+        
         withAnimation(.easeOut(duration: 0.35).delay(0.15)) {
             textOpacity = 1
         }
@@ -82,8 +75,6 @@ struct OnboardingVariantC: View {
                 } else {
                     stepTitleOnly
                     stepWidget
-                        .scaleEffect(widgetScale)
-                        .opacity(widgetOpacity)
                 }
             }
         }
@@ -185,10 +176,10 @@ struct OnboardingVariantC: View {
             Text(currentStep == 0 ? String(localized: "Continue") : String(localized: "Next"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                .padding(.vertical, 16)
                 .background(buttonBackground)
                 .foregroundColor(buttonForeground)
-                .cornerRadius(28)
+                .cornerRadius(26)
                 .scaleEffect(buttonScale)
         }
         .buttonStyle(.plain)

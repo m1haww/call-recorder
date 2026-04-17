@@ -2,8 +2,7 @@ import SwiftUI
 
 private enum OnboardingRegionGate {
     static var isKorea: Bool {
-//        return Locale.current.region?.identifier == "KR"
-        return true
+        return Locale.current.region?.identifier == "KR"
     }
 
     static var isJapan: Bool {
