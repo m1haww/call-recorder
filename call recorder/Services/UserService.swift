@@ -2,6 +2,7 @@ import Foundation
 
 struct UserData {
     let userId: String
+    let userName: String
     let phoneNumber: String
     let countryCode: String
     let notificationsEnabled: Bool
@@ -14,7 +15,7 @@ final class UserService {
     
     private init() {}
     
-    func registerUser(fcmToken: String?, phoneNumber: String, countryCode: String) async throws {
+    func registerUser(fcmToken: String?, phoneNumber: String, countryCode: String, userName: String?) async throws {
         guard let url = URL(string: "\(baseURL)/api/users/register") else {
             throw UserServiceError.invalidURL
         }
@@ -32,6 +33,10 @@ final class UserService {
         
         if let token = fcmToken {
             requestBody["fcmToken"] = token
+        }
+        
+        if let name = userName, !name.isEmpty {
+            requestBody["name"] = name
         }
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -113,7 +118,7 @@ final class UserService {
         }.resume()
     }
     
-    func updateUserPhoneNumber(userId: String, newPhoneNumber: String, countryCode: String) async throws -> Bool {
+    func updateUserPhoneNumber(userId: String, newPhoneNumber: String, countryCode: String, userName: String) async throws -> Bool {
         guard let url = URL(string: "\(baseURL)/api/users/update-phone") else {
             throw UserServiceError.invalidURL
         }
@@ -125,12 +130,13 @@ final class UserService {
         let requestBody: [String: Any] = [
             "userId": userId,
             "phoneNumber": newPhoneNumber,
-            "countryCode": countryCode
+            "countryCode": countryCode,
+            "name": userName
         ]
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
-        let (_, response) = try await safeSession().data(for: request)
+        let (data, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw UserServiceError.invalidResponse
@@ -207,10 +213,12 @@ final class UserService {
             throw UserServiceError.invalidResponse
         }
         
+        let userName = json["name"] as? String ?? ""
         let notificationsEnabled = json["notificationsEnabled"] as? Bool ?? true
         
         return UserData(
             userId: userId,
+            userName: userName,
             phoneNumber: phoneNumber,
             countryCode: countryCode,
             notificationsEnabled: notificationsEnabled

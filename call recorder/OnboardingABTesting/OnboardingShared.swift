@@ -43,7 +43,14 @@ struct PhoneSelectionView: View {
         
         Task {
             do {
-                try await UserService.shared.registerUser(fcmToken: viewModel.fcmToken, phoneNumber: fullPhoneNumber, countryCode: self.selectedCountry.code)
+                try await UserService.shared.registerUser(
+                    fcmToken: viewModel.fcmToken,
+                    phoneNumber: fullPhoneNumber,
+                    countryCode: self.selectedCountry.code,
+                    userName: viewModel.userName
+                )
+                
+                await viewModel.loadUserDataFromServer()
                 
                 self.isLoading = false
                 self.viewModel.toggleRegisterStatus()
@@ -52,6 +59,7 @@ struct PhoneSelectionView: View {
                     self.viewModel.showPhoneSelection = false
                 }
             } catch {
+                self.isLoading = false
                 let notificationFeedback = UINotificationFeedbackGenerator()
                 notificationFeedback.notificationOccurred(.error)
                 self.showError = true

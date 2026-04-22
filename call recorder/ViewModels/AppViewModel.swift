@@ -146,14 +146,15 @@ final class AppViewModel: ObservableObject {
     }
     
     @MainActor
-    func updatePhoneNumber(newPhoneNumber: String, countryCode: String) async {
+    func updatePhoneNumber(newPhoneNumber: String, countryCode: String, name: String) async {
         isLoading = true
         
         do {
-            let success = try await UserService.shared.updateUserPhoneNumber(userId: self.userId, newPhoneNumber: newPhoneNumber, countryCode: countryCode)
+            let success = try await UserService.shared.updateUserPhoneNumber(userId: self.userId, newPhoneNumber: newPhoneNumber, countryCode: countryCode, userName: name)
             if success {
                 userPhoneNumber = newPhoneNumber
                 userCountryCode = countryCode
+                userName = name
                 showToast("Phone number updated successfully")
             } else {
                 showToast("Failed to update phone number")

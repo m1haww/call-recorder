@@ -29,8 +29,6 @@ struct SplashView: View {
             
             await OnboardingRemoteConfigManager.shared.fetchAndActivateConfig()
             
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            
             await viewModel.loadUserDataFromServer()
             await viewModel.fetchCallsFromServerAsync()
             await viewModel.fetchPhoneServiceNumber()

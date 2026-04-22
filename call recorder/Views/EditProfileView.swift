@@ -200,43 +200,13 @@ struct EditProfileView: View {
     private func saveChanges() {
         let fullPhoneNumber = selectedCountry.dialCode + editedPhoneNumber
         
-        let phoneChanged = fullPhoneNumber != viewModel.userPhoneNumber
-        
         isLoading = true
         
-        UserDefaults.standard.set(editedName, forKey: "userName")
-        viewModel.userName = editedName
-        
-        if phoneChanged {
-            Task {
-                await updatePhoneNumber(fullPhoneNumber)
-            }
-        } else {
-            isLoading = false
-            showSaveAlert = true
-        }
-    }
-    
-    @MainActor
-    private func updatePhoneNumber(_ fullPhoneNumber: String) async {
-        do {
-            let success = try await UserService.shared.updateUserPhoneNumber(userId: viewModel.userId,newPhoneNumber: fullPhoneNumber, countryCode: selectedCountry.code)
+        Task {
+            await AppViewModel.shared.updatePhoneNumber(newPhoneNumber: fullPhoneNumber, countryCode: selectedCountry.code, name: editedName)
             
-            if success {
-                viewModel.userPhoneNumber = fullPhoneNumber
-                viewModel.userCountryCode = selectedCountry.code
-                
-                isLoading = false
-                showSaveAlert = true
-            } else {
-                isLoading = false
-                showError = true
-                errorMessage = String(localized: "Failed to update phone number")
-            }
-        } catch {
             isLoading = false
-            showError = true
-            errorMessage = String(format: String(localized: "Error updating phone number: %@"), error.localizedDescription)
+            dismiss()
         }
     }
 }

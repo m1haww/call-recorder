@@ -5,7 +5,6 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
     @StateObject private var subscriptionService = SubscriptionService.shared
     
-    @State private var showToast = false
     @State private var showRecordCallTutorial = false
 
     private func navigationTitleForTab(_ tabIndex: Int) -> String {
@@ -148,13 +147,7 @@ struct ContentView: View {
             .sheet(isPresented: $showRecordCallTutorial) {
                 RecordCallTutorialView()
             }
-            .toast(message: appManager.alertMessage, isShowing: $showToast)
-            .onChange(of: appManager.showAlert) { newValue in
-                if newValue {
-                    showToast = true
-                    appManager.showAlert = false
-                }
-            }
+            .toast(message: appManager.alertMessage, isShowing: $appManager.showAlert)
         }
     }
 }

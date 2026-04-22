@@ -28,9 +28,6 @@ struct SettingsView: View {
         }
         .preferredColorScheme(.dark)
         .background(Color.darkBackground)
-        .onAppear {
-            viewModel.loadUserData()
-        }
         .alert(String(localized: "Delete Data"), isPresented: $showDeleteAccountAlert) {
             Button(String(localized: "Cancel"), role: .cancel) {}
             Button(String(localized: "Delete"), role: .destructive) {
