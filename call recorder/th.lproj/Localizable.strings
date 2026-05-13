@@ -219,3 +219,74 @@
 "Record every call instantly" = "บันทึกทุกสายทันที";
 "Turn calls into text" = "แปลงสายโทรศัพท์เป็นข้อความ";
 "Never miss important details" = "ไม่พลาด\nรายละเอียด\nสำคัญ";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "บันทึกการโทร";
+"onboarding_e_welcome_headline" = "ไม่พลาดทุก";
+"onboarding_e_welcome_headline_accent" = "คำพูดอีกต่อไป";
+"onboarding_e_get_started" = "เริ่มต้นใช้งาน";
+"onboarding_e_terms" = "ข้อกำหนด";
+"onboarding_e_privacy" = "ความเป็นส่วนตัว";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4.8 · 38K รีวิว";
+"onboarding_e_trust_headline" = "เป็นที่รักของผู้ใช้กว่า 2.4 ล้านคน";
+"onboarding_e_stat_calls" = "การโทรที่บันทึก";
+"onboarding_e_stat_accuracy" = "ความแม่นยำในการถอดความ";
+"onboarding_e_stat_countries" = "ประเทศ";
+"onboarding_e_testimonial_role_1" = "อสังหาริมทรัพย์";
+"onboarding_e_testimonial_quote_1" = "ปิดดีลได้เพิ่มอีก 3 รายการในเดือนนี้";
+"onboarding_e_testimonial_quote_2" = "เลิกจดโน้ตไปเลย";
+"onboarding_e_testimonial_role_2" = "นักข่าว";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "มือถือ · โทรออก";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "บันทึกด้วยการแตะครั้งเดียว";
+"onboarding_e_pill_auto_record" = "บันทึกอัตโนมัติ";
+"onboarding_e_pill_hd_quality" = "คุณภาพ HD";
+"onboarding_e_pill_cloud_backup" = "สำรองข้อมูลบนคลาวด์";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "ถอดความด้วย AI";
+"onboarding_e_transcript_live" = "· สด";
+"onboarding_e_transcript_speaker_me" = "ฉัน";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "ได้รับข้อเสนอแล้วหรือยัง?";
+"onboarding_e_transcript_line_2" = "ได้แล้ว — ปิดดีลภายในวันศุกร์ได้ไหม?";
+"onboarding_e_transcript_line_3" = "จะส่งสัญญาให้วันนี้เลย";
+"onboarding_e_transcript_title" = "ถอดความด้วย AI ทันที";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "ทั้งหมด";
+"onboarding_e_organize_filter_today" = "วันนี้";
+"onboarding_e_organize_filter_week" = "สัปดาห์นี้";
+"onboarding_e_organize_search_placeholder" = "ค้นหาการบันทึก...";
+"onboarding_e_organize_card1_name" = "บันทึกการโทร";
+"onboarding_e_organize_card1_date" = "12 มิ.ย. 2568 เวลา 13:43 น.";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 มิ.ย. 2568 เวลา 11:02 น.";
+"onboarding_e_organize_title" = "ทุกการโทร จัดเก็บครบ";
+"onboarding_e_organize_play" = "เล่น";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "กำลังปรับแต่ง";
+"onboarding_e_loading_step_1" = "ระบบบันทึกเสียง";
+"onboarding_e_loading_title" = "กำลังเตรียมทุกอย่างให้คุณ";
+"onboarding_e_loading_step_2" = "ถอดความด้วย AI";
+"onboarding_e_loading_step_3" = "ซิงค์คลาวด์อย่างปลอดภัย";
+"onboarding_e_loading_step_4" = "คลังส่วนตัว";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "คุณจะบันทึกอะไร?";
+"onboarding_e_personalize_subtitle" = "เลือกสิ่งที่สำคัญที่สุดสำหรับคุณ";
+"onboarding_e_personalize_option_work" = "งานและการประชุม";
+"onboarding_e_personalize_sub_work" = "ลูกค้า ผู้ขาย สัมภาษณ์งาน";
+"onboarding_e_personalize_option_sales" = "การโทรขาย";
+"onboarding_e_personalize_sub_sales" = "ลีดและการติดตามผล";
+"onboarding_e_personalize_option_legal" = "กฎหมายและสำคัญ";
+"onboarding_e_personalize_sub_legal" = "เก็บหลักฐานไว้";
+"onboarding_e_personalize_option_memories" = "ความทรงจำส่วนตัว";
+"onboarding_e_personalize_sub_memories" = "ครอบครัวและเพื่อน";

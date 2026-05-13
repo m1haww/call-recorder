@@ -218,3 +218,74 @@
 "Enter your phone number without the country code" = "Enter your phone number without the country code";
 "Please enter a valid phone number for %@" = "Please enter a valid phone number for %@";
 "Registration failed: %@" = "Registration failed: %@";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "Call Recorder";
+"onboarding_e_welcome_headline" = "Never miss a";
+"onboarding_e_welcome_headline_accent" = "word again";
+"onboarding_e_get_started" = "Get Started";
+"onboarding_e_terms" = "Terms";
+"onboarding_e_privacy" = "Privacy";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4.8 · 38K ratings";
+"onboarding_e_trust_headline" = "Loved by 2.4M+ users";
+"onboarding_e_stat_calls" = "Calls recorded";
+"onboarding_e_stat_accuracy" = "Transcript accuracy";
+"onboarding_e_stat_countries" = "Countries";
+"onboarding_e_testimonial_role_1" = "Real Estate";
+"onboarding_e_testimonial_quote_1" = "Closed 3 more deals this month.";
+"onboarding_e_testimonial_role_2" = "Journalist";
+"onboarding_e_testimonial_quote_2" = "I stopped taking notes entirely.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "Mobile · Outgoing";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "One-tap recording";
+"onboarding_e_pill_auto_record" = "Auto-record";
+"onboarding_e_pill_hd_quality" = "HD quality";
+"onboarding_e_pill_cloud_backup" = "Cloud backup";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "AI Transcript";
+"onboarding_e_transcript_live" = "· Live";
+"onboarding_e_transcript_speaker_me" = "YOU";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "Did you get the proposal?";
+"onboarding_e_transcript_line_2" = "Yes — can we close by Friday?";
+"onboarding_e_transcript_line_3" = "Sending the contract today.";
+"onboarding_e_transcript_title" = "AI transcripts, instantly";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "All";
+"onboarding_e_organize_filter_today" = "Today";
+"onboarding_e_organize_filter_week" = "Week";
+"onboarding_e_organize_search_placeholder" = "Search recordings...";
+"onboarding_e_organize_card1_name" = "Call Recording";
+"onboarding_e_organize_card1_date" = "12 Jun 2026 at 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 Jun 2026 at 11:02";
+"onboarding_e_organize_title" = "All calls, organized";
+"onboarding_e_organize_play" = "Play";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "PERSONALIZING";
+"onboarding_e_loading_title" = "Setting things up";
+"onboarding_e_loading_step_1" = "Recording engine";
+"onboarding_e_loading_step_2" = "AI transcription";
+"onboarding_e_loading_step_3" = "Secure cloud sync";
+"onboarding_e_loading_step_4" = "Personal library";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "What will you record?";
+"onboarding_e_personalize_subtitle" = "Choose what matters most to you";
+"onboarding_e_personalize_option_work" = "Work & meetings";
+"onboarding_e_personalize_sub_work" = "Clients, vendors, interviews";
+"onboarding_e_personalize_option_sales" = "Sales calls";
+"onboarding_e_personalize_sub_sales" = "Leads and follow-ups";
+"onboarding_e_personalize_option_legal" = "Legal & important";
+"onboarding_e_personalize_sub_legal" = "Have a record";
+"onboarding_e_personalize_option_memories" = "Personal memories";
+"onboarding_e_personalize_sub_memories" = "Family & friends";

@@ -28,6 +28,8 @@ struct OnboardingEntryView: View {
                 OnboardingVariantC()
             case .d:
                 OnboardingVariantD()
+            case .e:
+                OnboardingVariantE()
             }
         }
     }

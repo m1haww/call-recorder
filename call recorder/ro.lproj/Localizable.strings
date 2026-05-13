@@ -219,3 +219,74 @@
 "Record every call instantly" = "Înregistrează fiecare apel instant";
 "Turn calls into text" = "Transformă apelurile în text";
 "Never miss important details" = "Nu rata\ndetalii\nimportante";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "Înregistrator de apeluri";
+"onboarding_e_welcome_headline" = "Nu rata niciun";
+"onboarding_e_welcome_headline_accent" = "cuvânt important";
+"onboarding_e_get_started" = "Începe";
+"onboarding_e_terms" = "Termeni";
+"onboarding_e_privacy" = "Confidențialitate";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4,8 · 38 mii de recenzii";
+"onboarding_e_trust_headline" = "Iubit de peste 2,4 milioane de utilizatori";
+"onboarding_e_stat_calls" = "Apeluri înregistrate";
+"onboarding_e_stat_accuracy" = "Precizie transcriere";
+"onboarding_e_stat_countries" = "Țări";
+"onboarding_e_testimonial_role_1" = "Imobiliare";
+"onboarding_e_testimonial_quote_1" = "Am încheiat cu 3 contracte mai multe luna aceasta.";
+"onboarding_e_testimonial_role_2" = "Jurnalist";
+"onboarding_e_testimonial_quote_2" = "Am renunțat complet la notițe.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "Mobil · Apel ieșit";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "Înregistrare dintr-o atingere";
+"onboarding_e_pill_auto_record" = "Înregistrare automată";
+"onboarding_e_pill_hd_quality" = "Calitate HD";
+"onboarding_e_pill_cloud_backup" = "Backup în cloud";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "Transcriere AI";
+"onboarding_e_transcript_live" = "· Live";
+"onboarding_e_transcript_speaker_me" = "EU";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "Ai primit propunerea?";
+"onboarding_e_transcript_line_2" = "Da — putem finaliza până vineri?";
+"onboarding_e_transcript_line_3" = "Trimit contractul astăzi.";
+"onboarding_e_transcript_title" = "Transcriere AI instantanee";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "Toate";
+"onboarding_e_organize_filter_today" = "Azi";
+"onboarding_e_organize_filter_week" = "Săptămână";
+"onboarding_e_organize_search_placeholder" = "Caută înregistrări...";
+"onboarding_e_organize_card1_name" = "Înregistrare apel";
+"onboarding_e_organize_card1_date" = "12 iun. 2026, 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 iun. 2026, 11:02";
+"onboarding_e_organize_title" = "Toate apelurile, organizate";
+"onboarding_e_organize_play" = "Redă";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "PERSONALIZARE";
+"onboarding_e_loading_title" = "Pregătim totul pentru tine";
+"onboarding_e_loading_step_1" = "Motor de înregistrare";
+"onboarding_e_loading_step_2" = "Transcriere AI";
+"onboarding_e_loading_step_3" = "Sincronizare securizată";
+"onboarding_e_loading_step_4" = "Bibliotecă personală";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "Ce vei înregistra?";
+"onboarding_e_personalize_subtitle" = "Alege ce contează cel mai mult pentru tine";
+"onboarding_e_personalize_option_work" = "Muncă și ședințe";
+"onboarding_e_personalize_sub_work" = "Clienți, furnizori, interviuri";
+"onboarding_e_personalize_option_sales" = "Apeluri de vânzări";
+"onboarding_e_personalize_sub_sales" = "Leaduri și follow-up-uri";
+"onboarding_e_personalize_option_legal" = "Legal și important";
+"onboarding_e_personalize_sub_legal" = "Păstrează o evidență";
+"onboarding_e_personalize_option_memories" = "Amintiri personale";
+"onboarding_e_personalize_sub_memories" = "Familie și prieteni";

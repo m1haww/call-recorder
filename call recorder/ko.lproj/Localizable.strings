@@ -219,3 +219,74 @@
 "Record every call instantly" = "모든 통화를 즉시 녹음하세요";
 "Turn calls into text" = "통화를 텍스트로 변환하세요";
 "Never miss important details" = "중요한\n세부사항을\n놓치지 마세요";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "통화 녹음기";
+"onboarding_e_welcome_headline" = "단 한 마디도";
+"onboarding_e_welcome_headline_accent" = "놓치지 마세요";
+"onboarding_e_get_started" = "시작하기";
+"onboarding_e_terms" = "이용약관";
+"onboarding_e_privacy" = "개인정보";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4.8 · 38K 평가";
+"onboarding_e_trust_headline" = "240만 명 이상이 사용 중";
+"onboarding_e_stat_calls" = "녹음된 통화";
+"onboarding_e_stat_accuracy" = "전사 정확도";
+"onboarding_e_stat_countries" = "국가";
+"onboarding_e_testimonial_role_1" = "부동산";
+"onboarding_e_testimonial_quote_1" = "이번 달 계약을 3건 더 성사시켰어요.";
+"onboarding_e_testimonial_role_2" = "기자";
+"onboarding_e_testimonial_quote_2" = "메모를 완전히 그만뒀어요.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "휴대폰 · 발신";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "한 번 탭으로 녹음";
+"onboarding_e_pill_auto_record" = "자동 녹음";
+"onboarding_e_pill_hd_quality" = "HD 음질";
+"onboarding_e_pill_cloud_backup" = "클라우드 백업";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "AI 전사";
+"onboarding_e_transcript_live" = "· 실시간";
+"onboarding_e_transcript_speaker_me" = "나";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "제안서 받으셨나요?";
+"onboarding_e_transcript_line_2" = "네 — 금요일까지 마무리할 수 있을까요?";
+"onboarding_e_transcript_line_3" = "오늘 계약서 보내드릴게요.";
+"onboarding_e_transcript_title" = "AI가 즉시 전사";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "전체";
+"onboarding_e_organize_filter_today" = "오늘";
+"onboarding_e_organize_filter_week" = "이번 주";
+"onboarding_e_organize_search_placeholder" = "녹음 검색...";
+"onboarding_e_organize_card1_name" = "통화 녹음";
+"onboarding_e_organize_card1_date" = "2026년 6월 12일 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "2026년 6월 12일 11:02";
+"onboarding_e_organize_title" = "모든 통화를 한눈에";
+"onboarding_e_organize_play" = "재생";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "맞춤 설정 중";
+"onboarding_e_loading_title" = "준비하고 있어요";
+"onboarding_e_loading_step_1" = "녹음 엔진";
+"onboarding_e_loading_step_2" = "AI 전사";
+"onboarding_e_loading_step_3" = "보안 클라우드 동기화";
+"onboarding_e_loading_step_4" = "개인 보관함";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "무엇을 녹음할 건가요?";
+"onboarding_e_personalize_subtitle" = "가장 중요한 것을 선택하세요";
+"onboarding_e_personalize_option_work" = "업무 및 회의";
+"onboarding_e_personalize_sub_work" = "고객, 거래처, 면접";
+"onboarding_e_personalize_option_sales" = "영업 통화";
+"onboarding_e_personalize_sub_sales" = "잠재 고객 및 후속 조치";
+"onboarding_e_personalize_option_legal" = "법률 및 중요 통화";
+"onboarding_e_personalize_sub_legal" = "기록 남기기";
+"onboarding_e_personalize_option_memories" = "개인적인 추억";
+"onboarding_e_personalize_sub_memories" = "가족 및 친구";

@@ -219,3 +219,74 @@
 "Record every call instantly" = "Nagrywaj każde połączenie natychmiast";
 "Turn calls into text" = "Zamień połączenia w tekst";
 "Never miss important details" = "Nigdy nie\nprzegap\nważnych szczegółów";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "Rejestrator rozmów";
+"onboarding_e_welcome_headline" = "Nie przegap ani";
+"onboarding_e_welcome_headline_accent" = "jednego słowa";
+"onboarding_e_get_started" = "Zaczynamy";
+"onboarding_e_terms" = "Regulamin";
+"onboarding_e_privacy" = "Prywatność";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4,8 · 38 tys. ocen";
+"onboarding_e_trust_headline" = "Ulubiona aplikacja ponad 2,4 mln użytkowników";
+"onboarding_e_stat_calls" = "Nagranych rozmów";
+"onboarding_e_stat_accuracy" = "Dokładność transkrypcji";
+"onboarding_e_stat_countries" = "Krajów";
+"onboarding_e_testimonial_role_1" = "Nieruchomości";
+"onboarding_e_testimonial_quote_1" = "W tym miesiącu zamknąłem o 3 transakcje więcej.";
+"onboarding_e_testimonial_role_2" = "Dziennikarz";
+"onboarding_e_testimonial_quote_2" = "Całkowicie przestałem robić notatki.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "Komórka · Wychodzące";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "Nagrywanie jednym dotknięciem";
+"onboarding_e_pill_auto_record" = "Automatyczne nagrywanie";
+"onboarding_e_pill_hd_quality" = "Jakość HD";
+"onboarding_e_pill_cloud_backup" = "Kopia w chmurze";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "Transkrypcja AI";
+"onboarding_e_transcript_live" = "· Na żywo";
+"onboarding_e_transcript_speaker_me" = "JA";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "Czy dostałeś propozycję?";
+"onboarding_e_transcript_line_2" = "Tak — czy możemy zamknąć do piątku?";
+"onboarding_e_transcript_line_3" = "Wysyłam umowę dzisiaj.";
+"onboarding_e_transcript_title" = "Transkrypcja AI w mgnieniu oka";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "Wszystkie";
+"onboarding_e_organize_filter_today" = "Dziś";
+"onboarding_e_organize_filter_week" = "Tydzień";
+"onboarding_e_organize_search_placeholder" = "Szukaj nagrań...";
+"onboarding_e_organize_card1_name" = "Nagranie rozmowy";
+"onboarding_e_organize_card1_date" = "12 cze 2026, 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 cze 2026, 11:02";
+"onboarding_e_organize_title" = "Wszystkie rozmowy w jednym miejscu";
+"onboarding_e_organize_play" = "Odtwórz";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "PERSONALIZACJA";
+"onboarding_e_loading_title" = "Przygotowujemy wszystko dla Ciebie";
+"onboarding_e_loading_step_1" = "Silnik nagrywania";
+"onboarding_e_loading_step_2" = "Transkrypcja AI";
+"onboarding_e_loading_step_3" = "Bezpieczna synchronizacja";
+"onboarding_e_loading_step_4" = "Osobista biblioteka";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "Co będziesz nagrywać?";
+"onboarding_e_personalize_subtitle" = "Wybierz, co jest dla Ciebie najważniejsze";
+"onboarding_e_personalize_option_work" = "Praca i spotkania";
+"onboarding_e_personalize_sub_work" = "Klienci, dostawcy, rozmowy kwalifikacyjne";
+"onboarding_e_personalize_option_sales" = "Rozmowy sprzedażowe";
+"onboarding_e_personalize_sub_sales" = "Leady i follow-upy";
+"onboarding_e_personalize_option_legal" = "Prawne i ważne";
+"onboarding_e_personalize_sub_legal" = "Miej zapis";
+"onboarding_e_personalize_option_memories" = "Osobiste wspomnienia";
+"onboarding_e_personalize_sub_memories" = "Rodzina i przyjaciele";

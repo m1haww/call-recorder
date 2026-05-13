@@ -219,3 +219,74 @@
 "Record every call instantly" = "Nahrajte každý hovor okamžitě";
 "Turn calls into text" = "Převeďte hovory na text";
 "Never miss important details" = "Nikdy\nnezmeškejte\ndůležité detaily";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "Záznam hovorů";
+"onboarding_e_welcome_headline" = "Nezmeškejte ani";
+"onboarding_e_welcome_headline_accent" = "jedno slovo";
+"onboarding_e_get_started" = "Začít";
+"onboarding_e_terms" = "Podmínky";
+"onboarding_e_privacy" = "Soukromí";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4.8 · 38 tis. hodnocení";
+"onboarding_e_trust_headline" = "Oblíbené u více než 2,4 mil. uživatelů";
+"onboarding_e_stat_calls" = "Nahraných hovorů";
+"onboarding_e_stat_accuracy" = "Přesnost přepisu";
+"onboarding_e_stat_countries" = "Zemí";
+"onboarding_e_testimonial_role_1" = "Reality";
+"onboarding_e_testimonial_quote_1" = "Tento měsíc jsem uzavřel o 3 obchody více.";
+"onboarding_e_testimonial_role_2" = "Novinář";
+"onboarding_e_testimonial_quote_2" = "Přestal jsem si úplně dělat poznámky.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "Mobil · Odchozí";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "Nahrávání jedním klepnutím";
+"onboarding_e_pill_auto_record" = "Automatické nahrávání";
+"onboarding_e_pill_hd_quality" = "Kvalita HD";
+"onboarding_e_pill_cloud_backup" = "Záloha v cloudu";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "AI přepis";
+"onboarding_e_transcript_live" = "· Živě";
+"onboarding_e_transcript_speaker_me" = "JÁ";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "Dostali jste návrh?";
+"onboarding_e_transcript_line_2" = "Ano — můžeme uzavřít do pátku?";
+"onboarding_e_transcript_line_3" = "Smlouvu posílám dnes.";
+"onboarding_e_transcript_title" = "AI přepis okamžitě";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "Vše";
+"onboarding_e_organize_filter_today" = "Dnes";
+"onboarding_e_organize_filter_week" = "Týden";
+"onboarding_e_organize_search_placeholder" = "Hledat nahrávky...";
+"onboarding_e_organize_card1_name" = "Záznam hovoru";
+"onboarding_e_organize_card1_date" = "12. 6. 2026 v 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12. 6. 2026 v 11:02";
+"onboarding_e_organize_title" = "Všechny hovory, přehledně";
+"onboarding_e_organize_play" = "Přehrát";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "PŘIZPŮSOBUJEME";
+"onboarding_e_loading_title" = "Připravujeme vše pro vás";
+"onboarding_e_loading_step_1" = "Nahrávací modul";
+"onboarding_e_loading_step_2" = "AI přepis";
+"onboarding_e_loading_step_3" = "Zabezpečená synchronizace";
+"onboarding_e_loading_step_4" = "Osobní knihovna";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "Co budete nahrávat?";
+"onboarding_e_personalize_subtitle" = "Vyberte, co je pro vás nejdůležitější";
+"onboarding_e_personalize_option_work" = "Práce a schůzky";
+"onboarding_e_personalize_sub_work" = "Klienti, dodavatelé, pohovory";
+"onboarding_e_personalize_option_sales" = "Obchodní hovory";
+"onboarding_e_personalize_sub_sales" = "Leady a následné kroky";
+"onboarding_e_personalize_option_legal" = "Právní a důležité";
+"onboarding_e_personalize_sub_legal" = "Mějte záznam";
+"onboarding_e_personalize_option_memories" = "Osobní vzpomínky";
+"onboarding_e_personalize_sub_memories" = "Rodina a přátelé";

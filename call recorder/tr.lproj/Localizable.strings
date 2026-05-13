@@ -219,3 +219,74 @@
 "Record every call instantly" = "Her aramayı anında kaydedin";
 "Turn calls into text" = "Aramaları metne dönüştürün";
 "Never miss important details" = "Önemli\nayrıntıları\nkaçırmayın";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "Arama Kaydedici";
+"onboarding_e_welcome_headline" = "Hiçbir sözü";
+"onboarding_e_welcome_headline_accent" = "kaçırmayın";
+"onboarding_e_get_started" = "Başla";
+"onboarding_e_terms" = "Koşullar";
+"onboarding_e_privacy" = "Gizlilik";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4,8 · 38 bin değerlendirme";
+"onboarding_e_trust_headline" = "2,4 milyondan fazla kullanıcının favorisi";
+"onboarding_e_stat_calls" = "Kaydedilen arama";
+"onboarding_e_stat_accuracy" = "Transkripsiyon doğruluğu";
+"onboarding_e_stat_countries" = "Ülke";
+"onboarding_e_testimonial_role_1" = "Emlak";
+"onboarding_e_testimonial_quote_1" = "Bu ay 3 anlaşma daha kapattım.";
+"onboarding_e_testimonial_role_2" = "Gazeteci";
+"onboarding_e_testimonial_quote_2" = "Not almayı tamamen bıraktım.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "Cep · Giden arama";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "Tek dokunuşla kayıt";
+"onboarding_e_pill_auto_record" = "Otomatik kayıt";
+"onboarding_e_pill_hd_quality" = "HD kalite";
+"onboarding_e_pill_cloud_backup" = "Bulut yedekleme";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "AI Transkripsiyon";
+"onboarding_e_transcript_live" = "· Canlı";
+"onboarding_e_transcript_speaker_me" = "BEN";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "Teklifi aldınız mı?";
+"onboarding_e_transcript_line_2" = "Evet — Cuma'ya kadar kapanabilir miyiz?";
+"onboarding_e_transcript_line_3" = "Sözleşmeyi bugün gönderiyorum.";
+"onboarding_e_transcript_title" = "Anında AI transkripsiyonu";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "Tümü";
+"onboarding_e_organize_filter_today" = "Bugün";
+"onboarding_e_organize_filter_week" = "Bu hafta";
+"onboarding_e_organize_search_placeholder" = "Kayıtlarda ara...";
+"onboarding_e_organize_card1_name" = "Arama kaydı";
+"onboarding_e_organize_card1_date" = "12 Haz 2026, 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 Haz 2026, 11:02";
+"onboarding_e_organize_title" = "Tüm aramalar, düzenli";
+"onboarding_e_organize_play" = "Oynat";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "KİŞİSELLEŞTİRİLİYOR";
+"onboarding_e_loading_title" = "Her şey sizin için hazırlanıyor";
+"onboarding_e_loading_step_1" = "Kayıt motoru";
+"onboarding_e_loading_step_2" = "AI transkripsiyonu";
+"onboarding_e_loading_step_3" = "Güvenli bulut senkronizasyonu";
+"onboarding_e_loading_step_4" = "Kişisel kütüphane";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "Ne kaydetmek istiyorsunuz?";
+"onboarding_e_personalize_subtitle" = "Sizin için en önemli olanı seçin";
+"onboarding_e_personalize_option_work" = "İş ve toplantılar";
+"onboarding_e_personalize_sub_work" = "Müşteriler, tedarikçiler, mülakatlar";
+"onboarding_e_personalize_option_sales" = "Satış aramaları";
+"onboarding_e_personalize_sub_sales" = "Adaylar ve takip görüşmeleri";
+"onboarding_e_personalize_option_legal" = "Hukuki ve önemli";
+"onboarding_e_personalize_sub_legal" = "Kayıt altında tutun";
+"onboarding_e_personalize_option_memories" = "Kişisel anılar";
+"onboarding_e_personalize_sub_memories" = "Aile ve arkadaşlar";

@@ -219,3 +219,74 @@
 "Record every call instantly" = "سجّل كل مكالمة فوراً";
 "Turn calls into text" = "حوّل المكالمات إلى نص";
 "Never miss important details" = "لا تفوّتك\nتفاصيل\nمهمة";
+
+/* Welcome screen */
+"onboarding_e_app_name" = "مسجّل المكالمات";
+"onboarding_e_welcome_headline" = "لا تفوّتك";
+"onboarding_e_welcome_headline_accent" = "كلمة واحدة";
+"onboarding_e_get_started" = "ابدأ الآن";
+"onboarding_e_terms" = "الشروط";
+"onboarding_e_privacy" = "الخصوصية";
+
+/* Trust screen */
+"onboarding_e_trust_rating_badge" = "4.8 · 38 ألف تقييم";
+"onboarding_e_trust_headline" = "يحبّه أكثر من 2.4 مليون مستخدم";
+"onboarding_e_stat_calls" = "مكالمات مسجّلة";
+"onboarding_e_stat_accuracy" = "دقة النسخ";
+"onboarding_e_stat_countries" = "دولة";
+"onboarding_e_testimonial_role_1" = "عقارات";
+"onboarding_e_testimonial_quote_1" = "أتممت 3 صفقات إضافية هذا الشهر.";
+"onboarding_e_testimonial_role_2" = "صحفي";
+"onboarding_e_testimonial_quote_2" = "توقفت عن تدوين الملاحظات تمامًا.";
+
+/* Recording screen */
+"onboarding_e_recording_contact_name" = "Emily Martinez";
+"onboarding_e_recording_contact_detail" = "جوّال · صادرة";
+"onboarding_e_recording_rec_active" = "REC 02:47";
+"onboarding_e_recording_rec_idle" = "00:00";
+"onboarding_e_recording_title" = "تسجيل بنقرة واحدة";
+"onboarding_e_pill_auto_record" = "تسجيل تلقائي";
+"onboarding_e_pill_hd_quality" = "جودة عالية HD";
+"onboarding_e_pill_cloud_backup" = "نسخ احتياطي سحابي";
+
+/* Transcript screen */
+"onboarding_e_transcript_badge" = "نسخ بالذكاء الاصطناعي";
+"onboarding_e_transcript_live" = "· مباشر";
+"onboarding_e_transcript_speaker_me" = "أنا";
+"onboarding_e_transcript_speaker_them" = "EMILY";
+"onboarding_e_transcript_line_1" = "هل استلمت المقترح؟";
+"onboarding_e_transcript_line_2" = "نعم — هل يمكننا الإغلاق بحلول الجمعة؟";
+"onboarding_e_transcript_line_3" = "سأرسل العقد اليوم.";
+"onboarding_e_transcript_title" = "نسخ فوري بالذكاء الاصطناعي";
+
+/* Organize screen */
+"onboarding_e_organize_filter_all" = "الكل";
+"onboarding_e_organize_filter_today" = "اليوم";
+"onboarding_e_organize_filter_week" = "الأسبوع";
+"onboarding_e_organize_search_placeholder" = "ابحث في التسجيلات...";
+"onboarding_e_organize_card1_name" = "تسجيل مكالمة";
+"onboarding_e_organize_card1_date" = "12 يونيو 2026، الساعة 13:43";
+"onboarding_e_organize_card2_name" = "Emily Martinez";
+"onboarding_e_organize_card2_date" = "12 يونيو 2026، الساعة 11:02";
+"onboarding_e_organize_title" = "جميع مكالماتك، منظّمة";
+"onboarding_e_organize_play" = "تشغيل";
+
+/* Loading screen */
+"onboarding_e_loading_label" = "جارٍ التخصيص";
+"onboarding_e_loading_title" = "نُعِدّ كل شيء لك";
+"onboarding_e_loading_step_1" = "محرّك التسجيل";
+"onboarding_e_loading_step_2" = "النسخ بالذكاء الاصطناعي";
+"onboarding_e_loading_step_3" = "مزامنة سحابية آمنة";
+"onboarding_e_loading_step_4" = "المكتبة الشخصية";
+
+/* Personalize screen */
+"onboarding_e_personalize_title" = "ماذا ستسجّل؟";
+"onboarding_e_personalize_subtitle" = "اختر ما يهمّك أكثر";
+"onboarding_e_personalize_option_work" = "العمل والاجتماعات";
+"onboarding_e_personalize_sub_work" = "عملاء، موردون، مقابلات";
+"onboarding_e_personalize_option_sales" = "مكالمات المبيعات";
+"onboarding_e_personalize_sub_sales" = "العملاء المحتملون والمتابعة";
+"onboarding_e_personalize_option_legal" = "قانوني ومهم";
+"onboarding_e_personalize_sub_legal" = "احتفظ بسجل";
+"onboarding_e_personalize_option_memories" = "ذكريات شخصية";
+"onboarding_e_personalize_sub_memories" = "العائلة والأصدقاء";

@@ -6,13 +6,7 @@ enum OnboardingABVariant: String, CaseIterable {
     case b
     case c
     case d
-}
-
-struct OnboardingStep: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let icon: String
+    case e
 }
 
 struct PhoneSelectionView: View {
@@ -257,29 +251,4 @@ struct PhoneSelectionView: View {
             CountryPickerView(selectedCountry: $selectedCountry)
         }
     }
-}
-
-extension OnboardingStep {
-    static let defaultSteps: [OnboardingStep] = [
-        OnboardingStep(
-            title: "Welcome to Call Recorder",
-            subtitle: "Record and transcribe your important calls",
-            icon: "phone.circle.fill"
-        ),
-        OnboardingStep(
-            title: "Smart Call Recording",
-            subtitle: "AI-powered transcription with 99% accuracy",
-            icon: "waveform.circle.fill"
-        ),
-        OnboardingStep(
-            title: "Instant Summary & Insights",
-            subtitle: "Get key points and action items automatically",
-            icon: "sparkles"
-        ),
-        OnboardingStep(
-            title: "Enter Your Phone Number",
-            subtitle: "Select your country and enter your phone number",
-            icon: "person.circle.fill"
-        )
-    ]
 }
