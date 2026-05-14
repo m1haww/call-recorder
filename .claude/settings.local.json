@@ -3,7 +3,9 @@
     "allow": [
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(xcodebuild -workspace \"call recorder.xcworkspace\" -scheme \"call recorder\" -destination \"generic/platform=iOS\" -quiet build)",
+      "Bash(xcodebuild -workspace \"call recorder.xcworkspace\" -scheme \"call recorder\" -destination \"generic/platform=iOS\" CODE_SIGNING_ALLOWED=NO build)"
     ],
     "deny": []
   }

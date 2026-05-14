@@ -29,6 +29,7 @@ final class UserService {
             "id": AppViewModel.shared.userId,
             "countryCode": countryCode,
             "phoneNumber": phoneNumber,
+            "language": Locale.current.language.languageCode?.identifier ?? "en"
         ]
         
         if let token = fcmToken {
@@ -44,10 +45,6 @@ final class UserService {
         print("📤 Register User Request:")
         
         let (data, response) = try await safeSession().data(for: request)
-        
-        if let httpResponse = response as? HTTPURLResponse {
-            print("📥 Register User Response:")
-        }
         
         if let responseString = String(data: data, encoding: .utf8) {
             print("   Body: \(responseString)")
@@ -136,7 +133,7 @@ final class UserService {
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
-        let (data, response) = try await safeSession().data(for: request)
+        let (_, response) = try await safeSession().data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw UserServiceError.invalidResponse
