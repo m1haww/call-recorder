@@ -83,8 +83,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         guard !UserDefaults.standard.bool(forKey: Self.hasSetAppleSearchAdsAttributionKey) else { return }
         UserDefaults.standard.set(true, forKey: Self.hasSetAppleSearchAdsAttributionKey)
 
-        guard let data = await AppleAttributionManager.shared.fetchAttributionData() else { return }
-        guard data.attribution else { return }
+        let data = await AppleAttributionManager.shared.fetchAttributionData()
+        guard let data, data.attribution else {
+            Purchases.shared.attribution.setAttributes(["installDate": Self.getCurrentDate()])
+            return
+        }
         setRevenuecatAttributes(data: data)
     }
 
