@@ -254,7 +254,7 @@ final class AppViewModel: ObservableObject {
             if error._code == NSURLErrorCancelled {
                 print("Request was cancelled")
             } else {
-                showToast("Failed to fetch calls: \(error.localizedDescription)")
+                print("Failed to fetch recordings: \(error.localizedDescription)")
             }
         }
         

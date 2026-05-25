@@ -5,8 +5,6 @@ import StoreKit
 struct KoreaOnboardingPaywallView: View {
     var onPurchaseSuccess: () -> Void
 
-    private static let offeringId = "default"
-
     @State private var offering: Offering?
     @State private var selectedPackage: Package?
     @State private var loadFailed = false
@@ -26,7 +24,7 @@ struct KoreaOnboardingPaywallView: View {
                     .padding(.top, 32)
 
                 featureList
-                    .padding(.top, -32)
+                    .padding(.top, -60)
 
                 Spacer()
 
@@ -48,14 +46,33 @@ struct KoreaOnboardingPaywallView: View {
                 purchaseButton
                     .padding(.top, 22)
 
-                Button("구매 복원") {
-                    Task { await restorePurchases() }
+                HStack(spacing: 16) {
+                    if let termsURL = URL(string: "https://docs.google.com/document/d/1uSdixI2AsQ32u3aMMekKI9M_eEJH2SNPcr8RLT_DS3Q/edit?usp=sharing") {
+                        Link("이용약관", destination: termsURL)
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondaryText)
+                    }
+                    
+                    Spacer()
+                    
+                    Button("구매 복원") {
+                        Task { await restorePurchases() }
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondaryText)
+                    
+                    Spacer()
+
+                    if let privacyURL = URL(string: "https://docs.google.com/document/d/1uth_ytIH6sL8eJu1w2loQkPMonuRYz-c1yq5xkVK71k/edit?usp=sharing") {
+                        Link("개인정보", destination: privacyURL)
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondaryText)
+                    }
                 }
-                .font(.subheadline)
-                .foregroundColor(.secondaryText)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
+                .padding(.horizontal, 8)
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -136,13 +153,22 @@ struct KoreaOnboardingPaywallView: View {
 
     private var planOptions: some View {
         VStack(spacing: 12) {
+            if let annual = offering?.annual {
+                koreaPlanCard(
+                    package: annual,
+                    title: "연간",
+                    subtitle: priceSubtitle(annual),
+                    showsDiscountRibbon: true,
+                    isPopular: true
+                )
+            }
             if let weekly = offering?.weekly {
                 koreaPlanCard(
                     package: weekly,
                     title: "주간",
                     subtitle: priceSubtitle(weekly),
-                    showsDiscountRibbon: true,
-                    isPopular: true
+                    showsDiscountRibbon: offering?.annual == nil,
+                    isPopular: offering?.annual == nil
                 )
             }
             if let monthly = offering?.monthly {
@@ -154,7 +180,7 @@ struct KoreaOnboardingPaywallView: View {
                     isPopular: false
                 )
             }
-            if offering?.weekly == nil, offering?.monthly == nil {
+            if offering?.weekly == nil, offering?.annual == nil, offering?.monthly == nil {
                 ForEach(offering?.availablePackages ?? [], id: \.identifier) { pkg in
                     koreaPlanCard(
                         package: pkg,
@@ -244,6 +270,8 @@ struct KoreaOnboardingPaywallView: View {
             return "그 후 \(price) / 주"
         case .monthly:
             return "그 후 \(price) / 월"
+        case .annual:
+            return "그 후 \(price) / 년"
         default:
             return price
         }
@@ -281,10 +309,12 @@ struct KoreaOnboardingPaywallView: View {
     private func loadOffering() async {
         do {
             let offerings = try await Purchases.shared.offerings()
-            let resolved = offerings.offering(identifier: Self.offeringId) ?? offerings.current
+            let resolved = offerings.current
             await MainActor.run {
                 offering = resolved
-                if let w = resolved?.weekly {
+                if let a = resolved?.annual {
+                    selectedPackage = a
+                } else if let w = resolved?.weekly {
                     selectedPackage = w
                 } else if let m = resolved?.monthly {
                     selectedPackage = m

@@ -4,8 +4,6 @@ import SwiftUI
 struct JapanOnboardingPaywallView: View {
     var onPurchaseSuccess: () -> Void
 
-    private static let offeringId = "default"
-
     @State private var offering: Offering?
     @State private var selectedPackage: Package?
     @State private var loadFailed = false
@@ -327,14 +325,24 @@ struct JapanOnboardingPaywallView: View {
 
             if let offering {
                 VStack(spacing: 10) {
+                    if let annual = offering.annual {
+                        planCard(
+                            package: annual,
+                            title: "年間プラン",
+                            subtitle: "\(annual.localizedPriceString) / 年",
+                            perWeek: weeklyEquivalent(annual),
+                            badge: "お得",
+                            recommended: true
+                        )
+                    }
                     if let weekly = offering.weekly {
                         planCard(
                             package: weekly,
                             title: "週間プラン",
                             subtitle: "\(weekly.localizedPriceString) / 週",
                             perWeek: "毎週請求",
-                            badge: "人気 No.1",
-                            recommended: true
+                            badge: offering.annual == nil ? "人気 No.1" : nil,
+                            recommended: offering.annual == nil
                         )
                     }
                     if let monthly = offering.monthly {
@@ -347,7 +355,7 @@ struct JapanOnboardingPaywallView: View {
                             recommended: false
                         )
                     }
-                    if offering.monthly == nil, offering.weekly == nil {
+                    if offering.weekly == nil, offering.annual == nil, offering.monthly == nil {
                         ForEach(offering.availablePackages, id: \.identifier) { pkg in
                             planCard(
                                 package: pkg,
@@ -482,9 +490,21 @@ struct JapanOnboardingPaywallView: View {
     }
 
     private func weeklyEquivalent(_ pkg: Package) -> String {
-        let monthly = NSDecimalNumber(decimal: pkg.storeProduct.price).doubleValue
-        let weekly = monthly / 4.33
-        return String(format: "約 $%.2f / 週", weekly)
+        let price = NSDecimalNumber(decimal: pkg.storeProduct.price).doubleValue
+        let divisor: Double
+        switch pkg.packageType {
+        case .annual: divisor = 52.0
+        case .monthly: divisor = 4.33
+        default: divisor = 1.0
+        }
+        let perWeek = price / divisor
+        let currencyCode = pkg.storeProduct.currencyCode ?? "JPY"
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = currencyCode
+        formatter.maximumFractionDigits = 0
+        let formatted = formatter.string(from: NSNumber(value: perWeek)) ?? ""
+        return "約 \(formatted) / 週"
     }
 
     // MARK: - Testimonials
@@ -802,10 +822,12 @@ struct JapanOnboardingPaywallView: View {
     private func loadOffering() async {
         do {
             let offerings = try await Purchases.shared.offerings()
-            let resolved = offerings.offering(identifier: Self.offeringId) ?? offerings.current
+            let resolved = offerings.current
             await MainActor.run {
                 offering = resolved
-                if let w = resolved?.weekly {
+                if let a = resolved?.annual {
+                    selectedPackage = a
+                } else if let w = resolved?.weekly {
                     selectedPackage = w
                 } else if let m = resolved?.monthly {
                     selectedPackage = m
