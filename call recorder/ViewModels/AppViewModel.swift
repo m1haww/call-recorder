@@ -55,6 +55,16 @@ final class AppViewModel: ObservableObject {
         navigationPath.append(destination)
     }
     
+    func makePhoneCall() {
+        guard recordingServiceNumber.isEmpty == false else { return }
+        let phoneNumber = "tel://\(recordingServiceNumber)"
+        if let url = URL(string: phoneNumber), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        } else {
+            showToast(String(localized: "Unable to make phone call on this device"))
+        }
+    }
+    
     func navigateBack() {
         if !navigationPath.isEmpty {
             navigationPath.removeLast()

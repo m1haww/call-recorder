@@ -128,8 +128,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle(navigationTitleForTab(viewModel.selectedTab))
-            .navigationBarTitleDisplayMode(.large)
+            .adaptiveNavigationTitle(navigationTitleForTab(viewModel.selectedTab))
             .toolbarBackground(Color.darkBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
