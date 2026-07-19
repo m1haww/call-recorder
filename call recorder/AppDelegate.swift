@@ -89,6 +89,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             return
         }
         setRevenuecatAttributes(data: data)
+        
+        Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
     }
 
     private func setRevenuecatAttributes(data: AppleAttributionData) {
